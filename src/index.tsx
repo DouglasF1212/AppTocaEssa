@@ -97,16 +97,21 @@ app.get('/splash-1668x2224.png', serveStatic({ path: 'splash-1668x2224.png', roo
 app.get('/splash-1668x2388.png', serveStatic({ path: 'splash-1668x2388.png', root: './public' }))
 app.get('/splash-2048x2732.png', serveStatic({ path: 'splash-2048x2732.png', root: './public' }))
 
-// Serve Android APK for download
+// APK download — redirect to static asset served directly by Cloudflare Pages
 app.get('/download/TocaEssa.apk', (c) => {
+  return c.redirect('/TocaEssa.apk', 302)
+})
+
+// Also serve directly at /TocaEssa.apk with correct headers (fallback if CF Pages doesn't add them)
+app.get('/TocaEssa.apk', (c) => {
+  c.header('Content-Type', 'application/vnd.android.package-archive')
   c.header('Content-Disposition', 'attachment; filename="TocaEssa.apk"')
-  return serveStatic({ path: 'TocaEssa.apk', root: './public' })(c, async () => {})
+  return serveStatic({ path: 'TocaEssa.apk', root: './' })(c, async () => {})
 })
 
 // Serve promotional video
 app.get('/video-promo', (c) => {
-  c.header('Content-Disposition', 'inline; filename="video_toca_essa_promo.mp4"')
-  return serveStatic({ path: 'video_toca_essa_promo.mp4', root: './public' })(c, async () => {})
+  return c.redirect('/video_toca_essa_promo.mp4', 302)
 })
 
 // ======================
