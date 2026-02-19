@@ -123,7 +123,13 @@ function generateSessionId(): string {
 
 // Check if user is authenticated
 async function checkAuth(c: any): Promise<any> {
-  const sessionId = getCookie(c, 'session_id')
+  // Try cookie first
+  let sessionId = getCookie(c, 'session_id')
+  
+  // Fallback: try X-Session-ID header
+  if (!sessionId) {
+    sessionId = c.req.header('X-Session-ID') || null
+  }
   
   if (!sessionId) {
     return null
@@ -142,6 +148,13 @@ async function checkAuth(c: any): Promise<any> {
 // ======================
 // API Routes - Authentication
 // ======================
+
+// Debug: check cookies received
+app.get('/api/debug/cookies', (c) => {
+  const allCookies = c.req.header('cookie') || 'nenhum cookie'
+  const sessionId = getCookie(c, 'session_id') || 'session_id ausente'
+  return c.json({ cookies_raw: allCookies, session_id: sessionId })
+})
 
 // Register new artist
 app.post('/api/auth/register', async (c) => {
@@ -228,7 +241,7 @@ app.post('/api/auth/login', async (c) => {
   
   // Set cookie
   setCookie(c, 'session_id', sessionId, {
-    httpOnly: true,
+    httpOnly: false,
     secure: true,
     sameSite: 'Lax',
     expires: expiresAt,
@@ -244,7 +257,8 @@ app.post('/api/auth/login', async (c) => {
       role: user.role || 'artist',
       license_status: user.license_status || 'pending',
       artist_slug: user.artist_slug
-    }
+    },
+    session_id: sessionId
   })
 })
 
@@ -987,7 +1001,7 @@ app.post('/api/admin/login', async (c) => {
   `).bind(sessionId, user.id).run()
   
   setCookie(c, 'session_id', sessionId, {
-    httpOnly: true,
+    httpOnly: false,
     secure: true,
     sameSite: 'Lax',
     maxAge: 7 * 24 * 60 * 60,

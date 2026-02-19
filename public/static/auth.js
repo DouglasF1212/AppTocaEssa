@@ -244,10 +244,16 @@ async function handleLogin(event) {
   const password = document.getElementById('password').value;
   
   try {
-    const response = await axios.post('/api/auth/login', { email, password });
+    const response = await axios.post('/api/auth/login', { email, password }, { withCredentials: true });
     
     if (response.data.success) {
       const user = response.data.user;
+      // Salva session_id no localStorage como fallback
+      if (response.data.session_id) {
+        localStorage.setItem('session_id', response.data.session_id);
+      }
+      localStorage.setItem('user_role', user.role);
+      localStorage.setItem('license_status', user.license_status);
       showSuccess('Login realizado com sucesso!');
       setTimeout(() => {
         // Admin vai para o painel admin

@@ -6,6 +6,13 @@ let songs = [];
 let bankAccount = null;
 let currentTab = 'profile';
 
+// Configure axios: send cookies + fallback to localStorage session_id via header
+axios.defaults.withCredentials = true;
+const _storedSession = localStorage.getItem('session_id');
+if (_storedSession) {
+  axios.defaults.headers.common['X-Session-ID'] = _storedSession;
+}
+
 // Initialize
 async function init() {
   try {
