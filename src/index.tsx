@@ -52,6 +52,38 @@ app.get('/icon-192.png', serveStatic({ path: 'icon-192.png', root: './public' })
 app.get('/icon-512.png', serveStatic({ path: 'icon-512.png', root: './public' }))
 app.get('/sw.js', serveStatic({ path: 'sw.js', root: './public' }))
 
+// Serve Apple touch icons
+app.get('/apple-touch-icon.png',        serveStatic({ path: 'apple-touch-icon.png', root: './public' }))
+app.get('/apple-touch-icon-57x57.png',  serveStatic({ path: 'apple-touch-icon-57x57.png', root: './public' }))
+app.get('/apple-touch-icon-60x60.png',  serveStatic({ path: 'apple-touch-icon-60x60.png', root: './public' }))
+app.get('/apple-touch-icon-72x72.png',  serveStatic({ path: 'apple-touch-icon-72x72.png', root: './public' }))
+app.get('/apple-touch-icon-76x76.png',  serveStatic({ path: 'apple-touch-icon-76x76.png', root: './public' }))
+app.get('/apple-touch-icon-114x114.png',serveStatic({ path: 'apple-touch-icon-114x114.png', root: './public' }))
+app.get('/apple-touch-icon-120x120.png',serveStatic({ path: 'apple-touch-icon-120x120.png', root: './public' }))
+app.get('/apple-touch-icon-144x144.png',serveStatic({ path: 'apple-touch-icon-144x144.png', root: './public' }))
+app.get('/apple-touch-icon-152x152.png',serveStatic({ path: 'apple-touch-icon-152x152.png', root: './public' }))
+app.get('/apple-touch-icon-167x167.png',serveStatic({ path: 'apple-touch-icon-167x167.png', root: './public' }))
+app.get('/apple-touch-icon-180x180.png',serveStatic({ path: 'apple-touch-icon-180x180.png', root: './public' }))
+
+// Serve Apple splash screens
+app.get('/splash-640x1136.png',  serveStatic({ path: 'splash-640x1136.png', root: './public' }))
+app.get('/splash-750x1334.png',  serveStatic({ path: 'splash-750x1334.png', root: './public' }))
+app.get('/splash-828x1792.png',  serveStatic({ path: 'splash-828x1792.png', root: './public' }))
+app.get('/splash-1080x1920.png', serveStatic({ path: 'splash-1080x1920.png', root: './public' }))
+app.get('/splash-1125x2436.png', serveStatic({ path: 'splash-1125x2436.png', root: './public' }))
+app.get('/splash-1170x2532.png', serveStatic({ path: 'splash-1170x2532.png', root: './public' }))
+app.get('/splash-1179x2556.png', serveStatic({ path: 'splash-1179x2556.png', root: './public' }))
+app.get('/splash-1242x2208.png', serveStatic({ path: 'splash-1242x2208.png', root: './public' }))
+app.get('/splash-1242x2688.png', serveStatic({ path: 'splash-1242x2688.png', root: './public' }))
+app.get('/splash-1284x2778.png', serveStatic({ path: 'splash-1284x2778.png', root: './public' }))
+app.get('/splash-1290x2796.png', serveStatic({ path: 'splash-1290x2796.png', root: './public' }))
+app.get('/splash-1488x2266.png', serveStatic({ path: 'splash-1488x2266.png', root: './public' }))
+app.get('/splash-1536x2048.png', serveStatic({ path: 'splash-1536x2048.png', root: './public' }))
+app.get('/splash-1620x2160.png', serveStatic({ path: 'splash-1620x2160.png', root: './public' }))
+app.get('/splash-1668x2224.png', serveStatic({ path: 'splash-1668x2224.png', root: './public' }))
+app.get('/splash-1668x2388.png', serveStatic({ path: 'splash-1668x2388.png', root: './public' }))
+app.get('/splash-2048x2732.png', serveStatic({ path: 'splash-2048x2732.png', root: './public' }))
+
 // ======================
 // Helper Functions
 // ======================
@@ -1502,7 +1534,33 @@ app.get('/', (c) => {
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
         <meta name="apple-mobile-web-app-title" content="TOCA ESSA">
         <link rel="manifest" href="/manifest.json">
-        <link rel="apple-touch-icon" href="/icon-192.png">
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+        <link rel="apple-touch-icon" sizes="57x57"   href="/apple-touch-icon-57x57.png">
+        <link rel="apple-touch-icon" sizes="60x60"   href="/apple-touch-icon-60x60.png">
+        <link rel="apple-touch-icon" sizes="72x72"   href="/apple-touch-icon-72x72.png">
+        <link rel="apple-touch-icon" sizes="76x76"   href="/apple-touch-icon-76x76.png">
+        <link rel="apple-touch-icon" sizes="114x114" href="/apple-touch-icon-114x114.png">
+        <link rel="apple-touch-icon" sizes="120x120" href="/apple-touch-icon-120x120.png">
+        <link rel="apple-touch-icon" sizes="144x144" href="/apple-touch-icon-144x144.png">
+        <link rel="apple-touch-icon" sizes="152x152" href="/apple-touch-icon-152x152.png">
+        <link rel="apple-touch-icon" sizes="167x167" href="/apple-touch-icon-167x167.png">
+        <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon-180x180.png">
+        <!-- Splash screens iOS -->
+        <link rel="apple-touch-startup-image" media="(device-width:320px) and (device-height:568px) and (-webkit-device-pixel-ratio:2)"  href="/splash-640x1136.png">
+        <link rel="apple-touch-startup-image" media="(device-width:375px) and (device-height:667px) and (-webkit-device-pixel-ratio:2)"  href="/splash-750x1334.png">
+        <link rel="apple-touch-startup-image" media="(device-width:414px) and (device-height:736px) and (-webkit-device-pixel-ratio:3)"  href="/splash-1242x2208.png">
+        <link rel="apple-touch-startup-image" media="(device-width:375px) and (device-height:812px) and (-webkit-device-pixel-ratio:3)"  href="/splash-1125x2436.png">
+        <link rel="apple-touch-startup-image" media="(device-width:414px) and (device-height:896px) and (-webkit-device-pixel-ratio:2)"  href="/splash-828x1792.png">
+        <link rel="apple-touch-startup-image" media="(device-width:414px) and (device-height:896px) and (-webkit-device-pixel-ratio:3)"  href="/splash-1242x2688.png">
+        <link rel="apple-touch-startup-image" media="(device-width:390px) and (device-height:844px) and (-webkit-device-pixel-ratio:3)"  href="/splash-1170x2532.png">
+        <link rel="apple-touch-startup-image" media="(device-width:428px) and (device-height:926px) and (-webkit-device-pixel-ratio:3)"  href="/splash-1284x2778.png">
+        <link rel="apple-touch-startup-image" media="(device-width:393px) and (device-height:852px) and (-webkit-device-pixel-ratio:3)"  href="/splash-1179x2556.png">
+        <link rel="apple-touch-startup-image" media="(device-width:430px) and (device-height:932px) and (-webkit-device-pixel-ratio:3)"  href="/splash-1290x2796.png">
+        <link rel="apple-touch-startup-image" media="(device-width:414px) and (device-height:736px) and (-webkit-device-pixel-ratio:3)"  href="/splash-1080x1920.png">
+        <link rel="apple-touch-startup-image" media="(device-width:768px) and (device-height:1024px) and (-webkit-device-pixel-ratio:2)" href="/splash-1536x2048.png">
+        <link rel="apple-touch-startup-image" media="(device-width:834px) and (device-height:1112px) and (-webkit-device-pixel-ratio:2)" href="/splash-1668x2224.png">
+        <link rel="apple-touch-startup-image" media="(device-width:834px) and (device-height:1194px) and (-webkit-device-pixel-ratio:2)" href="/splash-1668x2388.png">
+        <link rel="apple-touch-startup-image" media="(device-width:1024px) and (device-height:1366px) and (-webkit-device-pixel-ratio:2)" href="/splash-2048x2732.png">
         <script src="https://cdn.tailwindcss.com"></script>
         <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
     </head>
@@ -1690,7 +1748,33 @@ app.get('/login', (c) => {
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
         <meta name="apple-mobile-web-app-title" content="TOCA ESSA">
         <link rel="manifest" href="/manifest.json">
-        <link rel="apple-touch-icon" href="/icon-192.png">
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+        <link rel="apple-touch-icon" sizes="57x57"   href="/apple-touch-icon-57x57.png">
+        <link rel="apple-touch-icon" sizes="60x60"   href="/apple-touch-icon-60x60.png">
+        <link rel="apple-touch-icon" sizes="72x72"   href="/apple-touch-icon-72x72.png">
+        <link rel="apple-touch-icon" sizes="76x76"   href="/apple-touch-icon-76x76.png">
+        <link rel="apple-touch-icon" sizes="114x114" href="/apple-touch-icon-114x114.png">
+        <link rel="apple-touch-icon" sizes="120x120" href="/apple-touch-icon-120x120.png">
+        <link rel="apple-touch-icon" sizes="144x144" href="/apple-touch-icon-144x144.png">
+        <link rel="apple-touch-icon" sizes="152x152" href="/apple-touch-icon-152x152.png">
+        <link rel="apple-touch-icon" sizes="167x167" href="/apple-touch-icon-167x167.png">
+        <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon-180x180.png">
+        <!-- Splash screens iOS -->
+        <link rel="apple-touch-startup-image" media="(device-width:320px) and (device-height:568px) and (-webkit-device-pixel-ratio:2)"  href="/splash-640x1136.png">
+        <link rel="apple-touch-startup-image" media="(device-width:375px) and (device-height:667px) and (-webkit-device-pixel-ratio:2)"  href="/splash-750x1334.png">
+        <link rel="apple-touch-startup-image" media="(device-width:414px) and (device-height:736px) and (-webkit-device-pixel-ratio:3)"  href="/splash-1242x2208.png">
+        <link rel="apple-touch-startup-image" media="(device-width:375px) and (device-height:812px) and (-webkit-device-pixel-ratio:3)"  href="/splash-1125x2436.png">
+        <link rel="apple-touch-startup-image" media="(device-width:414px) and (device-height:896px) and (-webkit-device-pixel-ratio:2)"  href="/splash-828x1792.png">
+        <link rel="apple-touch-startup-image" media="(device-width:414px) and (device-height:896px) and (-webkit-device-pixel-ratio:3)"  href="/splash-1242x2688.png">
+        <link rel="apple-touch-startup-image" media="(device-width:390px) and (device-height:844px) and (-webkit-device-pixel-ratio:3)"  href="/splash-1170x2532.png">
+        <link rel="apple-touch-startup-image" media="(device-width:428px) and (device-height:926px) and (-webkit-device-pixel-ratio:3)"  href="/splash-1284x2778.png">
+        <link rel="apple-touch-startup-image" media="(device-width:393px) and (device-height:852px) and (-webkit-device-pixel-ratio:3)"  href="/splash-1179x2556.png">
+        <link rel="apple-touch-startup-image" media="(device-width:430px) and (device-height:932px) and (-webkit-device-pixel-ratio:3)"  href="/splash-1290x2796.png">
+        <link rel="apple-touch-startup-image" media="(device-width:414px) and (device-height:736px) and (-webkit-device-pixel-ratio:3)"  href="/splash-1080x1920.png">
+        <link rel="apple-touch-startup-image" media="(device-width:768px) and (device-height:1024px) and (-webkit-device-pixel-ratio:2)" href="/splash-1536x2048.png">
+        <link rel="apple-touch-startup-image" media="(device-width:834px) and (device-height:1112px) and (-webkit-device-pixel-ratio:2)" href="/splash-1668x2224.png">
+        <link rel="apple-touch-startup-image" media="(device-width:834px) and (device-height:1194px) and (-webkit-device-pixel-ratio:2)" href="/splash-1668x2388.png">
+        <link rel="apple-touch-startup-image" media="(device-width:1024px) and (device-height:1366px) and (-webkit-device-pixel-ratio:2)" href="/splash-2048x2732.png">
         <title>Login - TOCA ESSA</title>
         <script src="https://cdn.tailwindcss.com"></script>
         <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
@@ -1719,7 +1803,33 @@ app.get('/register', (c) => {
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
         <meta name="apple-mobile-web-app-title" content="TOCA ESSA">
         <link rel="manifest" href="/manifest.json">
-        <link rel="apple-touch-icon" href="/icon-192.png">
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+        <link rel="apple-touch-icon" sizes="57x57"   href="/apple-touch-icon-57x57.png">
+        <link rel="apple-touch-icon" sizes="60x60"   href="/apple-touch-icon-60x60.png">
+        <link rel="apple-touch-icon" sizes="72x72"   href="/apple-touch-icon-72x72.png">
+        <link rel="apple-touch-icon" sizes="76x76"   href="/apple-touch-icon-76x76.png">
+        <link rel="apple-touch-icon" sizes="114x114" href="/apple-touch-icon-114x114.png">
+        <link rel="apple-touch-icon" sizes="120x120" href="/apple-touch-icon-120x120.png">
+        <link rel="apple-touch-icon" sizes="144x144" href="/apple-touch-icon-144x144.png">
+        <link rel="apple-touch-icon" sizes="152x152" href="/apple-touch-icon-152x152.png">
+        <link rel="apple-touch-icon" sizes="167x167" href="/apple-touch-icon-167x167.png">
+        <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon-180x180.png">
+        <!-- Splash screens iOS -->
+        <link rel="apple-touch-startup-image" media="(device-width:320px) and (device-height:568px) and (-webkit-device-pixel-ratio:2)"  href="/splash-640x1136.png">
+        <link rel="apple-touch-startup-image" media="(device-width:375px) and (device-height:667px) and (-webkit-device-pixel-ratio:2)"  href="/splash-750x1334.png">
+        <link rel="apple-touch-startup-image" media="(device-width:414px) and (device-height:736px) and (-webkit-device-pixel-ratio:3)"  href="/splash-1242x2208.png">
+        <link rel="apple-touch-startup-image" media="(device-width:375px) and (device-height:812px) and (-webkit-device-pixel-ratio:3)"  href="/splash-1125x2436.png">
+        <link rel="apple-touch-startup-image" media="(device-width:414px) and (device-height:896px) and (-webkit-device-pixel-ratio:2)"  href="/splash-828x1792.png">
+        <link rel="apple-touch-startup-image" media="(device-width:414px) and (device-height:896px) and (-webkit-device-pixel-ratio:3)"  href="/splash-1242x2688.png">
+        <link rel="apple-touch-startup-image" media="(device-width:390px) and (device-height:844px) and (-webkit-device-pixel-ratio:3)"  href="/splash-1170x2532.png">
+        <link rel="apple-touch-startup-image" media="(device-width:428px) and (device-height:926px) and (-webkit-device-pixel-ratio:3)"  href="/splash-1284x2778.png">
+        <link rel="apple-touch-startup-image" media="(device-width:393px) and (device-height:852px) and (-webkit-device-pixel-ratio:3)"  href="/splash-1179x2556.png">
+        <link rel="apple-touch-startup-image" media="(device-width:430px) and (device-height:932px) and (-webkit-device-pixel-ratio:3)"  href="/splash-1290x2796.png">
+        <link rel="apple-touch-startup-image" media="(device-width:414px) and (device-height:736px) and (-webkit-device-pixel-ratio:3)"  href="/splash-1080x1920.png">
+        <link rel="apple-touch-startup-image" media="(device-width:768px) and (device-height:1024px) and (-webkit-device-pixel-ratio:2)" href="/splash-1536x2048.png">
+        <link rel="apple-touch-startup-image" media="(device-width:834px) and (device-height:1112px) and (-webkit-device-pixel-ratio:2)" href="/splash-1668x2224.png">
+        <link rel="apple-touch-startup-image" media="(device-width:834px) and (device-height:1194px) and (-webkit-device-pixel-ratio:2)" href="/splash-1668x2388.png">
+        <link rel="apple-touch-startup-image" media="(device-width:1024px) and (device-height:1366px) and (-webkit-device-pixel-ratio:2)" href="/splash-2048x2732.png">
         <title>Cadastro - TOCA ESSA</title>
         <script src="https://cdn.tailwindcss.com"></script>
         <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
@@ -1748,7 +1858,33 @@ app.get('/license-payment', (c) => {
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
         <meta name="apple-mobile-web-app-title" content="TOCA ESSA">
         <link rel="manifest" href="/manifest.json">
-        <link rel="apple-touch-icon" href="/icon-192.png">
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+        <link rel="apple-touch-icon" sizes="57x57"   href="/apple-touch-icon-57x57.png">
+        <link rel="apple-touch-icon" sizes="60x60"   href="/apple-touch-icon-60x60.png">
+        <link rel="apple-touch-icon" sizes="72x72"   href="/apple-touch-icon-72x72.png">
+        <link rel="apple-touch-icon" sizes="76x76"   href="/apple-touch-icon-76x76.png">
+        <link rel="apple-touch-icon" sizes="114x114" href="/apple-touch-icon-114x114.png">
+        <link rel="apple-touch-icon" sizes="120x120" href="/apple-touch-icon-120x120.png">
+        <link rel="apple-touch-icon" sizes="144x144" href="/apple-touch-icon-144x144.png">
+        <link rel="apple-touch-icon" sizes="152x152" href="/apple-touch-icon-152x152.png">
+        <link rel="apple-touch-icon" sizes="167x167" href="/apple-touch-icon-167x167.png">
+        <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon-180x180.png">
+        <!-- Splash screens iOS -->
+        <link rel="apple-touch-startup-image" media="(device-width:320px) and (device-height:568px) and (-webkit-device-pixel-ratio:2)"  href="/splash-640x1136.png">
+        <link rel="apple-touch-startup-image" media="(device-width:375px) and (device-height:667px) and (-webkit-device-pixel-ratio:2)"  href="/splash-750x1334.png">
+        <link rel="apple-touch-startup-image" media="(device-width:414px) and (device-height:736px) and (-webkit-device-pixel-ratio:3)"  href="/splash-1242x2208.png">
+        <link rel="apple-touch-startup-image" media="(device-width:375px) and (device-height:812px) and (-webkit-device-pixel-ratio:3)"  href="/splash-1125x2436.png">
+        <link rel="apple-touch-startup-image" media="(device-width:414px) and (device-height:896px) and (-webkit-device-pixel-ratio:2)"  href="/splash-828x1792.png">
+        <link rel="apple-touch-startup-image" media="(device-width:414px) and (device-height:896px) and (-webkit-device-pixel-ratio:3)"  href="/splash-1242x2688.png">
+        <link rel="apple-touch-startup-image" media="(device-width:390px) and (device-height:844px) and (-webkit-device-pixel-ratio:3)"  href="/splash-1170x2532.png">
+        <link rel="apple-touch-startup-image" media="(device-width:428px) and (device-height:926px) and (-webkit-device-pixel-ratio:3)"  href="/splash-1284x2778.png">
+        <link rel="apple-touch-startup-image" media="(device-width:393px) and (device-height:852px) and (-webkit-device-pixel-ratio:3)"  href="/splash-1179x2556.png">
+        <link rel="apple-touch-startup-image" media="(device-width:430px) and (device-height:932px) and (-webkit-device-pixel-ratio:3)"  href="/splash-1290x2796.png">
+        <link rel="apple-touch-startup-image" media="(device-width:414px) and (device-height:736px) and (-webkit-device-pixel-ratio:3)"  href="/splash-1080x1920.png">
+        <link rel="apple-touch-startup-image" media="(device-width:768px) and (device-height:1024px) and (-webkit-device-pixel-ratio:2)" href="/splash-1536x2048.png">
+        <link rel="apple-touch-startup-image" media="(device-width:834px) and (device-height:1112px) and (-webkit-device-pixel-ratio:2)" href="/splash-1668x2224.png">
+        <link rel="apple-touch-startup-image" media="(device-width:834px) and (device-height:1194px) and (-webkit-device-pixel-ratio:2)" href="/splash-1668x2388.png">
+        <link rel="apple-touch-startup-image" media="(device-width:1024px) and (device-height:1366px) and (-webkit-device-pixel-ratio:2)" href="/splash-2048x2732.png">
         <title>Pagamento da Licença - TOCA ESSA</title>
         <script src="https://cdn.tailwindcss.com"></script>
         <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
@@ -1777,7 +1913,33 @@ app.get('/admin/login', (c) => {
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
         <meta name="apple-mobile-web-app-title" content="TOCA ESSA">
         <link rel="manifest" href="/manifest.json">
-        <link rel="apple-touch-icon" href="/icon-192.png">
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+        <link rel="apple-touch-icon" sizes="57x57"   href="/apple-touch-icon-57x57.png">
+        <link rel="apple-touch-icon" sizes="60x60"   href="/apple-touch-icon-60x60.png">
+        <link rel="apple-touch-icon" sizes="72x72"   href="/apple-touch-icon-72x72.png">
+        <link rel="apple-touch-icon" sizes="76x76"   href="/apple-touch-icon-76x76.png">
+        <link rel="apple-touch-icon" sizes="114x114" href="/apple-touch-icon-114x114.png">
+        <link rel="apple-touch-icon" sizes="120x120" href="/apple-touch-icon-120x120.png">
+        <link rel="apple-touch-icon" sizes="144x144" href="/apple-touch-icon-144x144.png">
+        <link rel="apple-touch-icon" sizes="152x152" href="/apple-touch-icon-152x152.png">
+        <link rel="apple-touch-icon" sizes="167x167" href="/apple-touch-icon-167x167.png">
+        <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon-180x180.png">
+        <!-- Splash screens iOS -->
+        <link rel="apple-touch-startup-image" media="(device-width:320px) and (device-height:568px) and (-webkit-device-pixel-ratio:2)"  href="/splash-640x1136.png">
+        <link rel="apple-touch-startup-image" media="(device-width:375px) and (device-height:667px) and (-webkit-device-pixel-ratio:2)"  href="/splash-750x1334.png">
+        <link rel="apple-touch-startup-image" media="(device-width:414px) and (device-height:736px) and (-webkit-device-pixel-ratio:3)"  href="/splash-1242x2208.png">
+        <link rel="apple-touch-startup-image" media="(device-width:375px) and (device-height:812px) and (-webkit-device-pixel-ratio:3)"  href="/splash-1125x2436.png">
+        <link rel="apple-touch-startup-image" media="(device-width:414px) and (device-height:896px) and (-webkit-device-pixel-ratio:2)"  href="/splash-828x1792.png">
+        <link rel="apple-touch-startup-image" media="(device-width:414px) and (device-height:896px) and (-webkit-device-pixel-ratio:3)"  href="/splash-1242x2688.png">
+        <link rel="apple-touch-startup-image" media="(device-width:390px) and (device-height:844px) and (-webkit-device-pixel-ratio:3)"  href="/splash-1170x2532.png">
+        <link rel="apple-touch-startup-image" media="(device-width:428px) and (device-height:926px) and (-webkit-device-pixel-ratio:3)"  href="/splash-1284x2778.png">
+        <link rel="apple-touch-startup-image" media="(device-width:393px) and (device-height:852px) and (-webkit-device-pixel-ratio:3)"  href="/splash-1179x2556.png">
+        <link rel="apple-touch-startup-image" media="(device-width:430px) and (device-height:932px) and (-webkit-device-pixel-ratio:3)"  href="/splash-1290x2796.png">
+        <link rel="apple-touch-startup-image" media="(device-width:414px) and (device-height:736px) and (-webkit-device-pixel-ratio:3)"  href="/splash-1080x1920.png">
+        <link rel="apple-touch-startup-image" media="(device-width:768px) and (device-height:1024px) and (-webkit-device-pixel-ratio:2)" href="/splash-1536x2048.png">
+        <link rel="apple-touch-startup-image" media="(device-width:834px) and (device-height:1112px) and (-webkit-device-pixel-ratio:2)" href="/splash-1668x2224.png">
+        <link rel="apple-touch-startup-image" media="(device-width:834px) and (device-height:1194px) and (-webkit-device-pixel-ratio:2)" href="/splash-1668x2388.png">
+        <link rel="apple-touch-startup-image" media="(device-width:1024px) and (device-height:1366px) and (-webkit-device-pixel-ratio:2)" href="/splash-2048x2732.png">
         <title>Admin Login - TOCA ESSA</title>
         <script src="https://cdn.tailwindcss.com"></script>
         <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
@@ -1869,7 +2031,33 @@ app.get('/admin/panel', (c) => {
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
         <meta name="apple-mobile-web-app-title" content="TOCA ESSA">
         <link rel="manifest" href="/manifest.json">
-        <link rel="apple-touch-icon" href="/icon-192.png">
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+        <link rel="apple-touch-icon" sizes="57x57"   href="/apple-touch-icon-57x57.png">
+        <link rel="apple-touch-icon" sizes="60x60"   href="/apple-touch-icon-60x60.png">
+        <link rel="apple-touch-icon" sizes="72x72"   href="/apple-touch-icon-72x72.png">
+        <link rel="apple-touch-icon" sizes="76x76"   href="/apple-touch-icon-76x76.png">
+        <link rel="apple-touch-icon" sizes="114x114" href="/apple-touch-icon-114x114.png">
+        <link rel="apple-touch-icon" sizes="120x120" href="/apple-touch-icon-120x120.png">
+        <link rel="apple-touch-icon" sizes="144x144" href="/apple-touch-icon-144x144.png">
+        <link rel="apple-touch-icon" sizes="152x152" href="/apple-touch-icon-152x152.png">
+        <link rel="apple-touch-icon" sizes="167x167" href="/apple-touch-icon-167x167.png">
+        <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon-180x180.png">
+        <!-- Splash screens iOS -->
+        <link rel="apple-touch-startup-image" media="(device-width:320px) and (device-height:568px) and (-webkit-device-pixel-ratio:2)"  href="/splash-640x1136.png">
+        <link rel="apple-touch-startup-image" media="(device-width:375px) and (device-height:667px) and (-webkit-device-pixel-ratio:2)"  href="/splash-750x1334.png">
+        <link rel="apple-touch-startup-image" media="(device-width:414px) and (device-height:736px) and (-webkit-device-pixel-ratio:3)"  href="/splash-1242x2208.png">
+        <link rel="apple-touch-startup-image" media="(device-width:375px) and (device-height:812px) and (-webkit-device-pixel-ratio:3)"  href="/splash-1125x2436.png">
+        <link rel="apple-touch-startup-image" media="(device-width:414px) and (device-height:896px) and (-webkit-device-pixel-ratio:2)"  href="/splash-828x1792.png">
+        <link rel="apple-touch-startup-image" media="(device-width:414px) and (device-height:896px) and (-webkit-device-pixel-ratio:3)"  href="/splash-1242x2688.png">
+        <link rel="apple-touch-startup-image" media="(device-width:390px) and (device-height:844px) and (-webkit-device-pixel-ratio:3)"  href="/splash-1170x2532.png">
+        <link rel="apple-touch-startup-image" media="(device-width:428px) and (device-height:926px) and (-webkit-device-pixel-ratio:3)"  href="/splash-1284x2778.png">
+        <link rel="apple-touch-startup-image" media="(device-width:393px) and (device-height:852px) and (-webkit-device-pixel-ratio:3)"  href="/splash-1179x2556.png">
+        <link rel="apple-touch-startup-image" media="(device-width:430px) and (device-height:932px) and (-webkit-device-pixel-ratio:3)"  href="/splash-1290x2796.png">
+        <link rel="apple-touch-startup-image" media="(device-width:414px) and (device-height:736px) and (-webkit-device-pixel-ratio:3)"  href="/splash-1080x1920.png">
+        <link rel="apple-touch-startup-image" media="(device-width:768px) and (device-height:1024px) and (-webkit-device-pixel-ratio:2)" href="/splash-1536x2048.png">
+        <link rel="apple-touch-startup-image" media="(device-width:834px) and (device-height:1112px) and (-webkit-device-pixel-ratio:2)" href="/splash-1668x2224.png">
+        <link rel="apple-touch-startup-image" media="(device-width:834px) and (device-height:1194px) and (-webkit-device-pixel-ratio:2)" href="/splash-1668x2388.png">
+        <link rel="apple-touch-startup-image" media="(device-width:1024px) and (device-height:1366px) and (-webkit-device-pixel-ratio:2)" href="/splash-2048x2732.png">
         <title>Painel Admin - TOCA ESSA</title>
         <script src="https://cdn.tailwindcss.com"></script>
         <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
@@ -1928,7 +2116,33 @@ app.get('/manage', (c) => {
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
         <meta name="apple-mobile-web-app-title" content="TOCA ESSA">
         <link rel="manifest" href="/manifest.json">
-        <link rel="apple-touch-icon" href="/icon-192.png">
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+        <link rel="apple-touch-icon" sizes="57x57"   href="/apple-touch-icon-57x57.png">
+        <link rel="apple-touch-icon" sizes="60x60"   href="/apple-touch-icon-60x60.png">
+        <link rel="apple-touch-icon" sizes="72x72"   href="/apple-touch-icon-72x72.png">
+        <link rel="apple-touch-icon" sizes="76x76"   href="/apple-touch-icon-76x76.png">
+        <link rel="apple-touch-icon" sizes="114x114" href="/apple-touch-icon-114x114.png">
+        <link rel="apple-touch-icon" sizes="120x120" href="/apple-touch-icon-120x120.png">
+        <link rel="apple-touch-icon" sizes="144x144" href="/apple-touch-icon-144x144.png">
+        <link rel="apple-touch-icon" sizes="152x152" href="/apple-touch-icon-152x152.png">
+        <link rel="apple-touch-icon" sizes="167x167" href="/apple-touch-icon-167x167.png">
+        <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon-180x180.png">
+        <!-- Splash screens iOS -->
+        <link rel="apple-touch-startup-image" media="(device-width:320px) and (device-height:568px) and (-webkit-device-pixel-ratio:2)"  href="/splash-640x1136.png">
+        <link rel="apple-touch-startup-image" media="(device-width:375px) and (device-height:667px) and (-webkit-device-pixel-ratio:2)"  href="/splash-750x1334.png">
+        <link rel="apple-touch-startup-image" media="(device-width:414px) and (device-height:736px) and (-webkit-device-pixel-ratio:3)"  href="/splash-1242x2208.png">
+        <link rel="apple-touch-startup-image" media="(device-width:375px) and (device-height:812px) and (-webkit-device-pixel-ratio:3)"  href="/splash-1125x2436.png">
+        <link rel="apple-touch-startup-image" media="(device-width:414px) and (device-height:896px) and (-webkit-device-pixel-ratio:2)"  href="/splash-828x1792.png">
+        <link rel="apple-touch-startup-image" media="(device-width:414px) and (device-height:896px) and (-webkit-device-pixel-ratio:3)"  href="/splash-1242x2688.png">
+        <link rel="apple-touch-startup-image" media="(device-width:390px) and (device-height:844px) and (-webkit-device-pixel-ratio:3)"  href="/splash-1170x2532.png">
+        <link rel="apple-touch-startup-image" media="(device-width:428px) and (device-height:926px) and (-webkit-device-pixel-ratio:3)"  href="/splash-1284x2778.png">
+        <link rel="apple-touch-startup-image" media="(device-width:393px) and (device-height:852px) and (-webkit-device-pixel-ratio:3)"  href="/splash-1179x2556.png">
+        <link rel="apple-touch-startup-image" media="(device-width:430px) and (device-height:932px) and (-webkit-device-pixel-ratio:3)"  href="/splash-1290x2796.png">
+        <link rel="apple-touch-startup-image" media="(device-width:414px) and (device-height:736px) and (-webkit-device-pixel-ratio:3)"  href="/splash-1080x1920.png">
+        <link rel="apple-touch-startup-image" media="(device-width:768px) and (device-height:1024px) and (-webkit-device-pixel-ratio:2)" href="/splash-1536x2048.png">
+        <link rel="apple-touch-startup-image" media="(device-width:834px) and (device-height:1112px) and (-webkit-device-pixel-ratio:2)" href="/splash-1668x2224.png">
+        <link rel="apple-touch-startup-image" media="(device-width:834px) and (device-height:1194px) and (-webkit-device-pixel-ratio:2)" href="/splash-1668x2388.png">
+        <link rel="apple-touch-startup-image" media="(device-width:1024px) and (device-height:1366px) and (-webkit-device-pixel-ratio:2)" href="/splash-2048x2732.png">
         <title>Gerenciar - TOCA ESSA</title>
         <script src="https://cdn.tailwindcss.com"></script>
         <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
@@ -1985,7 +2199,33 @@ app.get('/payment/:slug/:tipId', async (c) => {
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
         <meta name="apple-mobile-web-app-title" content="TOCA ESSA">
         <link rel="manifest" href="/manifest.json">
-        <link rel="apple-touch-icon" href="/icon-192.png">
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+        <link rel="apple-touch-icon" sizes="57x57"   href="/apple-touch-icon-57x57.png">
+        <link rel="apple-touch-icon" sizes="60x60"   href="/apple-touch-icon-60x60.png">
+        <link rel="apple-touch-icon" sizes="72x72"   href="/apple-touch-icon-72x72.png">
+        <link rel="apple-touch-icon" sizes="76x76"   href="/apple-touch-icon-76x76.png">
+        <link rel="apple-touch-icon" sizes="114x114" href="/apple-touch-icon-114x114.png">
+        <link rel="apple-touch-icon" sizes="120x120" href="/apple-touch-icon-120x120.png">
+        <link rel="apple-touch-icon" sizes="144x144" href="/apple-touch-icon-144x144.png">
+        <link rel="apple-touch-icon" sizes="152x152" href="/apple-touch-icon-152x152.png">
+        <link rel="apple-touch-icon" sizes="167x167" href="/apple-touch-icon-167x167.png">
+        <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon-180x180.png">
+        <!-- Splash screens iOS -->
+        <link rel="apple-touch-startup-image" media="(device-width:320px) and (device-height:568px) and (-webkit-device-pixel-ratio:2)"  href="/splash-640x1136.png">
+        <link rel="apple-touch-startup-image" media="(device-width:375px) and (device-height:667px) and (-webkit-device-pixel-ratio:2)"  href="/splash-750x1334.png">
+        <link rel="apple-touch-startup-image" media="(device-width:414px) and (device-height:736px) and (-webkit-device-pixel-ratio:3)"  href="/splash-1242x2208.png">
+        <link rel="apple-touch-startup-image" media="(device-width:375px) and (device-height:812px) and (-webkit-device-pixel-ratio:3)"  href="/splash-1125x2436.png">
+        <link rel="apple-touch-startup-image" media="(device-width:414px) and (device-height:896px) and (-webkit-device-pixel-ratio:2)"  href="/splash-828x1792.png">
+        <link rel="apple-touch-startup-image" media="(device-width:414px) and (device-height:896px) and (-webkit-device-pixel-ratio:3)"  href="/splash-1242x2688.png">
+        <link rel="apple-touch-startup-image" media="(device-width:390px) and (device-height:844px) and (-webkit-device-pixel-ratio:3)"  href="/splash-1170x2532.png">
+        <link rel="apple-touch-startup-image" media="(device-width:428px) and (device-height:926px) and (-webkit-device-pixel-ratio:3)"  href="/splash-1284x2778.png">
+        <link rel="apple-touch-startup-image" media="(device-width:393px) and (device-height:852px) and (-webkit-device-pixel-ratio:3)"  href="/splash-1179x2556.png">
+        <link rel="apple-touch-startup-image" media="(device-width:430px) and (device-height:932px) and (-webkit-device-pixel-ratio:3)"  href="/splash-1290x2796.png">
+        <link rel="apple-touch-startup-image" media="(device-width:414px) and (device-height:736px) and (-webkit-device-pixel-ratio:3)"  href="/splash-1080x1920.png">
+        <link rel="apple-touch-startup-image" media="(device-width:768px) and (device-height:1024px) and (-webkit-device-pixel-ratio:2)" href="/splash-1536x2048.png">
+        <link rel="apple-touch-startup-image" media="(device-width:834px) and (device-height:1112px) and (-webkit-device-pixel-ratio:2)" href="/splash-1668x2224.png">
+        <link rel="apple-touch-startup-image" media="(device-width:834px) and (device-height:1194px) and (-webkit-device-pixel-ratio:2)" href="/splash-1668x2388.png">
+        <link rel="apple-touch-startup-image" media="(device-width:1024px) and (device-height:1366px) and (-webkit-device-pixel-ratio:2)" href="/splash-2048x2732.png">
         <title>Pagamento PIX - TOCA ESSA</title>
         <script src="https://cdn.tailwindcss.com"></script>
         <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
@@ -2021,7 +2261,33 @@ app.get('/dashboard/:slug', (c) => {
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
         <meta name="apple-mobile-web-app-title" content="TOCA ESSA">
         <link rel="manifest" href="/manifest.json">
-        <link rel="apple-touch-icon" href="/icon-192.png">
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+        <link rel="apple-touch-icon" sizes="57x57"   href="/apple-touch-icon-57x57.png">
+        <link rel="apple-touch-icon" sizes="60x60"   href="/apple-touch-icon-60x60.png">
+        <link rel="apple-touch-icon" sizes="72x72"   href="/apple-touch-icon-72x72.png">
+        <link rel="apple-touch-icon" sizes="76x76"   href="/apple-touch-icon-76x76.png">
+        <link rel="apple-touch-icon" sizes="114x114" href="/apple-touch-icon-114x114.png">
+        <link rel="apple-touch-icon" sizes="120x120" href="/apple-touch-icon-120x120.png">
+        <link rel="apple-touch-icon" sizes="144x144" href="/apple-touch-icon-144x144.png">
+        <link rel="apple-touch-icon" sizes="152x152" href="/apple-touch-icon-152x152.png">
+        <link rel="apple-touch-icon" sizes="167x167" href="/apple-touch-icon-167x167.png">
+        <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon-180x180.png">
+        <!-- Splash screens iOS -->
+        <link rel="apple-touch-startup-image" media="(device-width:320px) and (device-height:568px) and (-webkit-device-pixel-ratio:2)"  href="/splash-640x1136.png">
+        <link rel="apple-touch-startup-image" media="(device-width:375px) and (device-height:667px) and (-webkit-device-pixel-ratio:2)"  href="/splash-750x1334.png">
+        <link rel="apple-touch-startup-image" media="(device-width:414px) and (device-height:736px) and (-webkit-device-pixel-ratio:3)"  href="/splash-1242x2208.png">
+        <link rel="apple-touch-startup-image" media="(device-width:375px) and (device-height:812px) and (-webkit-device-pixel-ratio:3)"  href="/splash-1125x2436.png">
+        <link rel="apple-touch-startup-image" media="(device-width:414px) and (device-height:896px) and (-webkit-device-pixel-ratio:2)"  href="/splash-828x1792.png">
+        <link rel="apple-touch-startup-image" media="(device-width:414px) and (device-height:896px) and (-webkit-device-pixel-ratio:3)"  href="/splash-1242x2688.png">
+        <link rel="apple-touch-startup-image" media="(device-width:390px) and (device-height:844px) and (-webkit-device-pixel-ratio:3)"  href="/splash-1170x2532.png">
+        <link rel="apple-touch-startup-image" media="(device-width:428px) and (device-height:926px) and (-webkit-device-pixel-ratio:3)"  href="/splash-1284x2778.png">
+        <link rel="apple-touch-startup-image" media="(device-width:393px) and (device-height:852px) and (-webkit-device-pixel-ratio:3)"  href="/splash-1179x2556.png">
+        <link rel="apple-touch-startup-image" media="(device-width:430px) and (device-height:932px) and (-webkit-device-pixel-ratio:3)"  href="/splash-1290x2796.png">
+        <link rel="apple-touch-startup-image" media="(device-width:414px) and (device-height:736px) and (-webkit-device-pixel-ratio:3)"  href="/splash-1080x1920.png">
+        <link rel="apple-touch-startup-image" media="(device-width:768px) and (device-height:1024px) and (-webkit-device-pixel-ratio:2)" href="/splash-1536x2048.png">
+        <link rel="apple-touch-startup-image" media="(device-width:834px) and (device-height:1112px) and (-webkit-device-pixel-ratio:2)" href="/splash-1668x2224.png">
+        <link rel="apple-touch-startup-image" media="(device-width:834px) and (device-height:1194px) and (-webkit-device-pixel-ratio:2)" href="/splash-1668x2388.png">
+        <link rel="apple-touch-startup-image" media="(device-width:1024px) and (device-height:1366px) and (-webkit-device-pixel-ratio:2)" href="/splash-2048x2732.png">
         <title>Dashboard - TOCA ESSA</title>
         <script src="https://cdn.tailwindcss.com"></script>
         <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
@@ -2061,7 +2327,33 @@ app.get('/:slug', (c) => {
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
         <meta name="apple-mobile-web-app-title" content="TOCA ESSA">
         <link rel="manifest" href="/manifest.json">
-        <link rel="apple-touch-icon" href="/icon-192.png">
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+        <link rel="apple-touch-icon" sizes="57x57"   href="/apple-touch-icon-57x57.png">
+        <link rel="apple-touch-icon" sizes="60x60"   href="/apple-touch-icon-60x60.png">
+        <link rel="apple-touch-icon" sizes="72x72"   href="/apple-touch-icon-72x72.png">
+        <link rel="apple-touch-icon" sizes="76x76"   href="/apple-touch-icon-76x76.png">
+        <link rel="apple-touch-icon" sizes="114x114" href="/apple-touch-icon-114x114.png">
+        <link rel="apple-touch-icon" sizes="120x120" href="/apple-touch-icon-120x120.png">
+        <link rel="apple-touch-icon" sizes="144x144" href="/apple-touch-icon-144x144.png">
+        <link rel="apple-touch-icon" sizes="152x152" href="/apple-touch-icon-152x152.png">
+        <link rel="apple-touch-icon" sizes="167x167" href="/apple-touch-icon-167x167.png">
+        <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon-180x180.png">
+        <!-- Splash screens iOS -->
+        <link rel="apple-touch-startup-image" media="(device-width:320px) and (device-height:568px) and (-webkit-device-pixel-ratio:2)"  href="/splash-640x1136.png">
+        <link rel="apple-touch-startup-image" media="(device-width:375px) and (device-height:667px) and (-webkit-device-pixel-ratio:2)"  href="/splash-750x1334.png">
+        <link rel="apple-touch-startup-image" media="(device-width:414px) and (device-height:736px) and (-webkit-device-pixel-ratio:3)"  href="/splash-1242x2208.png">
+        <link rel="apple-touch-startup-image" media="(device-width:375px) and (device-height:812px) and (-webkit-device-pixel-ratio:3)"  href="/splash-1125x2436.png">
+        <link rel="apple-touch-startup-image" media="(device-width:414px) and (device-height:896px) and (-webkit-device-pixel-ratio:2)"  href="/splash-828x1792.png">
+        <link rel="apple-touch-startup-image" media="(device-width:414px) and (device-height:896px) and (-webkit-device-pixel-ratio:3)"  href="/splash-1242x2688.png">
+        <link rel="apple-touch-startup-image" media="(device-width:390px) and (device-height:844px) and (-webkit-device-pixel-ratio:3)"  href="/splash-1170x2532.png">
+        <link rel="apple-touch-startup-image" media="(device-width:428px) and (device-height:926px) and (-webkit-device-pixel-ratio:3)"  href="/splash-1284x2778.png">
+        <link rel="apple-touch-startup-image" media="(device-width:393px) and (device-height:852px) and (-webkit-device-pixel-ratio:3)"  href="/splash-1179x2556.png">
+        <link rel="apple-touch-startup-image" media="(device-width:430px) and (device-height:932px) and (-webkit-device-pixel-ratio:3)"  href="/splash-1290x2796.png">
+        <link rel="apple-touch-startup-image" media="(device-width:414px) and (device-height:736px) and (-webkit-device-pixel-ratio:3)"  href="/splash-1080x1920.png">
+        <link rel="apple-touch-startup-image" media="(device-width:768px) and (device-height:1024px) and (-webkit-device-pixel-ratio:2)" href="/splash-1536x2048.png">
+        <link rel="apple-touch-startup-image" media="(device-width:834px) and (device-height:1112px) and (-webkit-device-pixel-ratio:2)" href="/splash-1668x2224.png">
+        <link rel="apple-touch-startup-image" media="(device-width:834px) and (device-height:1194px) and (-webkit-device-pixel-ratio:2)" href="/splash-1668x2388.png">
+        <link rel="apple-touch-startup-image" media="(device-width:1024px) and (device-height:1366px) and (-webkit-device-pixel-ratio:2)" href="/splash-2048x2732.png">
         <title>Repertório - TOCA ESSA</title>
         
         <!-- PWA Meta Tags -->
@@ -2069,7 +2361,33 @@ app.get('/:slug', (c) => {
         <meta name="description" content="Plataforma de interação ao vivo entre artistas e público">
         <link rel="manifest" href="/manifest.json">
         <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png">
-        <link rel="apple-touch-icon" href="/icon-192.png">
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+        <link rel="apple-touch-icon" sizes="57x57"   href="/apple-touch-icon-57x57.png">
+        <link rel="apple-touch-icon" sizes="60x60"   href="/apple-touch-icon-60x60.png">
+        <link rel="apple-touch-icon" sizes="72x72"   href="/apple-touch-icon-72x72.png">
+        <link rel="apple-touch-icon" sizes="76x76"   href="/apple-touch-icon-76x76.png">
+        <link rel="apple-touch-icon" sizes="114x114" href="/apple-touch-icon-114x114.png">
+        <link rel="apple-touch-icon" sizes="120x120" href="/apple-touch-icon-120x120.png">
+        <link rel="apple-touch-icon" sizes="144x144" href="/apple-touch-icon-144x144.png">
+        <link rel="apple-touch-icon" sizes="152x152" href="/apple-touch-icon-152x152.png">
+        <link rel="apple-touch-icon" sizes="167x167" href="/apple-touch-icon-167x167.png">
+        <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon-180x180.png">
+        <!-- Splash screens iOS -->
+        <link rel="apple-touch-startup-image" media="(device-width:320px) and (device-height:568px) and (-webkit-device-pixel-ratio:2)"  href="/splash-640x1136.png">
+        <link rel="apple-touch-startup-image" media="(device-width:375px) and (device-height:667px) and (-webkit-device-pixel-ratio:2)"  href="/splash-750x1334.png">
+        <link rel="apple-touch-startup-image" media="(device-width:414px) and (device-height:736px) and (-webkit-device-pixel-ratio:3)"  href="/splash-1242x2208.png">
+        <link rel="apple-touch-startup-image" media="(device-width:375px) and (device-height:812px) and (-webkit-device-pixel-ratio:3)"  href="/splash-1125x2436.png">
+        <link rel="apple-touch-startup-image" media="(device-width:414px) and (device-height:896px) and (-webkit-device-pixel-ratio:2)"  href="/splash-828x1792.png">
+        <link rel="apple-touch-startup-image" media="(device-width:414px) and (device-height:896px) and (-webkit-device-pixel-ratio:3)"  href="/splash-1242x2688.png">
+        <link rel="apple-touch-startup-image" media="(device-width:390px) and (device-height:844px) and (-webkit-device-pixel-ratio:3)"  href="/splash-1170x2532.png">
+        <link rel="apple-touch-startup-image" media="(device-width:428px) and (device-height:926px) and (-webkit-device-pixel-ratio:3)"  href="/splash-1284x2778.png">
+        <link rel="apple-touch-startup-image" media="(device-width:393px) and (device-height:852px) and (-webkit-device-pixel-ratio:3)"  href="/splash-1179x2556.png">
+        <link rel="apple-touch-startup-image" media="(device-width:430px) and (device-height:932px) and (-webkit-device-pixel-ratio:3)"  href="/splash-1290x2796.png">
+        <link rel="apple-touch-startup-image" media="(device-width:414px) and (device-height:736px) and (-webkit-device-pixel-ratio:3)"  href="/splash-1080x1920.png">
+        <link rel="apple-touch-startup-image" media="(device-width:768px) and (device-height:1024px) and (-webkit-device-pixel-ratio:2)" href="/splash-1536x2048.png">
+        <link rel="apple-touch-startup-image" media="(device-width:834px) and (device-height:1112px) and (-webkit-device-pixel-ratio:2)" href="/splash-1668x2224.png">
+        <link rel="apple-touch-startup-image" media="(device-width:834px) and (device-height:1194px) and (-webkit-device-pixel-ratio:2)" href="/splash-1668x2388.png">
+        <link rel="apple-touch-startup-image" media="(device-width:1024px) and (device-height:1366px) and (-webkit-device-pixel-ratio:2)" href="/splash-2048x2732.png">
         <meta name="mobile-web-app-capable" content="yes">
         <meta name="apple-mobile-web-app-capable" content="yes">
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
