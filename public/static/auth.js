@@ -247,9 +247,21 @@ async function handleLogin(event) {
     const response = await axios.post('/api/auth/login', { email, password });
     
     if (response.data.success) {
+      const user = response.data.user;
       showSuccess('Login realizado com sucesso!');
       setTimeout(() => {
-        window.location.href = '/manage';
+        // Admin vai para o painel admin
+        if (user.role === 'admin') {
+          window.location.href = '/admin/panel';
+          return;
+        }
+        // Artista aprovado vai para gerenciamento
+        if (user.license_status === 'approved') {
+          window.location.href = '/manage';
+          return;
+        }
+        // Artista ainda não aprovado vai para pagamento de licença
+        window.location.href = '/license-payment';
       }, 1000);
     }
   } catch (error) {
@@ -286,8 +298,9 @@ async function handleRegister(event) {
     if (response.data.success) {
       if (response.data.payment_required) {
         showSuccess('Conta criada! Redirecionando para pagamento da licença...');
-        // Armazena email no sessionStorage de forma segura (sem senha na URL)
+        // Armazena credenciais no sessionStorage para login automático na tela de pagamento
         sessionStorage.setItem('pending_email', email);
+        sessionStorage.setItem('pending_password', password);
         setTimeout(() => {
           window.location.href = '/license-payment';
         }, 2000);

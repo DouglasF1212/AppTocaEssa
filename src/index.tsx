@@ -190,6 +190,8 @@ app.post('/api/auth/login', async (c) => {
       id: user.id,
       email: user.email,
       full_name: user.full_name,
+      role: user.role || 'artist',
+      license_status: user.license_status || 'pending',
       artist_slug: user.artist_slug
     }
   })

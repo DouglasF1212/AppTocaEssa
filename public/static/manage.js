@@ -25,7 +25,12 @@ async function checkAuthentication() {
     user = response.data.user;
     artist = response.data.artist;
     
-    // Check license status
+    // Admin não precisa de licença aprovada
+    if (user.role === 'admin') {
+      return;
+    }
+
+    // Artista sem licença aprovada vai para pagamento
     if (user.license_status !== 'approved') {
       window.location.href = '/license-payment';
       return;

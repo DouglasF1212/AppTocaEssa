@@ -6,6 +6,19 @@ let paymentConfig = {};
 // Initialize
 async function init() {
   try {
+    // Se o usuário acabou de se registrar e está no sessionStorage, faz login automático
+    const pendingEmail = sessionStorage.getItem('pending_email');
+    const pendingPassword = sessionStorage.getItem('pending_password');
+    if (pendingEmail && pendingPassword) {
+      sessionStorage.removeItem('pending_email');
+      sessionStorage.removeItem('pending_password');
+      try {
+        await axios.post('/api/auth/login', { email: pendingEmail, password: pendingPassword });
+      } catch (e) {
+        // ignora erro de login automático; usuário pode logar manualmente
+      }
+    }
+
     // Carrega dados de pagamento e usuário em paralelo
     const [configRes, userRes] = await Promise.allSettled([
       axios.get('/api/license/payment-info'),
@@ -28,7 +41,7 @@ async function init() {
 
     if (userRes.status === 'fulfilled') {
       currentUser = userRes.value.data.user;
-      if (currentUser.license_status === 'approved') {
+      if (currentUser && currentUser.license_status === 'approved') {
         window.location.href = '/manage';
         return;
       }
