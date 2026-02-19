@@ -535,8 +535,6 @@ async function handleSaveProfile(event) {
     console.error(error);
   }
 }
-  }
-}
 
 // ======================
 // Repertoire Tab
