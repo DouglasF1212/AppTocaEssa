@@ -8,7 +8,7 @@ let systemConfig = {};
 
 // Configure axios with credentials + localStorage session fallback
 axios.defaults.withCredentials = true;
-const _adminSession = localStorage.getItem('session_id');
+const _adminSession = localStorage.getItem('admin_session_id') || localStorage.getItem('session_id');
 if (_adminSession) {
   axios.defaults.headers.common['X-Session-ID'] = _adminSession;
 }
@@ -33,6 +33,15 @@ async function init() {
 
   renderNavigation();
   renderPage();
+
+  // Auto-refresh dashboard data every 30 seconds
+  setInterval(async () => {
+    await loadStats();
+    await loadUsers();
+    await loadPendingLicenses();
+    // Re-render only if on dashboard page
+    if (currentPage === 'dashboard') renderPage();
+  }, 30000);
 }
 
 // Load statistics
@@ -641,6 +650,9 @@ function showError(message) {
 
 async function handleLogout() {
   try { await axios.post('/api/admin/logout'); } catch(e) {}
+  localStorage.removeItem('admin_session_id');
+  localStorage.removeItem('session_id');
+  localStorage.removeItem('user_role');
   window.location.href = '/admin/login';
 }
 

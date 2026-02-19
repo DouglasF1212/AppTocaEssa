@@ -711,19 +711,22 @@ app.post('/api/artists/:slug/requests', async (c) => {
     VALUES (?, ?, ?, ?, ?, ?, 'pending')
   `).bind(artist.id, song_id, requester_name || 'Anônimo', requester_message || null, tipValue, tip_message || null).run()
   
-  // If tip was included, create a tip record
+  // If tip was included, create a tip record as PENDING (only completes when user confirms payment)
+  let tipId = null
   if (tipValue > 0) {
-    await c.env.DB.prepare(`
+    const tipResult = await c.env.DB.prepare(`
       INSERT INTO tips (artist_id, amount, sender_name, message, payment_method, payment_status, transaction_id)
-      VALUES (?, ?, ?, ?, 'pix', 'completed', ?)
+      VALUES (?, ?, ?, ?, 'pix', 'pending', ?)
     `).bind(artist.id, tipValue, requester_name || 'Anônimo', tip_message || 'Gorjeta junto com pedido', `TXN-${Date.now()}`).run()
+    tipId = tipResult.meta.last_row_id
   }
   
   return c.json({ 
     id: result.meta.last_row_id,
     message: tipValue > 0 ? 'Pedido com gorjeta enviado! Vai para o topo da fila!' : 'Pedido enviado com sucesso!',
     has_tip: tipValue > 0,
-    tip_amount: tipValue
+    tip_amount: tipValue,
+    tip_id: tipId
   })
 })
 
@@ -2376,6 +2379,7 @@ app.get('/admin/login', (c) => {
                 try {
                     const response = await axios.post('/api/admin/login', { email, password }, { withCredentials: true });
                     if (response.data.session_id) {
+                        localStorage.setItem('admin_session_id', response.data.session_id);
                         localStorage.setItem('session_id', response.data.session_id);
                         localStorage.setItem('user_role', 'admin');
                     }
