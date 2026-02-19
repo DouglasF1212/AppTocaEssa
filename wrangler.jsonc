@@ -10,7 +10,11 @@
       "database_name": "webapp-production",
       "database_id": "ce112326-8b35-4d51-870a-9344102771bb"
     }
+  ],
+  "r2_buckets": [
+    {
+      "binding": "PHOTOS",
+      "bucket_name": "tocaessa-photos"
+    }
   ]
-  // R2 para fotos: adicione o binding PHOTOS via painel do Cloudflare
-  // Settings > Bindings > R2 Bucket > nome do bucket: tocaessa-photos
 }
