@@ -1044,25 +1044,25 @@ app.delete('/api/admin/users/:id', async (c) => {
 
 // Get payment information for license (public - no auth needed for registration flow)
 app.get('/api/license/payment-info', async (c) => {
-  // Get admin payment configuration from system_config
   const { results } = await c.env.DB.prepare(`
     SELECT config_key, config_value 
     FROM system_config 
-    WHERE config_key IN ('admin_pix_key', 'admin_pix_key_type', 'admin_pix_name', 'license_amount', 'license_description')
+    WHERE config_key IN ('admin_pix_key', 'admin_pix_key_type', 'admin_pix_name', 'license_amount', 'license_description', 'support_whatsapp', 'support_email')
   `).all()
   
-  // Convert results to object
   const config: Record<string, string> = {}
   results.forEach((row: any) => {
     config[row.config_key] = row.config_value
   })
   
   return c.json({
-    pix_key: config.admin_pix_key || '04940013138',
-    pix_key_type: config.admin_pix_key_type || 'cpf',
-    recipient_name: config.admin_pix_name || 'Douglas Felipe Nogueira da Silva',
-    amount: parseFloat(config.license_amount || '199.00'),
-    description: config.license_description || 'Licença Vitalícia TOCA ESSA'
+    pix_key:           config.admin_pix_key      || '04940013138',
+    pix_key_type:      config.admin_pix_key_type  || 'cpf',
+    recipient_name:    config.admin_pix_name       || 'Douglas Felipe Nogueira da Silva',
+    amount:            parseFloat(config.license_amount || '199.00'),
+    description:       config.license_description  || 'Licença Vitalícia TOCA ESSA',
+    support_whatsapp:  config.support_whatsapp     || '',
+    support_email:     config.support_email        || ''
   })
 })
 
@@ -1203,6 +1203,37 @@ app.put('/api/admin/settings/:key', async (c) => {
     WHERE setting_key = ?
   `).bind(value, key).run()
   
+  return c.json({ success: true, key, value })
+})
+
+// Get system config (admin) - retorna objeto chave/valor
+app.get('/api/admin/system-config', async (c) => {
+  const adminSession = await checkAdminAuth(c)
+  if (!adminSession) return c.json({ error: 'Acesso negado' }, 403)
+
+  const { results } = await c.env.DB.prepare(`
+    SELECT config_key, config_value FROM system_config
+  `).all()
+
+  const config: Record<string, string> = {}
+  results.forEach((row: any) => { config[row.config_key] = row.config_value })
+  return c.json(config)
+})
+
+// Save/update a single system config key (admin)
+app.post('/api/admin/system-config', async (c) => {
+  const adminSession = await checkAdminAuth(c)
+  if (!adminSession) return c.json({ error: 'Acesso negado' }, 403)
+
+  const { key, value } = await c.req.json()
+  if (!key) return c.json({ error: 'Chave obrigatória' }, 400)
+
+  await c.env.DB.prepare(`
+    INSERT INTO system_config (config_key, config_value, updated_at)
+    VALUES (?, ?, datetime('now'))
+    ON CONFLICT(config_key) DO UPDATE SET config_value = excluded.config_value, updated_at = excluded.updated_at
+  `).bind(key, value ?? '').run()
+
   return c.json({ success: true, key, value })
 })
 
