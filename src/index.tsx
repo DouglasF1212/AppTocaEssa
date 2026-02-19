@@ -10,6 +10,15 @@ type Bindings = {
 
 const app = new Hono<{ Bindings: Bindings }>()
 
+// Redireciona apptocaessa.com.br (sem www) para www.apptocaessa.com.br
+app.use('*', async (c, next) => {
+  const host = c.req.header('host') || ''
+  if (host === 'apptocaessa.com.br') {
+    return c.redirect('https://www.apptocaessa.com.br' + c.req.path, 301)
+  }
+  await next()
+})
+
 // Enable CORS
 app.use('/api/*', cors())
 
@@ -217,7 +226,8 @@ app.post('/api/auth/login', async (c) => {
     secure: true,
     sameSite: 'Lax',
     expires: expiresAt,
-    path: '/'
+    path: '/',
+    domain: '.apptocaessa.com.br'
   })
   
   return c.json({ 
@@ -245,7 +255,8 @@ app.post('/api/auth/logout', async (c) => {
   
   setCookie(c, 'session_id', '', {
     maxAge: 0,
-    path: '/'
+    path: '/',
+    domain: '.apptocaessa.com.br'
   })
   
   return c.json({ success: true })
@@ -974,9 +985,10 @@ app.post('/api/admin/login', async (c) => {
   setCookie(c, 'session_id', sessionId, {
     httpOnly: true,
     secure: true,
-    sameSite: 'Strict',
+    sameSite: 'Lax',
     maxAge: 7 * 24 * 60 * 60,
-    path: '/'
+    path: '/',
+    domain: '.apptocaessa.com.br'
   })
   
   return c.json({ 
@@ -999,7 +1011,8 @@ app.post('/api/admin/logout', async (c) => {
   
   setCookie(c, 'session_id', '', {
     maxAge: 0,
-    path: '/'
+    path: '/',
+    domain: '.apptocaessa.com.br'
   })
   
   return c.json({ success: true })
