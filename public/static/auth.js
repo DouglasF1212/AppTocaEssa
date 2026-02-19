@@ -286,13 +286,10 @@ async function handleRegister(event) {
     if (response.data.success) {
       if (response.data.payment_required) {
         showSuccess('Conta criada! Redirecionando para pagamento da licença...');
-        // Pass credentials in URL for automatic login after payment
-        const params = new URLSearchParams({
-          email: email,
-          temp: password
-        });
+        // Armazena email no sessionStorage de forma segura (sem senha na URL)
+        sessionStorage.setItem('pending_email', email);
         setTimeout(() => {
-          window.location.href = `/license-payment?${params.toString()}`;
+          window.location.href = '/license-payment';
         }, 2000);
       } else {
         showSuccess('Conta criada com sucesso! Faça login para continuar.');

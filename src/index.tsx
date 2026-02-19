@@ -918,38 +918,7 @@ app.post('/api/admin/logout', async (c) => {
   return c.json({ success: true })
 })
 
-// Get admin stats
-app.get('/api/admin/stats', async (c) => {
-  const adminSession = await checkAdminAuth(c)
-  if (!adminSession) return c.json({ error: 'Acesso negado' }, 403)
-  
-  // Total users
-  const usersResult = await c.env.DB.prepare(`
-    SELECT COUNT(*) as count FROM users
-  `).first()
-  
-  // Total artists
-  const artistsResult = await c.env.DB.prepare(`
-    SELECT COUNT(*) as count FROM artists WHERE active = 1
-  `).first()
-  
-  // Total songs
-  const songsResult = await c.env.DB.prepare(`
-    SELECT COUNT(*) as count FROM songs
-  `).first()
-  
-  // Total requests
-  const requestsResult = await c.env.DB.prepare(`
-    SELECT COUNT(*) as count FROM song_requests
-  `).first()
-  
-  return c.json({
-    total_users: usersResult?.count || 0,
-    total_artists: artistsResult?.count || 0,
-    total_songs: songsResult?.count || 0,
-    total_requests: requestsResult?.count || 0
-  })
-})
+// Get admin stats - rota unificada (removida duplicata)
 
 // Get all users
 app.get('/api/admin/users', async (c) => {
@@ -1692,7 +1661,7 @@ app.get('/register', (c) => {
   `)
 })
 
-// License Payment Page (after registration)
+// License Payment Page (after registration) - rota única consolidada
 app.get('/license-payment', (c) => {
   return c.html(`
     <!DOCTYPE html>
@@ -1701,28 +1670,6 @@ app.get('/license-payment', (c) => {
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Pagamento da Licença - TOCA ESSA</title>
-        <script src="https://cdn.tailwindcss.com"></script>
-        <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
-    </head>
-    <body class="bg-gradient-to-br from-purple-900 via-indigo-900 to-blue-900 text-white min-h-screen">
-        <div id="app" class="container mx-auto px-4 py-8"></div>
-        <script src="https://cdn.jsdelivr.net/npm/axios@1.6.0/dist/axios.min.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
-        <script src="/static/license-payment.js"></script>
-    </body>
-    </html>
-  `)
-})
-
-// License payment page
-app.get('/license-payment', (c) => {
-  return c.html(`
-    <!DOCTYPE html>
-    <html lang="pt-BR">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Pagamento de Licença - TOCA ESSA</title>
         <script src="https://cdn.tailwindcss.com"></script>
         <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
     </head>
@@ -1896,6 +1843,7 @@ app.get('/manage', (c) => {
         
         <script src="https://cdn.jsdelivr.net/npm/axios@1.6.0/dist/axios.min.js"></script>
         <script src="/static/manage.js"></script>
+        <script>init()</script>
     </body>
     </html>
   `)
@@ -1944,6 +1892,7 @@ app.get('/payment/:slug/:tipId', async (c) => {
         </script>
         <script src="/static/pix-generator.js"></script>
         <script src="/static/payment.js"></script>
+        <script>init()</script>
     </body>
     </html>
   `)
@@ -1976,6 +1925,7 @@ app.get('/dashboard/:slug', (c) => {
           const ARTIST_SLUG = '${slug}';
         </script>
         <script src="/static/dashboard.js"></script>
+        <script>init()</script>
     </body>
     </html>
   `)
@@ -2021,6 +1971,7 @@ app.get('/:slug', (c) => {
         </script>
         <script src="/static/pix-generator.js"></script>
         <script src="/static/audience.js"></script>
+        <script>init()</script>
         
         <!-- PWA Service Worker -->
         <script>
