@@ -1663,15 +1663,14 @@ app.get('/', (c) => {
 
                     <!-- Download App -->
                     <div class="mt-6">
-                        <a href="/download/TocaEssa.apk"
-                           download="TocaEssa.apk"
+                        <a href="/download"
                            style="display:inline-flex;align-items:center;gap:12px;background:rgba(0,0,0,0.45);border:1px solid rgba(255,255,255,0.25);padding:10px 20px;border-radius:16px;text-decoration:none;color:#fff;transition:background 0.2s;"
                            onmouseover="this.style.background='rgba(0,0,0,0.65)'"
                            onmouseout="this.style.background='rgba(0,0,0,0.45)'">
                             <img src="/icon-192.png" alt="Toca Essa" style="width:44px;height:44px;border-radius:10px;box-shadow:0 2px 8px rgba(0,0,0,0.4);">
                             <div style="text-align:left;line-height:1.2;">
-                                <div style="font-size:11px;color:#ccc;margin-bottom:3px;">Baixar para</div>
-                                <div style="font-size:15px;font-weight:700;">Android <span style="color:#4ade80;font-size:11px;font-weight:400;">.apk</span></div>
+                                <div style="font-size:11px;color:#ccc;margin-bottom:3px;">Baixar App</div>
+                                <div style="font-size:15px;font-weight:700;">Android & iPhone</div>
                             </div>
                             <i class="fas fa-download" style="color:#4ade80;font-size:14px;margin-left:4px;"></i>
                         </a>
@@ -1802,9 +1801,9 @@ app.get('/', (c) => {
             <footer class="text-center text-gray-400 border-t border-white/10 pt-8">
                 <p>© 2024 TOCA ESSA - Conectando artistas e público</p>
                 <div class="mt-4 flex gap-4 justify-center flex-wrap">
-                    <a href="/download/TocaEssa.apk" download="TocaEssa.apk" class="hover:text-white transition">
+                    <a href="/download" class="hover:text-white transition">
                         <i class="fas fa-download mr-1"></i>
-                        Baixar App Android
+                        Baixar App
                     </a>
                     <span class="text-gray-600">|</span>
                     <a href="/admin" class="hover:text-white transition">
@@ -1823,6 +1822,257 @@ app.get('/', (c) => {
         });
       }
     </script>
+    </body>
+    </html>
+  `)
+})
+
+
+// Download page
+app.get('/download', (c) => {
+  return c.html(`
+    <!DOCTYPE html>
+    <html lang="pt-BR">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Baixar App - TOCA ESSA</title>
+        <meta name="description" content="Baixe o app TOCA ESSA para Android e conecte artistas ao público durante shows ao vivo.">
+        <link rel="icon" href="/icon-192.png">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+        <style>
+          * { margin: 0; padding: 0; box-sizing: border-box; }
+          body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #1a0b2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+          }
+          .card {
+            background: rgba(255,255,255,0.07);
+            border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 28px;
+            padding: 48px 40px;
+            max-width: 480px;
+            width: 100%;
+            text-align: center;
+            backdrop-filter: blur(16px);
+            box-shadow: 0 24px 64px rgba(0,0,0,0.4);
+          }
+          .app-icon {
+            width: 120px;
+            height: 120px;
+            border-radius: 28px;
+            box-shadow: 0 8px 32px rgba(99,102,241,0.5);
+            margin: 0 auto 20px;
+            display: block;
+          }
+          .app-name {
+            font-size: 32px;
+            font-weight: 800;
+            letter-spacing: 2px;
+            background: linear-gradient(90deg, #a78bfa, #60a5fa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 6px;
+          }
+          .app-sub {
+            font-size: 14px;
+            color: #94a3b8;
+            margin-bottom: 28px;
+          }
+          .badges {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 32px;
+          }
+          .badge {
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 20px;
+            padding: 5px 14px;
+            font-size: 12px;
+            color: #cbd5e1;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+          }
+          .badge i { color: #a78bfa; }
+          .btn-android {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 14px;
+            background: linear-gradient(135deg, #16a34a, #15803d);
+            border: none;
+            border-radius: 16px;
+            padding: 16px 28px;
+            color: #fff;
+            font-size: 17px;
+            font-weight: 700;
+            text-decoration: none;
+            width: 100%;
+            margin-bottom: 14px;
+            box-shadow: 0 4px 20px rgba(22,163,74,0.4);
+            transition: transform 0.15s, box-shadow 0.15s;
+          }
+          .btn-android:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 28px rgba(22,163,74,0.5);
+          }
+          .btn-android .btn-label { text-align: left; line-height: 1.2; }
+          .btn-android .btn-label small { font-size: 11px; font-weight: 400; opacity: 0.85; display: block; }
+          .btn-pwa {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 14px;
+            background: rgba(99,102,241,0.2);
+            border: 1px solid rgba(99,102,241,0.4);
+            border-radius: 16px;
+            padding: 16px 28px;
+            color: #fff;
+            font-size: 17px;
+            font-weight: 700;
+            text-decoration: none;
+            width: 100%;
+            margin-bottom: 28px;
+            transition: background 0.15s;
+          }
+          .btn-pwa:hover { background: rgba(99,102,241,0.35); }
+          .btn-pwa .btn-label { text-align: left; line-height: 1.2; }
+          .btn-pwa .btn-label small { font-size: 11px; font-weight: 400; opacity: 0.75; display: block; }
+          .divider {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #475569;
+            font-size: 12px;
+            margin-bottom: 14px;
+          }
+          .divider::before, .divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: rgba(255,255,255,0.1);
+          }
+          .features {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 28px;
+          }
+          .feature {
+            background: rgba(255,255,255,0.05);
+            border-radius: 12px;
+            padding: 12px;
+            font-size: 12px;
+            color: #94a3b8;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+          }
+          .feature i { color: #a78bfa; font-size: 14px; }
+          .note {
+            font-size: 11px;
+            color: #64748b;
+            line-height: 1.6;
+          }
+          .note a { color: #818cf8; text-decoration: none; }
+          .back {
+            margin-top: 24px;
+            font-size: 13px;
+            color: #64748b;
+          }
+          .back a { color: #94a3b8; text-decoration: none; }
+          .back a:hover { color: #fff; }
+          .version-tag {
+            display: inline-block;
+            background: rgba(99,102,241,0.2);
+            border: 1px solid rgba(99,102,241,0.3);
+            border-radius: 8px;
+            padding: 2px 10px;
+            font-size: 11px;
+            color: #818cf8;
+            margin-bottom: 20px;
+          }
+        </style>
+    </head>
+    <body>
+        <div class="card">
+            <img src="/icon-192.png" alt="TOCA ESSA" class="app-icon">
+            <div class="app-name">TOCA ESSA</div>
+            <div class="app-sub">Conectando artistas e público ao vivo</div>
+            <span class="version-tag">v1.0 · Gratuito</span>
+
+            <div class="badges">
+                <span class="badge"><i class="fas fa-music"></i> Pedidos de músicas</span>
+                <span class="badge"><i class="fas fa-hand-holding-dollar"></i> Gorjetas</span>
+                <span class="badge"><i class="fas fa-qrcode"></i> QR Code</span>
+                <span class="badge"><i class="fas fa-bolt"></i> Tempo real</span>
+            </div>
+
+            <div class="features">
+                <div class="feature"><i class="fas fa-mobile-alt"></i> Android & iOS</div>
+                <div class="feature"><i class="fas fa-wifi"></i> Funciona offline</div>
+                <div class="feature"><i class="fas fa-lock"></i> 100% seguro</div>
+                <div class="feature"><i class="fas fa-infinity"></i> Uso ilimitado</div>
+            </div>
+
+            <a href="/download/TocaEssa.apk" download="TocaEssa.apk" class="btn-android">
+                <i class="fab fa-android" style="font-size:28px;"></i>
+                <div class="btn-label">
+                    <small>Baixar para</small>
+                    Android APK
+                </div>
+                <i class="fas fa-download" style="margin-left:auto;font-size:16px;"></i>
+            </a>
+
+            <div class="divider">ou instale como PWA</div>
+
+            <a href="/" class="btn-pwa" onclick="handlePWAInstall(event)">
+                <i class="fas fa-globe" style="font-size:22px;color:#818cf8;"></i>
+                <div class="btn-label">
+                    <small>Instalar no</small>
+                    iPhone / Navegador
+                </div>
+                <i class="fas fa-plus-circle" style="margin-left:auto;font-size:16px;color:#818cf8;"></i>
+            </a>
+
+            <div class="note">
+                <strong style="color:#94a3b8;">Android:</strong> Após baixar, abra o arquivo .apk. Se aparecer aviso de segurança, toque em <em>Instalar mesmo assim</em>.<br><br>
+                <strong style="color:#94a3b8;">iPhone / Safari:</strong> Acesse <a href="https://www.apptocaessa.com.br">apptocaessa.com.br</a>, toque em <i class="fas fa-share-from-square"></i> e escolha <em>Adicionar à Tela de Início</em>.
+            </div>
+        </div>
+
+        <div class="back">
+            <a href="/"><i class="fas fa-arrow-left" style="margin-right:6px;"></i>Voltar ao início</a>
+        </div>
+
+        <script>
+          let deferredPrompt;
+          window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+          });
+
+          function handlePWAInstall(e) {
+            if (deferredPrompt) {
+              e.preventDefault();
+              deferredPrompt.prompt();
+              deferredPrompt.userChoice.then(() => { deferredPrompt = null; });
+            }
+            // else: navigate to homepage normally
+          }
+        </script>
     </body>
     </html>
   `)
