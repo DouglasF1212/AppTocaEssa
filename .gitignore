@@ -38,3 +38,5 @@ logs/
 # Temp files
 *.tmp
 *.temp
+public/AppTocaEssa_backup_2026-02-19.tar.gz
+*.tar.gz

@@ -97,9 +97,6 @@ app.get('/download/TocaEssa.apk', async (c) => {
 })
 app.get('/TocaEssa.apk', serveStatic({ path: 'TocaEssa.apk', root: './public' }))
 
-// Backup download
-app.get('/AppTocaEssa_backup_2026-02-19.tar.gz', serveStatic({ path: 'AppTocaEssa_backup_2026-02-19.tar.gz', root: './public' }))
-
 // ======================
 // Helper Functions
 // ======================
