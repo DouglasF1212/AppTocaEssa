@@ -468,7 +468,7 @@ app.post('/api/artists/:slug/upload-photo', async (c) => {
         httpMetadata: { contentType: file.type }
       })
 
-      const photoUrl = `/api/photos/${filename}`
+      const photoUrl = `https://pub-df20f3da598547869c7b81faf9a60ffd.r2.dev/${filename}`
 
       await c.env.DB.prepare(`
         UPDATE artists SET photo_url = ? WHERE id = ?
