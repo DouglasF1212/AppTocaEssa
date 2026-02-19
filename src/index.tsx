@@ -52,10 +52,6 @@ app.get('/icon-192.png', serveStatic({ path: 'icon-192.png', root: './public' })
 app.get('/icon-512.png', serveStatic({ path: 'icon-512.png', root: './public' }))
 app.get('/sw.js', serveStatic({ path: 'sw.js', root: './public' }))
 
-// Versioned icon routes (force cache bust for PWABuilder)
-app.get('/icon-192-v2.png', serveStatic({ path: 'icon-192.png', root: './public' }))
-app.get('/icon-512-v2.png', serveStatic({ path: 'icon-512.png', root: './public' }))
-
 // Serve PWA screenshots
 app.get('/screenshot-portrait.png',  serveStatic({ path: 'screenshot-portrait.png',  root: './public' }))
 app.get('/screenshot-landscape.png', serveStatic({ path: 'screenshot-landscape.png', root: './public' }))
