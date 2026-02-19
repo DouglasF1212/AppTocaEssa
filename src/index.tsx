@@ -1492,6 +1492,10 @@ app.get('/api/admin/stats', async (c) => {
   const adminSession = await checkAdminAuth(c)
   if (!adminSession) return c.json({ error: 'Acesso negado' }, 403)
   
+  const totalUsers = await c.env.DB.prepare(`
+    SELECT COUNT(*) as count FROM users WHERE role != 'admin'
+  `).first()
+
   const totalArtists = await c.env.DB.prepare(`
     SELECT COUNT(*) as count FROM artists WHERE active = 1
   `).first()
@@ -1509,17 +1513,18 @@ app.get('/api/admin/stats', async (c) => {
     FROM tips 
     WHERE payment_status = 'completed'
   `).first()
-  
-  const monthlyRevenue = await c.env.DB.prepare(`
-    SELECT COUNT(*) as count FROM subscriptions WHERE status = 'active'
+
+  const totalRevenue = await c.env.DB.prepare(`
+    SELECT COUNT(*) as count FROM users WHERE license_status = 'approved' AND role != 'admin'
   `).first()
   
   return c.json({
+    total_users: totalUsers?.count || 0,
     total_artists: totalArtists?.count || 0,
     total_songs: totalSongs?.count || 0,
     total_requests: totalRequests?.count || 0,
     total_tips: totalTips?.total || 0,
-    monthly_revenue: (monthlyRevenue?.count || 0) * 199.00 // Updated to one-time payment
+    monthly_revenue: (totalRevenue?.count || 0) * 199.00
   })
 })
 

@@ -48,6 +48,19 @@ async function init() {
     }
 
     renderPage();
+
+    // Poll every 15s to detect when admin approves the license
+    const pollInterval = setInterval(async () => {
+      try {
+        const res = await axios.get('/api/auth/me');
+        const u = res.data?.user;
+        if (u && u.license_status === 'approved') {
+          clearInterval(pollInterval);
+          window.location.href = '/manage';
+        }
+      } catch(e) { /* ignore */ }
+    }, 15000);
+
   } catch (error) {
     renderPage();
   }
