@@ -1817,7 +1817,7 @@ app.get('/', (c) => {
         navigator.serviceWorker.getRegistrations().then(regs => {
           regs.forEach(r => r.unregister());
         }).then(() => {
-          navigator.serviceWorker.register('/sw.js?v=5')
+          navigator.serviceWorker.register('/sw.js?v=6')
             .then(reg => console.log('✅ SW registrado:', reg.scope))
             .catch(err => console.log('SW erro:', err));
         });
@@ -2137,7 +2137,7 @@ app.get('/login', (c) => {
         navigator.serviceWorker.getRegistrations().then(regs => {
           regs.forEach(r => r.unregister());
         }).then(() => {
-          navigator.serviceWorker.register('/sw.js?v=5')
+          navigator.serviceWorker.register('/sw.js?v=6')
             .then(reg => console.log('✅ SW registrado:', reg.scope))
             .catch(err => console.log('SW erro:', err));
         });
@@ -2205,7 +2205,7 @@ app.get('/register', (c) => {
         navigator.serviceWorker.getRegistrations().then(regs => {
           regs.forEach(r => r.unregister());
         }).then(() => {
-          navigator.serviceWorker.register('/sw.js?v=5')
+          navigator.serviceWorker.register('/sw.js?v=6')
             .then(reg => console.log('✅ SW registrado:', reg.scope))
             .catch(err => console.log('SW erro:', err));
         });
@@ -2273,7 +2273,7 @@ app.get('/license-payment', (c) => {
         navigator.serviceWorker.getRegistrations().then(regs => {
           regs.forEach(r => r.unregister());
         }).then(() => {
-          navigator.serviceWorker.register('/sw.js?v=5')
+          navigator.serviceWorker.register('/sw.js?v=6')
             .then(reg => console.log('✅ SW registrado:', reg.scope))
             .catch(err => console.log('SW erro:', err));
         });
@@ -2404,7 +2404,7 @@ app.get('/admin/login', (c) => {
         navigator.serviceWorker.getRegistrations().then(regs => {
           regs.forEach(r => r.unregister());
         }).then(() => {
-          navigator.serviceWorker.register('/sw.js?v=5')
+          navigator.serviceWorker.register('/sw.js?v=6')
             .then(reg => console.log('✅ SW registrado:', reg.scope))
             .catch(err => console.log('SW erro:', err));
         });
@@ -2465,23 +2465,48 @@ app.get('/admin/panel', (c) => {
         <script src="https://cdn.tailwindcss.com"></script>
         <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
     </head>
+    <style>
+      /* Mobile sidebar overlay */
+      #sidebar-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:40; }
+      #sidebar-overlay.active { display:block; }
+      #admin-sidebar {
+        position:fixed; top:0; left:0; height:100%; width:260px;
+        background:rgba(0,0,0,0.85); backdrop-filter:blur(16px);
+        border-right:1px solid rgba(255,255,255,0.1);
+        z-index:50; transform:translateX(-100%); transition:transform 0.3s ease;
+        display:flex; flex-direction:column;
+      }
+      #admin-sidebar.open { transform:translateX(0); }
+      @media (min-width:768px) {
+        #admin-sidebar { position:relative; transform:none !important; flex-shrink:0; }
+        #sidebar-overlay { display:none !important; }
+        #hamburger-btn { display:none !important; }
+      }
+      #admin-main { flex:1; overflow-y:auto; }
+    </style>
     <body class="bg-gradient-to-br from-purple-900 via-indigo-900 to-blue-900 text-white min-h-screen">
-        <div class="flex h-screen">
+        <!-- Mobile overlay -->
+        <div id="sidebar-overlay" onclick="closeSidebar()"></div>
+
+        <div style="display:flex; height:100vh; overflow:hidden;">
             <!-- Sidebar -->
-            <aside class="w-64 bg-black/30 backdrop-blur-lg border-r border-white/10">
-                <div class="p-6">
-                    <h1 class="text-2xl font-bold mb-8">
-                        <i class="fas fa-user-shield mr-2"></i>
-                        Admin Panel
-                    </h1>
+            <aside id="admin-sidebar">
+                <div style="padding:24px; display:flex; flex-direction:column; height:100%; overflow-y:auto;">
+                    <!-- Mobile close button -->
+                    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:24px;">
+                      <h1 style="font-size:1.3rem; font-weight:700; margin:0;">
+                        <i class="fas fa-user-shield" style="margin-right:8px;"></i>Admin Panel
+                      </h1>
+                      <button onclick="closeSidebar()" id="close-sidebar-btn" style="background:none;border:none;color:white;font-size:1.3rem;cursor:pointer;padding:4px 8px;">✕</button>
+                    </div>
                     
-                    <nav id="admin-nav" class="space-y-2">
+                    <nav id="admin-nav" style="flex:1;">
                         <!-- Navigation will be rendered by JS -->
                     </nav>
                     
-                    <div class="mt-8 pt-8 border-t border-white/10">
-                        <a href="#" onclick="handleLogout(); return false;" class="flex items-center px-4 py-3 text-red-300 hover:bg-red-500/10 rounded-lg transition">
-                            <i class="fas fa-sign-out-alt mr-3"></i>
+                    <div style="padding-top:24px; border-top:1px solid rgba(255,255,255,0.1); margin-top:16px;">
+                        <a href="#" onclick="handleLogout(); return false;" style="display:flex; align-items:center; padding:12px 16px; color:#fca5a5; border-radius:8px; text-decoration:none;">
+                            <i class="fas fa-sign-out-alt" style="margin-right:12px;"></i>
                             <span>Sair</span>
                         </a>
                     </div>
@@ -2489,8 +2514,15 @@ app.get('/admin/panel', (c) => {
             </aside>
             
             <!-- Main Content -->
-            <main class="flex-1 overflow-y-auto">
-                <div class="p-8">
+            <main id="admin-main">
+                <!-- Mobile top bar -->
+                <div style="display:flex; align-items:center; padding:16px; background:rgba(0,0,0,0.3); border-bottom:1px solid rgba(255,255,255,0.1); position:sticky; top:0; z-index:30;">
+                  <button id="hamburger-btn" onclick="openSidebar()" style="background:none;border:none;color:white;font-size:1.4rem;cursor:pointer;margin-right:12px;padding:4px;">
+                    <i class="fas fa-bars"></i>
+                  </button>
+                  <span style="font-size:1rem; font-weight:600;">Admin Panel</span>
+                </div>
+                <div style="padding:20px;">
                     <div id="admin-content">
                         <!-- Content will be rendered by JS -->
                     </div>
@@ -2498,16 +2530,25 @@ app.get('/admin/panel', (c) => {
             </main>
         </div>
         
+        <script>
+          function openSidebar() {
+            document.getElementById('admin-sidebar').classList.add('open');
+            document.getElementById('sidebar-overlay').classList.add('active');
+          }
+          function closeSidebar() {
+            document.getElementById('admin-sidebar').classList.remove('open');
+            document.getElementById('sidebar-overlay').classList.remove('active');
+          }
+        </script>
         <script src="https://cdn.jsdelivr.net/npm/axios@1.6.0/dist/axios.min.js"></script>
-        <script src="/static/admin-panel.js"></script>
+        <script src="/static/admin-panel.js?v=6"></script>
     <script>
       if ('serviceWorker' in navigator) {
-        // Limpa caches antigos e registra SW novo
         caches.keys().then(keys => keys.forEach(k => caches.delete(k)));
         navigator.serviceWorker.getRegistrations().then(regs => {
           regs.forEach(r => r.unregister());
         }).then(() => {
-          navigator.serviceWorker.register('/sw.js?v=5')
+          navigator.serviceWorker.register('/sw.js?v=6')
             .then(reg => console.log('✅ SW registrado:', reg.scope))
             .catch(err => console.log('SW erro:', err));
         });
@@ -2582,7 +2623,7 @@ app.get('/manage', (c) => {
         navigator.serviceWorker.getRegistrations().then(regs => {
           regs.forEach(r => r.unregister());
         }).then(() => {
-          navigator.serviceWorker.register('/sw.js?v=5')
+          navigator.serviceWorker.register('/sw.js?v=6')
             .then(reg => console.log('✅ SW registrado:', reg.scope))
             .catch(err => console.log('SW erro:', err));
         });
@@ -2677,7 +2718,7 @@ app.get('/payment/:slug/:tipId', async (c) => {
         navigator.serviceWorker.getRegistrations().then(regs => {
           regs.forEach(r => r.unregister());
         }).then(() => {
-          navigator.serviceWorker.register('/sw.js?v=5')
+          navigator.serviceWorker.register('/sw.js?v=6')
             .then(reg => console.log('✅ SW registrado:', reg.scope))
             .catch(err => console.log('SW erro:', err));
         });
@@ -2756,7 +2797,7 @@ app.get('/dashboard/:slug', (c) => {
         navigator.serviceWorker.getRegistrations().then(regs => {
           regs.forEach(r => r.unregister());
         }).then(() => {
-          navigator.serviceWorker.register('/sw.js?v=5')
+          navigator.serviceWorker.register('/sw.js?v=6')
             .then(reg => console.log('✅ SW registrado:', reg.scope))
             .catch(err => console.log('SW erro:', err));
         });
@@ -2875,7 +2916,7 @@ app.get('/:slug', (c) => {
             navigator.serviceWorker.getRegistrations().then(regs => {
               regs.forEach(r => r.unregister());
             }).then(() => {
-              navigator.serviceWorker.register('/sw.js?v=5')
+              navigator.serviceWorker.register('/sw.js?v=6')
                 .then((reg) => console.log('✅ Service Worker registrado'))
                 .catch((err) => console.log('❌ Service Worker falhou:', err));
             });
@@ -2888,7 +2929,7 @@ app.get('/:slug', (c) => {
         navigator.serviceWorker.getRegistrations().then(regs => {
           regs.forEach(r => r.unregister());
         }).then(() => {
-          navigator.serviceWorker.register('/sw.js?v=5')
+          navigator.serviceWorker.register('/sw.js?v=6')
             .then(reg => console.log('✅ SW registrado:', reg.scope))
             .catch(err => console.log('SW erro:', err));
         });

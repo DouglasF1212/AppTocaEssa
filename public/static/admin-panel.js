@@ -6,12 +6,13 @@ let stats = {};
 let pendingLicenses = [];
 let systemConfig = {};
 
-// Configure axios with credentials + localStorage session fallback
+// Configure axios with credentials + localStorage session fallback (interceptor reads fresh on every request)
 axios.defaults.withCredentials = true;
-const _adminSession = localStorage.getItem('admin_session_id') || localStorage.getItem('session_id');
-if (_adminSession) {
-  axios.defaults.headers.common['X-Session-ID'] = _adminSession;
-}
+axios.interceptors.request.use(function(config) {
+  const sid = localStorage.getItem('admin_session_id') || localStorage.getItem('session_id');
+  if (sid) config.headers['X-Session-ID'] = sid;
+  return config;
+});
 
 // Initialize
 async function init() {
@@ -95,19 +96,21 @@ function renderNavigation() {
     { id: 'settings',   icon: 'fas fa-cog',         label: 'Configurações' }
   ];
 
-  nav.innerHTML = navItems.map(item => `
-    <button
-      onclick="navigateTo('${item.id}')"
-      class="w-full text-left px-4 py-3 rounded-lg transition flex items-center justify-between ${currentPage === item.id ? 'bg-purple-600 text-white' : 'text-gray-300 hover:bg-gray-700'}"
-    >
-      <span><i class="${item.icon} mr-3"></i>${item.label}</span>
-      ${item.badge ? `<span class="bg-red-500 text-white text-xs px-2 py-1 rounded-full">${item.badge}</span>` : ''}
+  nav.innerHTML = navItems.map(item => {
+    const isActive = currentPage === item.id;
+    const btnStyle = `width:100%;text-align:left;padding:10px 14px;border-radius:8px;border:none;cursor:pointer;display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;background:${isActive ? '#7c3aed' : 'transparent'};color:${isActive ? '#fff' : '#d1d5db'};font-size:0.95rem;`;
+    return `
+    <button onclick="navigateTo('${item.id}')" style="${btnStyle}">
+      <span><i class="${item.icon}" style="margin-right:10px;"></i>${item.label}</span>
+      ${item.badge ? `<span style="background:#ef4444;color:#fff;font-size:0.7rem;padding:2px 7px;border-radius:9999px;">${item.badge}</span>` : ''}
     </button>
-  `).join('');
+  `}).join('');
 }
 
 // Navigate to page
 async function navigateTo(page) {
+  // Close mobile sidebar when navigating
+  if (typeof closeSidebar === 'function') closeSidebar();
   currentPage = page;
   renderNavigation();
   try {

@@ -1,5 +1,5 @@
 // Service Worker para TOCA ESSA PWA
-const CACHE_NAME = 'toca-essa-v5';
+const CACHE_NAME = 'toca-essa-v6';
 
 // Apenas assets estáticos imutáveis
 const STATIC_ASSETS = [
