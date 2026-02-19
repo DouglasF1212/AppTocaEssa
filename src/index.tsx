@@ -88,6 +88,15 @@ app.get('/splash-1668x2224.png', serveStatic({ path: 'splash-1668x2224.png', roo
 app.get('/splash-1668x2388.png', serveStatic({ path: 'splash-1668x2388.png', root: './public' }))
 app.get('/splash-2048x2732.png', serveStatic({ path: 'splash-2048x2732.png', root: './public' }))
 
+// Serve Android APK for download
+app.get('/download/TocaEssa.apk', async (c) => {
+  const apkData = await c.env.ASSETS?.fetch?.(new Request('https://assets.local/TocaEssa.apk'))
+    .catch(() => null)
+  // Serve via serveStatic
+  return c.redirect('/TocaEssa.apk', 302)
+})
+app.get('/TocaEssa.apk', serveStatic({ path: 'TocaEssa.apk', root: './public' }))
+
 // ======================
 // Helper Functions
 // ======================
@@ -1742,6 +1751,78 @@ app.get('/', (c) => {
         });
       }
     </script>
+    </body>
+    </html>
+  `)
+})
+
+// APK Download page
+app.get('/download', (c) => {
+  return c.html(`
+    <!DOCTYPE html>
+    <html lang="pt-BR">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+        <title>Baixar App - TOCA ESSA</title>
+        <meta name="theme-color" content="#2563EB">
+        <link rel="icon" href="/icon-192.png">
+        <link rel="apple-touch-icon" href="/apple-touch-icon-180x180.png">
+        <script src="https://cdn.tailwindcss.com"></script>
+    </head>
+    <body class="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-blue-900 flex items-center justify-center p-4">
+        <div class="max-w-md w-full">
+            <!-- App Card -->
+            <div class="bg-white/10 backdrop-blur-sm rounded-3xl p-8 text-center shadow-2xl border border-white/20">
+                <!-- Icon -->
+                <img src="/icon-512.png" alt="TOCA ESSA" class="w-24 h-24 mx-auto rounded-2xl shadow-lg mb-6">
+                
+                <h1 class="text-3xl font-bold text-white mb-2">TOCA ESSA</h1>
+                <p class="text-blue-200 mb-8">Plataforma para artistas de shows ao vivo</p>
+                
+                <!-- Android Download -->
+                <a href="/TocaEssa.apk" download="TocaEssa.apk"
+                   class="flex items-center justify-center gap-3 w-full bg-green-500 hover:bg-green-400 text-white font-bold py-4 px-6 rounded-2xl mb-4 transition-all transform hover:scale-105 shadow-lg">
+                    <svg class="w-8 h-8" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M17.523 15.341l-1.523-.879V9a5 5 0 0 0-10 0v5.462l-1.523.879A1 1 0 0 0 4 16.317V19a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-2.683a1 1 0 0 0-.477-.976zM12 3a3 3 0 0 1 3 3v5H9V6a3 3 0 0 1 3-3z"/>
+                        <circle cx="8.5" cy="2.5" r="1" fill="#a3e635"/>
+                        <circle cx="15.5" cy="2.5" r="1" fill="#a3e635"/>
+                        <rect x="7" y="1" width="1.5" height="3" rx="0.75" fill="#a3e635" transform="rotate(-30 7 1)"/>
+                        <rect x="15.5" y="1" width="1.5" height="3" rx="0.75" fill="#a3e635" transform="rotate(30 15.5 1)"/>
+                    </svg>
+                    <div class="text-left">
+                        <div class="text-xs opacity-80">Baixar para</div>
+                        <div class="text-lg">Android (.apk)</div>
+                    </div>
+                </a>
+                
+                <!-- iOS Instructions -->
+                <div class="bg-white/10 rounded-2xl p-4 mb-6 text-left">
+                    <div class="flex items-center gap-2 mb-3">
+                        <svg class="w-6 h-6 text-white" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/>
+                        </svg>
+                        <span class="text-white font-semibold">iPhone / iPad</span>
+                    </div>
+                    <ol class="text-blue-200 text-sm space-y-1">
+                        <li>1. Abra o <strong class="text-white">Safari</strong> (não o Chrome)</li>
+                        <li>2. Acesse <strong class="text-white">apptocaessa.com.br</strong></li>
+                        <li>3. Toque em <strong class="text-white">Compartilhar</strong> (ícone ↑)</li>
+                        <li>4. Selecione <strong class="text-white">"Adicionar à Tela de Início"</strong></li>
+                    </ol>
+                </div>
+                
+                <!-- Info -->
+                <div class="text-blue-300 text-xs space-y-1">
+                    <p>📦 Versão 1.0 • 444 KB • Android 6.0+</p>
+                    <p>🔒 APK assinado digitalmente</p>
+                </div>
+                
+                <a href="/login" class="block mt-6 text-blue-300 hover:text-white text-sm transition-colors">
+                    ← Voltar para o app
+                </a>
+            </div>
+        </div>
     </body>
     </html>
   `)
