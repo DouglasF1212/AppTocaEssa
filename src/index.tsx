@@ -52,6 +52,10 @@ app.get('/icon-192.png', serveStatic({ path: 'icon-192.png', root: './public' })
 app.get('/icon-512.png', serveStatic({ path: 'icon-512.png', root: './public' }))
 app.get('/sw.js', serveStatic({ path: 'sw.js', root: './public' }))
 
+// Serve PWA screenshots
+app.get('/screenshot-portrait.png',  serveStatic({ path: 'screenshot-portrait.png',  root: './public' }))
+app.get('/screenshot-landscape.png', serveStatic({ path: 'screenshot-landscape.png', root: './public' }))
+
 // Serve Apple touch icons
 app.get('/apple-touch-icon.png',        serveStatic({ path: 'apple-touch-icon.png', root: './public' }))
 app.get('/apple-touch-icon-57x57.png',  serveStatic({ path: 'apple-touch-icon-57x57.png', root: './public' }))
@@ -1729,6 +1733,15 @@ app.get('/', (c) => {
                 </div>
             </footer>
         </div>
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js')
+            .then(reg => console.log('SW registrado:', reg.scope))
+            .catch(err => console.log('SW erro:', err));
+        });
+      }
+    </script>
     </body>
     </html>
   `)
@@ -1784,6 +1797,15 @@ app.get('/login', (c) => {
         <script src="https://cdn.jsdelivr.net/npm/axios@1.6.0/dist/axios.min.js"></script>
         <script src="/static/auth.js"></script>
         <script>renderLoginPage()</script>
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js')
+            .then(reg => console.log('SW registrado:', reg.scope))
+            .catch(err => console.log('SW erro:', err));
+        });
+      }
+    </script>
     </body>
     </html>
   `)
@@ -1839,6 +1861,15 @@ app.get('/register', (c) => {
         <script src="https://cdn.jsdelivr.net/npm/axios@1.6.0/dist/axios.min.js"></script>
         <script src="/static/auth.js"></script>
         <script>renderRegisterPage()</script>
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js')
+            .then(reg => console.log('SW registrado:', reg.scope))
+            .catch(err => console.log('SW erro:', err));
+        });
+      }
+    </script>
     </body>
     </html>
   `)
@@ -1894,6 +1925,15 @@ app.get('/license-payment', (c) => {
         <script src="https://cdn.jsdelivr.net/npm/axios@1.6.0/dist/axios.min.js"></script>
         <script src="/static/license-payment-new.js"></script>
         <script>init()</script>
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js')
+            .then(reg => console.log('SW registrado:', reg.scope))
+            .catch(err => console.log('SW erro:', err));
+        });
+      }
+    </script>
     </body>
     </html>
   `)
@@ -2007,6 +2047,15 @@ app.get('/admin/login', (c) => {
                 }
             });
         </script>
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js')
+            .then(reg => console.log('SW registrado:', reg.scope))
+            .catch(err => console.log('SW erro:', err));
+        });
+      }
+    </script>
     </body>
     </html>
   `)
@@ -2097,6 +2146,15 @@ app.get('/admin/panel', (c) => {
         
         <script src="https://cdn.jsdelivr.net/npm/axios@1.6.0/dist/axios.min.js"></script>
         <script src="/static/admin-panel.js"></script>
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js')
+            .then(reg => console.log('SW registrado:', reg.scope))
+            .catch(err => console.log('SW erro:', err));
+        });
+      }
+    </script>
     </body>
     </html>
   `)
@@ -2159,6 +2217,15 @@ app.get('/manage', (c) => {
         <script src="https://cdn.jsdelivr.net/npm/axios@1.6.0/dist/axios.min.js"></script>
         <script src="/static/manage.js"></script>
         <script>init()</script>
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js')
+            .then(reg => console.log('SW registrado:', reg.scope))
+            .catch(err => console.log('SW erro:', err));
+        });
+      }
+    </script>
     </body>
     </html>
   `)
@@ -2241,6 +2308,15 @@ app.get('/payment/:slug/:tipId', async (c) => {
         <script src="/static/pix-generator.js"></script>
         <script src="/static/payment.js"></script>
         <script>init()</script>
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js')
+            .then(reg => console.log('SW registrado:', reg.scope))
+            .catch(err => console.log('SW erro:', err));
+        });
+      }
+    </script>
     </body>
     </html>
   `)
@@ -2307,6 +2383,15 @@ app.get('/dashboard/:slug', (c) => {
         </script>
         <script src="/static/dashboard.js"></script>
         <script>init()</script>
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js')
+            .then(reg => console.log('SW registrado:', reg.scope))
+            .catch(err => console.log('SW erro:', err));
+        });
+      }
+    </script>
     </body>
     </html>
   `)
@@ -2423,6 +2508,15 @@ app.get('/:slug', (c) => {
             });
           }
         </script>
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js')
+            .then(reg => console.log('SW registrado:', reg.scope))
+            .catch(err => console.log('SW erro:', err));
+        });
+      }
+    </script>
     </body>
     </html>
   `)
