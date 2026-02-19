@@ -400,13 +400,40 @@ function renderProfileTab() {
 // Global variable to store selected photo file
 let selectedPhotoFile = null;
 
+// Resize image to max dimensions using canvas (client-side compression)
+function resizeImage(file, maxWidth, maxHeight, quality) {
+  return new Promise((resolve) => {
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      let { width, height } = img;
+      if (width > maxWidth || height > maxHeight) {
+        const ratio = Math.min(maxWidth / width, maxHeight / height);
+        width = Math.round(width * ratio);
+        height = Math.round(height * ratio);
+      }
+      const canvas = document.createElement('canvas');
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, width, height);
+      canvas.toBlob((blob) => {
+        const resized = new File([blob], file.name, { type: 'image/jpeg', lastModified: Date.now() });
+        resolve(resized);
+      }, 'image/jpeg', quality || 0.82);
+    };
+    img.src = url;
+  });
+}
+
 // Handle photo file selection
 function handlePhotoSelect(event) {
   const file = event.target.files[0];
   
   if (!file) return;
   
-  // Validate file size (10MB)
+  // Validate file size (10MB raw)
   const maxSize = 10 * 1024 * 1024;
   if (file.size > maxSize) {
     showError('Arquivo muito grande! Máximo: 10MB');
@@ -422,18 +449,17 @@ function handlePhotoSelect(event) {
     return;
   }
   
-  // Store file for upload
-  selectedPhotoFile = file;
-  
-  // Update UI
-  document.getElementById('photoFileName').textContent = file.name;
-  
-  // Show preview
-  const reader = new FileReader();
-  reader.onload = (e) => {
-    document.getElementById('profilePhotoPreview').src = e.target.result;
-  };
-  reader.readAsDataURL(file);
+  // Resize image before storing (max 800x800, JPEG 82% quality ≈ keeps it under 400KB)
+  resizeImage(file, 800, 800, 0.82).then((resized) => {
+    selectedPhotoFile = resized;
+    document.getElementById('photoFileName').textContent = file.name + ' (otimizada)';
+    // Show preview from resized
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      document.getElementById('profilePhotoPreview').src = e.target.result;
+    };
+    reader.readAsDataURL(resized);
+  });
 }
 
 // Remove photo
@@ -468,6 +494,7 @@ async function handleSaveProfile(event) {
   
   try {
     let photo_url = artist.photo_url;
+    let photoUpdatedByUpload = false;
     
     // If a new photo was selected, upload it first
     if (selectedPhotoFile) {
@@ -483,15 +510,18 @@ async function handleSaveProfile(event) {
       });
       
       photo_url = uploadResponse.data.photo_url;
-      selectedPhotoFile = null; // Clear after successful upload
+      photoUpdatedByUpload = true; // photo_url already saved by upload route
+      selectedPhotoFile = null;
     }
     
-    // Update profile data
-    await axios.patch(`/api/artists/${artist.slug}`, {
-      name,
-      bio,
-      photo_url
-    });
+    // Update profile data (name + bio only if photo was already saved by upload)
+    const patchPayload = { name, bio };
+    if (!photoUpdatedByUpload) {
+      // Only include photo_url if it wasn't just uploaded (avoids re-sending large base64)
+      patchPayload.photo_url = photo_url;
+    }
+    
+    await axios.patch(`/api/artists/${artist.slug}`, patchPayload);
     
     // Update local data
     artist.name = name;
@@ -503,6 +533,8 @@ async function handleSaveProfile(event) {
   } catch (error) {
     showError(error.response?.data?.error || 'Erro ao atualizar perfil');
     console.error(error);
+  }
+}
   }
 }
 

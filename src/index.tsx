@@ -370,22 +370,44 @@ app.patch('/api/artists/:slug', async (c) => {
   if (!session) return c.json({ error: 'Não autenticado' }, 401)
   
   const slug = c.req.param('slug')
-  const { name, bio, photo_url } = await c.req.json()
+  const body = await c.req.json()
+  const { name, bio } = body
   
-  // Verify ownership
-  const artist = await c.env.DB.prepare(`
-    SELECT id FROM artists WHERE slug = ? AND user_id = ?
-  `).bind(slug, session.user_id).first()
+  // photo_url is optional — only update if explicitly provided
+  const hasPhotoUrl = 'photo_url' in body
+  const photo_url = body.photo_url
+
+  // Verify ownership (admins can update any artist)
+  let artist: any
+  if (session.role === 'admin') {
+    artist = await c.env.DB.prepare(`
+      SELECT id FROM artists WHERE slug = ?
+    `).bind(slug).first()
+  } else {
+    artist = await c.env.DB.prepare(`
+      SELECT id FROM artists WHERE slug = ? AND user_id = ?
+    `).bind(slug, session.user_id).first()
+  }
   
   if (!artist) {
     return c.json({ error: 'Acesso negado' }, 403)
   }
-  
-  await c.env.DB.prepare(`
-    UPDATE artists 
-    SET name = ?, bio = ?, photo_url = ?
-    WHERE id = ?
-  `).bind(name, bio, photo_url, artist.id).run()
+
+  if (hasPhotoUrl) {
+    // Update name, bio AND photo_url
+    await c.env.DB.prepare(`
+      UPDATE artists 
+      SET name = ?, bio = ?, photo_url = ?
+      WHERE id = ?
+    `).bind(name, bio, photo_url, artist.id).run()
+  } else {
+    // Update only name and bio (photo was already saved by upload route)
+    await c.env.DB.prepare(`
+      UPDATE artists 
+      SET name = ?, bio = ?
+      WHERE id = ?
+    `).bind(name, bio, artist.id).run()
+  }
   
   return c.json({ success: true })
 })
@@ -455,12 +477,20 @@ app.post('/api/artists/:slug/upload-photo', async (c) => {
       return c.json({ success: true, photo_url: photoUrl })
     }
 
-    // Fallback: store as base64 data URL in D1 (max 2MB)
-    if (file.size > 2 * 1024 * 1024) {
-      return c.json({ error: 'Sem bucket R2 configurado. Use imagens menores que 2MB.' }, 400)
+    // Fallback: store as base64 data URL in D1 (max 512KB)
+    if (file.size > 512 * 1024) {
+      return c.json({ error: 'Foto muito grande. Sem R2 configurado, use imagens até 512KB. Configure o R2 no painel do Cloudflare para aceitar até 10MB.' }, 400)
     }
 
-    const base64 = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)))
+    // Safe base64 conversion (avoid stack overflow with large spread)
+    const bytes = new Uint8Array(arrayBuffer)
+    let binary = ''
+    const chunkSize = 8192
+    for (let i = 0; i < bytes.length; i += chunkSize) {
+      const chunk = bytes.subarray(i, i + chunkSize)
+      binary += String.fromCharCode(...chunk)
+    }
+    const base64 = btoa(binary)
     const photoUrl = `data:${file.type};base64,${base64}`
 
     await c.env.DB.prepare(`
