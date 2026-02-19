@@ -8,17 +8,24 @@ let pendingLicenses = [];
 // Initialize
 async function init() {
   try {
-    await loadStats();
-    await loadUsers();
-    await loadPendingLicenses();
-    renderNavigation();
-    renderPage();
+    // Testa autenticação primeiro
+    await axios.get('/api/admin/stats');
   } catch (error) {
-    console.error('❌ Erro ao carregar painel admin:', error);
     if (error.response?.status === 401 || error.response?.status === 403) {
       window.location.href = '/admin/login';
+      return;
     }
   }
+  
+  // Carrega dados em paralelo, sem travar se um falhar
+  await Promise.allSettled([
+    loadStats(),
+    loadUsers(),
+    loadPendingLicenses()
+  ]);
+  
+  renderNavigation();
+  renderPage();
 }
 
 // Load statistics
@@ -28,7 +35,7 @@ async function loadStats() {
     stats = response.data;
   } catch (error) {
     console.error('❌ Erro ao carregar estatísticas:', error);
-    throw error;
+    stats = { total_users: 0, total_artists: 0, total_songs: 0, total_requests: 0 };
   }
 }
 
@@ -39,7 +46,7 @@ async function loadUsers() {
     users = response.data;
   } catch (error) {
     console.error('❌ Erro ao carregar usuários:', error);
-    throw error;
+    users = [];
   }
 }
 
@@ -85,12 +92,16 @@ async function navigateTo(page) {
   currentPage = page;
   renderNavigation();
   
-  if (page === 'users') {
-    await loadUsers();
-  } else if (page === 'dashboard') {
-    await loadStats();
-  } else if (page === 'licenses') {
-    await loadPendingLicenses();
+  try {
+    if (page === 'users') {
+      await loadUsers();
+    } else if (page === 'dashboard') {
+      await loadStats();
+    } else if (page === 'licenses') {
+      await loadPendingLicenses();
+    }
+  } catch(e) {
+    console.error('Erro ao navegar:', e);
   }
   
   renderPage();
@@ -612,5 +623,9 @@ async function rejectLicense(userId) {
   }
 }
 
-// Initialize on page load
-init();
+// Initialize on page load - chamado pelo HTML ou automaticamente
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', init);
+} else {
+  init();
+}

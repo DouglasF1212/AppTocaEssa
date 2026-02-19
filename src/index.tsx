@@ -1795,7 +1795,7 @@ app.get('/admin/panel', (c) => {
                     </nav>
                     
                     <div class="mt-8 pt-8 border-t border-white/10">
-                        <a href="/admin/logout" class="flex items-center px-4 py-3 text-red-300 hover:bg-red-500/10 rounded-lg transition">
+                        <a href="#" onclick="handleLogout(); return false;" class="flex items-center px-4 py-3 text-red-300 hover:bg-red-500/10 rounded-lg transition">
                             <i class="fas fa-sign-out-alt mr-3"></i>
                             <span>Sair</span>
                         </a>
