@@ -6,6 +6,13 @@ let stats = {};
 let pendingLicenses = [];
 let systemConfig = {};
 
+// Configure axios with credentials + localStorage session fallback
+axios.defaults.withCredentials = true;
+const _adminSession = localStorage.getItem('session_id');
+if (_adminSession) {
+  axios.defaults.headers.common['X-Session-ID'] = _adminSession;
+}
+
 // Initialize
 async function init() {
   try {

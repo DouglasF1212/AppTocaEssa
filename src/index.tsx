@@ -1012,7 +1012,8 @@ app.post('/api/admin/login', async (c) => {
     id: user.id,
     email: user.email,
     full_name: user.full_name,
-    role: user.role
+    role: user.role,
+    session_id: sessionId
   })
 })
 
@@ -2373,7 +2374,11 @@ app.get('/admin/login', (c) => {
                 const password = document.getElementById('password').value;
                 
                 try {
-                    await axios.post('/api/admin/login', { email, password });
+                    const response = await axios.post('/api/admin/login', { email, password }, { withCredentials: true });
+                    if (response.data.session_id) {
+                        localStorage.setItem('session_id', response.data.session_id);
+                        localStorage.setItem('user_role', 'admin');
+                    }
                     window.location.href = '/admin/panel';
                 } catch (error) {
                     alert('Erro ao fazer login: ' + (error.response?.data?.error || error.message));
