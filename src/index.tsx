@@ -1051,6 +1051,8 @@ app.get('/api/admin/users', async (c) => {
       u.email,
       u.full_name,
       u.role,
+      u.license_status,
+      u.license_paid,
       u.created_at,
       a.name as artist_name,
       a.slug as artist_slug
@@ -1407,6 +1409,7 @@ app.get('/api/admin/artists', async (c) => {
       a.*,
       u.email,
       u.full_name as user_name,
+      u.license_status,
       COUNT(DISTINCT s.id) as song_count,
       COUNT(DISTINCT sr.id) as request_count,
       COALESCE(SUM(CASE WHEN t.payment_status = 'completed' THEN t.amount ELSE 0 END), 0) as total_tips
