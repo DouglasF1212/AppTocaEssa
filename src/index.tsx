@@ -97,6 +97,12 @@ app.get('/splash-1668x2224.png', serveStatic({ path: 'splash-1668x2224.png', roo
 app.get('/splash-1668x2388.png', serveStatic({ path: 'splash-1668x2388.png', root: './public' }))
 app.get('/splash-2048x2732.png', serveStatic({ path: 'splash-2048x2732.png', root: './public' }))
 
+// Serve Android APK for download
+app.get('/download/TocaEssa.apk', (c) => {
+  c.header('Content-Disposition', 'attachment; filename="TocaEssa.apk"')
+  return serveStatic({ path: 'TocaEssa.apk', root: './public' })(c, async () => {})
+})
+
 // ======================
 // Helper Functions
 // ======================
@@ -1630,7 +1636,7 @@ app.get('/', (c) => {
                         Seu público escaneia o QR Code e faz pedidos direto do celular
                     </p>
                     
-                    <div class="flex gap-4 justify-center">
+                    <div class="flex gap-4 justify-center flex-wrap">
                         <a href="/register" class="bg-green-600 hover:bg-green-700 px-8 py-4 rounded-xl font-bold text-xl transition">
                             <i class="fas fa-user-plus mr-2"></i>
                             Criar Conta
@@ -1638,6 +1644,20 @@ app.get('/', (c) => {
                         <a href="/login" class="bg-blue-600 hover:bg-blue-700 px-8 py-4 rounded-xl font-bold text-xl transition">
                             <i class="fas fa-sign-in-alt mr-2"></i>
                             Entrar
+                        </a>
+                    </div>
+
+                    <!-- Download App -->
+                    <div class="mt-6">
+                        <a href="/download/TocaEssa.apk"
+                           class="inline-flex items-center gap-3 bg-white/10 hover:bg-white/20 border border-white/30 hover:border-white/60 px-6 py-3 rounded-2xl transition-all duration-200 text-white font-semibold text-lg backdrop-blur-sm"
+                           download="TocaEssa.apk">
+                            <span class="text-3xl">🤖</span>
+                            <div class="text-left">
+                                <div class="text-xs text-gray-300 leading-none mb-0.5">Baixar para</div>
+                                <div class="text-base font-bold leading-none">Android (.apk)</div>
+                            </div>
+                            <i class="fas fa-download ml-1 text-green-400"></i>
                         </a>
                     </div>
 
@@ -1765,7 +1785,12 @@ app.get('/', (c) => {
             <!-- Footer -->
             <footer class="text-center text-gray-400 border-t border-white/10 pt-8">
                 <p>© 2024 TOCA ESSA - Conectando artistas e público</p>
-                <div class="mt-4 flex gap-4 justify-center">
+                <div class="mt-4 flex gap-4 justify-center flex-wrap">
+                    <a href="/download/TocaEssa.apk" download="TocaEssa.apk" class="hover:text-white transition">
+                        <i class="fas fa-download mr-1"></i>
+                        Baixar App Android
+                    </a>
+                    <span class="text-gray-600">|</span>
                     <a href="/admin" class="hover:text-white transition">
                         <i class="fas fa-user-shield mr-1"></i>
                         Admin
