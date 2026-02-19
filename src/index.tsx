@@ -1650,14 +1650,14 @@ app.get('/', (c) => {
                     <!-- Download App -->
                     <div class="mt-6">
                         <a href="/download/TocaEssa.apk"
-                           class="inline-flex items-center gap-3 bg-white/10 hover:bg-white/20 border border-white/30 hover:border-white/60 px-6 py-3 rounded-2xl transition-all duration-200 text-white font-semibold text-lg backdrop-blur-sm"
+                           class="inline-flex items-center gap-3 bg-black/40 hover:bg-black/60 border border-white/20 hover:border-white/50 px-5 py-3 rounded-2xl transition-all duration-200 text-white backdrop-blur-sm shadow-lg hover:shadow-xl"
                            download="TocaEssa.apk">
-                            <span class="text-3xl">🤖</span>
+                            <img src="/icon-192.png" alt="Toca Essa" class="w-10 h-10 rounded-xl shadow-md">
                             <div class="text-left">
-                                <div class="text-xs text-gray-300 leading-none mb-0.5">Baixar para</div>
-                                <div class="text-base font-bold leading-none">Android (.apk)</div>
+                                <div class="text-xs text-gray-300 leading-none mb-1">Baixar para</div>
+                                <div class="text-base font-bold leading-none tracking-wide">Android <span class="text-green-400 text-xs font-normal">.apk</span></div>
                             </div>
-                            <i class="fas fa-download ml-1 text-green-400"></i>
+                            <i class="fas fa-download text-green-400 text-sm ml-1"></i>
                         </a>
                     </div>
 
