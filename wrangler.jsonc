@@ -3,5 +3,12 @@
   "name": "apptocaessa",
   "compatibility_date": "2026-02-17",
   "pages_build_output_dir": "./dist",
-  "compatibility_flags": ["nodejs_compat"]
+  "compatibility_flags": ["nodejs_compat"],
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "webapp-production",
+      "database_id": "7a7cf05b-6e3d-4ef1-a53f-c179efcab43d"
+    }
+  ]
 }
