@@ -226,8 +226,7 @@ app.post('/api/auth/login', async (c) => {
     secure: true,
     sameSite: 'Lax',
     expires: expiresAt,
-    path: '/',
-    domain: '.apptocaessa.com.br'
+    path: '/'
   })
   
   return c.json({ 
@@ -255,8 +254,7 @@ app.post('/api/auth/logout', async (c) => {
   
   setCookie(c, 'session_id', '', {
     maxAge: 0,
-    path: '/',
-    domain: '.apptocaessa.com.br'
+    path: '/'
   })
   
   return c.json({ success: true })
@@ -987,8 +985,7 @@ app.post('/api/admin/login', async (c) => {
     secure: true,
     sameSite: 'Lax',
     maxAge: 7 * 24 * 60 * 60,
-    path: '/',
-    domain: '.apptocaessa.com.br'
+    path: '/'
   })
   
   return c.json({ 
@@ -1011,8 +1008,7 @@ app.post('/api/admin/logout', async (c) => {
   
   setCookie(c, 'session_id', '', {
     maxAge: 0,
-    path: '/',
-    domain: '.apptocaessa.com.br'
+    path: '/'
   })
   
   return c.json({ success: true })
