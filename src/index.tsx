@@ -1650,14 +1650,16 @@ app.get('/', (c) => {
                     <!-- Download App -->
                     <div class="mt-6">
                         <a href="/download/TocaEssa.apk"
-                           class="inline-flex items-center gap-3 bg-black/40 hover:bg-black/60 border border-white/20 hover:border-white/50 px-5 py-3 rounded-2xl transition-all duration-200 text-white backdrop-blur-sm shadow-lg hover:shadow-xl"
-                           download="TocaEssa.apk">
-                            <img src="/icon-192.png" alt="Toca Essa" class="w-10 h-10 rounded-xl shadow-md">
-                            <div class="text-left">
-                                <div class="text-xs text-gray-300 leading-none mb-1">Baixar para</div>
-                                <div class="text-base font-bold leading-none tracking-wide">Android <span class="text-green-400 text-xs font-normal">.apk</span></div>
+                           download="TocaEssa.apk"
+                           style="display:inline-flex;align-items:center;gap:12px;background:rgba(0,0,0,0.45);border:1px solid rgba(255,255,255,0.25);padding:10px 20px;border-radius:16px;text-decoration:none;color:#fff;transition:background 0.2s;"
+                           onmouseover="this.style.background='rgba(0,0,0,0.65)'"
+                           onmouseout="this.style.background='rgba(0,0,0,0.45)'">
+                            <img src="/icon-192.png" alt="Toca Essa" style="width:44px;height:44px;border-radius:10px;box-shadow:0 2px 8px rgba(0,0,0,0.4);">
+                            <div style="text-align:left;line-height:1.2;">
+                                <div style="font-size:11px;color:#ccc;margin-bottom:3px;">Baixar para</div>
+                                <div style="font-size:15px;font-weight:700;">Android <span style="color:#4ade80;font-size:11px;font-weight:400;">.apk</span></div>
                             </div>
-                            <i class="fas fa-download text-green-400 text-sm ml-1"></i>
+                            <i class="fas fa-download" style="color:#4ade80;font-size:14px;margin-left:4px;"></i>
                         </a>
                     </div>
 
