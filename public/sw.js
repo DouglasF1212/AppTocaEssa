@@ -1,5 +1,5 @@
 // Service Worker para TOCA ESSA PWA
-const CACHE_NAME = 'toca-essa-v2';
+const CACHE_NAME = 'toca-essa-v4';
 
 // Recursos estáticos que sempre ficam em cache
 const STATIC_ASSETS = [

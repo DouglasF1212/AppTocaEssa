@@ -1661,21 +1661,6 @@ app.get('/', (c) => {
                         </a>
                     </div>
 
-                    <!-- Download App -->
-                    <div class="mt-6">
-                        <a href="/download"
-                           style="display:inline-flex;align-items:center;gap:12px;background:rgba(0,0,0,0.45);border:1px solid rgba(255,255,255,0.25);padding:10px 20px;border-radius:16px;text-decoration:none;color:#fff;transition:background 0.2s;"
-                           onmouseover="this.style.background='rgba(0,0,0,0.65)'"
-                           onmouseout="this.style.background='rgba(0,0,0,0.45)'">
-                            <img src="/icon-192.png" alt="Toca Essa" style="width:44px;height:44px;border-radius:10px;box-shadow:0 2px 8px rgba(0,0,0,0.4);">
-                            <div style="text-align:left;line-height:1.2;">
-                                <div style="font-size:11px;color:#ccc;margin-bottom:3px;">Baixar App</div>
-                                <div style="font-size:15px;font-weight:700;">Android & iPhone</div>
-                            </div>
-                            <i class="fas fa-download" style="color:#4ade80;font-size:14px;margin-left:4px;"></i>
-                        </a>
-                    </div>
-
                 </div>
             </div>
             
