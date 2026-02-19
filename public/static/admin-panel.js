@@ -314,12 +314,12 @@ function renderUsers() {
                   </td>
                   <td class="px-6 py-4">
                     <div class="flex items-center justify-center gap-2">
-                      <button onclick="showChangePasswordModal(${user.id}, '${user.full_name.replace(/'/g,"\\'")}'')"
+                      <button onclick="showChangePasswordModal(${user.id}, '${user.full_name.replace(/'/g,"\\'")}')"
                         class="bg-yellow-600 hover:bg-yellow-700 px-3 py-1 rounded text-sm transition" title="Alterar Senha">
                         <i class="fas fa-key"></i>
                       </button>
                       ${user.role !== 'admin' ? `
-                        <button onclick="confirmDeleteUser(${user.id}, '${user.full_name.replace(/'/g,"\\'")}'')"
+                        <button onclick="confirmDeleteUser(${user.id}, '${user.full_name.replace(/'/g,"\\'")}')"
                           class="bg-red-600 hover:bg-red-700 px-3 py-1 rounded text-sm transition" title="Excluir">
                           <i class="fas fa-trash"></i>
                         </button>
