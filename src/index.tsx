@@ -352,10 +352,17 @@ app.post('/api/artists/:slug/upload-photo', async (c) => {
   
   const slug = c.req.param('slug')
   
-  // Verify ownership
-  const artist = await c.env.DB.prepare(`
-    SELECT id FROM artists WHERE slug = ? AND user_id = ?
-  `).bind(slug, session.user_id).first()
+  // Admins can upload for any artist; artists only for their own
+  let artist: any
+  if (session.role === 'admin') {
+    artist = await c.env.DB.prepare(`
+      SELECT id FROM artists WHERE slug = ?
+    `).bind(slug).first()
+  } else {
+    artist = await c.env.DB.prepare(`
+      SELECT id FROM artists WHERE slug = ? AND user_id = ?
+    `).bind(slug, session.user_id).first()
+  }
   
   if (!artist) {
     return c.json({ error: 'Acesso negado' }, 403)
@@ -370,45 +377,53 @@ app.post('/api/artists/:slug/upload-photo', async (c) => {
       return c.json({ error: 'Nenhum arquivo enviado' }, 400)
     }
     
-    // Check file size (max 10MB)
-    const maxSize = 10 * 1024 * 1024 // 10MB in bytes
-    if (file.size > maxSize) {
-      return c.json({ error: 'Arquivo muito grande. Máximo: 10MB' }, 400)
-    }
-    
     // Check file type
     const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp']
     if (!allowedTypes.includes(file.type)) {
       return c.json({ error: 'Tipo de arquivo não permitido. Use: JPG, PNG, GIF ou WebP' }, 400)
     }
-    
-    // Generate unique filename
-    const timestamp = Date.now()
-    const randomString = Math.random().toString(36).substring(7)
-    const extension = file.name.split('.').pop()
-    const filename = `artists/${artist.id}/${timestamp}-${randomString}.${extension}`
-    
-    // Upload to R2
+
     const arrayBuffer = await file.arrayBuffer()
-    await c.env.PHOTOS.put(filename, arrayBuffer, {
-      httpMetadata: {
-        contentType: file.type
+
+    // Try R2 first (if bucket is configured)
+    if (c.env.PHOTOS) {
+      // Check file size (max 10MB for R2)
+      if (file.size > 10 * 1024 * 1024) {
+        return c.json({ error: 'Arquivo muito grande. Máximo: 10MB' }, 400)
       }
-    })
-    
-    // Generate public URL (in production, this would be your R2 public domain)
-    // For development, we'll create a route to serve from R2
-    const photoUrl = `/api/photos/${filename}`
-    
-    // Update artist photo_url in database
+
+      const timestamp = Date.now()
+      const randomString = Math.random().toString(36).substring(7)
+      const extension = file.name.split('.').pop()
+      const filename = `artists/${artist.id}/${timestamp}-${randomString}.${extension}`
+
+      await c.env.PHOTOS.put(filename, arrayBuffer, {
+        httpMetadata: { contentType: file.type }
+      })
+
+      const photoUrl = `/api/photos/${filename}`
+
+      await c.env.DB.prepare(`
+        UPDATE artists SET photo_url = ? WHERE id = ?
+      `).bind(photoUrl, artist.id).run()
+
+      return c.json({ success: true, photo_url: photoUrl })
+    }
+
+    // Fallback: store as base64 data URL in D1 (max 2MB)
+    if (file.size > 2 * 1024 * 1024) {
+      return c.json({ error: 'Sem bucket R2 configurado. Use imagens menores que 2MB.' }, 400)
+    }
+
+    const base64 = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)))
+    const photoUrl = `data:${file.type};base64,${base64}`
+
     await c.env.DB.prepare(`
       UPDATE artists SET photo_url = ? WHERE id = ?
     `).bind(photoUrl, artist.id).run()
-    
-    return c.json({ 
-      success: true, 
-      photo_url: photoUrl 
-    })
+
+    return c.json({ success: true, photo_url: photoUrl })
+
   } catch (error) {
     console.error('Upload error:', error)
     return c.json({ error: 'Erro ao fazer upload da foto' }, 500)
@@ -417,6 +432,10 @@ app.post('/api/artists/:slug/upload-photo', async (c) => {
 
 // Serve photos from R2
 app.get('/api/photos/*', async (c) => {
+  if (!c.env.PHOTOS) {
+    return c.notFound()
+  }
+
   const path = c.req.path.replace('/api/photos/', '')
   
   try {

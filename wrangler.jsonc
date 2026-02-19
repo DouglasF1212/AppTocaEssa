@@ -11,4 +11,6 @@
       "database_id": "ce112326-8b35-4d51-870a-9344102771bb"
     }
   ]
+  // R2 para fotos: adicione o binding PHOTOS via painel do Cloudflare
+  // Settings > Bindings > R2 Bucket > nome do bucket: tocaessa-photos
 }
