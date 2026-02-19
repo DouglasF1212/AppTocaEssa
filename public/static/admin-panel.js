@@ -9,7 +9,9 @@ let systemConfig = {};
 // Configure axios with credentials + localStorage session fallback (interceptor reads fresh on every request)
 axios.defaults.withCredentials = true;
 axios.interceptors.request.use(function(config) {
-  const sid = localStorage.getItem('admin_session_id') || localStorage.getItem('session_id');
+  const sid = localStorage.getItem('admin_session_id')
+           || localStorage.getItem('session_id')
+           || sessionStorage.getItem('session_id');
   if (sid) config.headers['X-Session-ID'] = sid;
   return config;
 });

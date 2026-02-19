@@ -242,35 +242,39 @@ async function handleLogin(event) {
   
   const email = document.getElementById('email').value;
   const password = document.getElementById('password').value;
+  const btn = event.target.querySelector('button[type="submit"]');
+  if (btn) { btn.disabled = true; btn.textContent = 'Entrando...'; }
   
   try {
     const response = await axios.post('/api/auth/login', { email, password }, { withCredentials: true });
     
     if (response.data.success) {
       const user = response.data.user;
-      // Salva session_id no localStorage como fallback
-      if (response.data.session_id) {
-        localStorage.setItem('session_id', response.data.session_id);
+      const sid = response.data.session_id;
+
+      // Salva session_id em múltiplos storages para máxima compatibilidade mobile
+      if (sid) {
+        try { localStorage.setItem('session_id', sid); } catch(e) {}
+        try { sessionStorage.setItem('session_id', sid); } catch(e) {}
+        // Cookie manual como último fallback
+        document.cookie = `session_id=${sid}; path=/; max-age=${30*24*3600}; secure; samesite=None`;
       }
       localStorage.setItem('user_role', user.role);
       localStorage.setItem('license_status', user.license_status);
-      showSuccess('Login realizado com sucesso!');
-      setTimeout(() => {
-        // Admin vai para o painel admin
-        if (user.role === 'admin') {
-          window.location.href = '/admin/panel';
-          return;
-        }
-        // Artista aprovado vai para gerenciamento
-        if (user.license_status === 'approved') {
-          window.location.href = '/manage';
-          return;
-        }
-        // Artista ainda não aprovado vai para pagamento de licença
-        window.location.href = '/license-payment';
-      }, 1000);
+
+      // Redireciona imediatamente sem setTimeout
+      if (user.role === 'admin') {
+        window.location.replace('/admin/panel');
+        return;
+      }
+      if (user.license_status === 'approved') {
+        window.location.replace('/manage');
+        return;
+      }
+      window.location.replace('/license-payment');
     }
   } catch (error) {
+    if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-sign-in-alt mr-2"></i>Entrar'; }
     showError(error.response?.data?.error || 'Erro ao fazer login');
   }
 }

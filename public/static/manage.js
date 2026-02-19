@@ -6,12 +6,13 @@ let songs = [];
 let bankAccount = null;
 let currentTab = 'profile';
 
-// Configure axios: send cookies + fallback to localStorage session_id via header
+// Configure axios: send cookies + interceptor that reads session_id fresh on every request
 axios.defaults.withCredentials = true;
-const _storedSession = localStorage.getItem('session_id');
-if (_storedSession) {
-  axios.defaults.headers.common['X-Session-ID'] = _storedSession;
-}
+axios.interceptors.request.use(function(config) {
+  const sid = localStorage.getItem('session_id');
+  if (sid) config.headers['X-Session-ID'] = sid;
+  return config;
+});
 
 // Initialize
 async function init() {
@@ -20,34 +21,36 @@ async function init() {
     await loadData();
     renderPage();
   } catch (error) {
-    console.error(error);
-    window.location.href = '/login';
+    console.error('Init error:', error);
+    // Só redireciona para login em erro de autenticação (401), não em erros de rede
+    if (error.response && error.response.status === 401) {
+      window.location.href = '/login';
+    } else if (!error.response) {
+      // Erro de rede — tenta recarregar
+      setTimeout(() => window.location.reload(), 2000);
+    } else {
+      window.location.href = '/login';
+    }
   }
 }
 
 // Check authentication
 async function checkAuthentication() {
-  try {
-    const response = await axios.get('/api/auth/me');
-    user = response.data.user;
-    artist = response.data.artist;
-    
-    // Admin não precisa de licença aprovada
-    if (user.role === 'admin') {
-      return;
-    }
+  const response = await axios.get('/api/auth/me');
+  user = response.data.user;
+  artist = response.data.artist;
+  
+  // Admin não precisa de licença aprovada
+  if (user.role === 'admin') return;
 
-    // Artista sem licença aprovada vai para pagamento
-    if (user.license_status !== 'approved') {
-      window.location.href = '/license-payment';
-      return;
-    }
-    
-    if (!artist) {
-      throw new Error('Artista não encontrado');
-    }
-  } catch (error) {
-    throw error;
+  // Artista sem licença aprovada vai para pagamento
+  if (user.license_status !== 'approved') {
+    window.location.href = '/license-payment';
+    return;
+  }
+  
+  if (!artist) {
+    throw { response: { status: 401 } };
   }
 }
 

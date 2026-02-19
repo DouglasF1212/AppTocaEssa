@@ -241,21 +241,20 @@ app.post('/api/auth/login', async (c) => {
     return c.json({ error: 'Email ou senha incorretos' }, 401)
   }
   
-  // Create session
+  // Create session — usar datetime SQLite para compatibilidade com a query de validação
   const sessionId = generateSessionId()
-  const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 7 days
   
   await c.env.DB.prepare(`
     INSERT INTO sessions (id, user_id, expires_at)
-    VALUES (?, ?, ?)
-  `).bind(sessionId, user.id, expiresAt.toISOString()).run()
+    VALUES (?, ?, datetime('now', '+30 days'))
+  `).bind(sessionId, user.id).run()
   
-  // Set cookie
+  // Set cookie — sem httpOnly para que JS possa ler; SameSite=None para PWA mobile
   setCookie(c, 'session_id', sessionId, {
     httpOnly: false,
     secure: true,
-    sameSite: 'Lax',
-    expires: expiresAt,
+    sameSite: 'None',
+    maxAge: 30 * 24 * 60 * 60,
     path: '/'
   })
   
@@ -1011,14 +1010,14 @@ app.post('/api/admin/login', async (c) => {
   const sessionId = generateSessionId()
   await c.env.DB.prepare(`
     INSERT INTO sessions (id, user_id, expires_at)
-    VALUES (?, ?, datetime('now', '+7 days'))
+    VALUES (?, ?, datetime('now', '+30 days'))
   `).bind(sessionId, user.id).run()
   
   setCookie(c, 'session_id', sessionId, {
     httpOnly: false,
     secure: true,
-    sameSite: 'Lax',
-    maxAge: 7 * 24 * 60 * 60,
+    sameSite: 'None',
+    maxAge: 30 * 24 * 60 * 60,
     path: '/'
   })
   
@@ -2391,19 +2390,24 @@ app.get('/admin/login', (c) => {
         <script>
             document.getElementById('adminLoginForm').addEventListener('submit', async (e) => {
                 e.preventDefault();
+                const btn = e.target.querySelector('button[type="submit"]');
+                if (btn) { btn.disabled = true; btn.textContent = 'Entrando...'; }
                 
                 const email = document.getElementById('email').value;
                 const password = document.getElementById('password').value;
                 
                 try {
                     const response = await axios.post('/api/admin/login', { email, password }, { withCredentials: true });
-                    if (response.data.session_id) {
-                        localStorage.setItem('admin_session_id', response.data.session_id);
-                        localStorage.setItem('session_id', response.data.session_id);
-                        localStorage.setItem('user_role', 'admin');
+                    const sid = response.data.session_id;
+                    if (sid) {
+                        try { localStorage.setItem('admin_session_id', sid); } catch(e) {}
+                        try { localStorage.setItem('session_id', sid); } catch(e) {}
+                        try { sessionStorage.setItem('session_id', sid); } catch(e) {}
+                        document.cookie = 'session_id=' + sid + '; path=/; max-age=' + (30*24*3600) + '; secure; samesite=None';
                     }
-                    window.location.href = '/admin/panel';
+                    window.location.replace('/admin/panel');
                 } catch (error) {
+                    if (btn) { btn.disabled = false; btn.textContent = 'Entrar'; }
                     alert('Erro ao fazer login: ' + (error.response?.data?.error || error.message));
                 }
             });

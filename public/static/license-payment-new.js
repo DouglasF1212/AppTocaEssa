@@ -3,6 +3,14 @@
 let currentUser = null;
 let paymentConfig = {};
 
+// Configure axios interceptor
+axios.defaults.withCredentials = true;
+axios.interceptors.request.use(function(config) {
+  const sid = localStorage.getItem('session_id') || sessionStorage.getItem('session_id');
+  if (sid) config.headers['X-Session-ID'] = sid;
+  return config;
+});
+
 // Initialize
 async function init() {
   try {
@@ -13,7 +21,11 @@ async function init() {
       sessionStorage.removeItem('pending_email');
       sessionStorage.removeItem('pending_password');
       try {
-        await axios.post('/api/auth/login', { email: pendingEmail, password: pendingPassword });
+        const r = await axios.post('/api/auth/login', { email: pendingEmail, password: pendingPassword });
+        if (r.data.session_id) {
+          try { localStorage.setItem('session_id', r.data.session_id); } catch(e) {}
+          try { sessionStorage.setItem('session_id', r.data.session_id); } catch(e) {}
+        }
       } catch (e) {
         // ignora erro de login automático; usuário pode logar manualmente
       }
