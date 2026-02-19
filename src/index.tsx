@@ -103,6 +103,12 @@ app.get('/download/TocaEssa.apk', (c) => {
   return serveStatic({ path: 'TocaEssa.apk', root: './public' })(c, async () => {})
 })
 
+// Serve promotional video
+app.get('/video-promo', (c) => {
+  c.header('Content-Disposition', 'inline; filename="video_toca_essa_promo.mp4"')
+  return serveStatic({ path: 'video_toca_essa_promo.mp4', root: './public' })(c, async () => {})
+})
+
 // ======================
 // Helper Functions
 // ======================
