@@ -19,8 +19,15 @@ async function init() {
     // Render "my requests" section immediately
     renderMyRequestsSection();
 
-    // Poll for song list updates every 30 seconds
-    setInterval(loadSongs, 30000);
+    // Poll for song list and artist status updates every 30 seconds
+    setInterval(async () => {
+      await loadArtist();
+      await loadSongs();
+      // If status changed to blocked, re-render page
+      if (isRequestsBlocked()) {
+        renderBlockedPage();
+      }
+    }, 30000);
 
     // Check for request status updates every 8 seconds
     statusCheckInterval = setInterval(checkRequestStatusUpdates, 8000);
@@ -324,6 +331,38 @@ async function loadArtist() {
   artist = response.data;
 }
 
+// Check if requests are blocked (closed or limit reached)
+function isRequestsBlocked() {
+  if (!artist) return false;
+  // Requests closed by the artist
+  if (artist.requests_open === 0) return true;
+  // Limit reached
+  if (artist.max_requests > 0 && artist.today_requests_count >= artist.max_requests) return true;
+  return false;
+}
+
+// Get block reason message
+function getBlockMessage() {
+  if (!artist) return '';
+  if (artist.requests_open === 0) {
+    return {
+      icon: '🎤',
+      title: 'Pedidos Encerrados',
+      subtitle: 'O artista encerrou os pedidos de música por hoje.',
+      detail: 'Obrigado por participar! Até a próxima! 🎶'
+    };
+  }
+  if (artist.max_requests > 0 && artist.today_requests_count >= artist.max_requests) {
+    return {
+      icon: '🎵',
+      title: 'Limite de Pedidos Atingido',
+      subtitle: `${artist.name} já recebeu ${artist.max_requests} pedidos hoje — limite máximo do show!`,
+      detail: 'Não é possível enviar mais pedidos hoje. Obrigado por participar! 🙏'
+    };
+  }
+  return null;
+}
+
 // Load songs
 async function loadSongs() {
   const response = await axios.get(`/api/artists/${ARTIST_SLUG}/songs`);
@@ -343,6 +382,11 @@ async function loadSongs() {
 
 // Render the page
 function renderPage() {
+  // If requests are blocked, show special full-screen message
+  if (isRequestsBlocked()) {
+    renderBlockedPage();
+    return;
+  }
   const app = document.getElementById('app');
   app.innerHTML = `
     <div class="container mx-auto px-4 py-8 max-w-6xl">
@@ -463,6 +507,226 @@ function selectSong(songId) {
   if (!modal.classList.contains('hidden')) {
     showRequestModal();
   }
+}
+
+// Render full page when requests are blocked — shows tip-only form
+function renderBlockedPage() {
+  const app = document.getElementById('app');
+  const msg = getBlockMessage();
+  if (!msg) { renderPage(); return; }
+
+  app.innerHTML = `
+    <div class="min-h-screen bg-gray-900 text-white">
+      <!-- TOCA ESSA header -->
+      <div class="text-center pt-8 pb-4 px-4">
+        <h1 class="text-4xl font-black bg-gradient-to-r from-yellow-400 via-pink-500 to-purple-500 bg-clip-text text-transparent mb-1">
+          TOCA ESSA
+        </h1>
+      </div>
+
+      <div class="container mx-auto px-4 pb-12 max-w-md">
+
+        <!-- Artist identity -->
+        <div class="flex flex-col items-center text-center mb-6">
+          ${artist.photo_url ? `
+            <img src="${artist.photo_url}" alt="${artist.name}"
+              class="w-28 h-28 rounded-full object-cover border-4 border-purple-500 shadow-xl mb-4"
+              onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+            <div class="w-28 h-28 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full items-center justify-center mb-4" style="display:none;">
+              <i class="fas fa-user text-5xl"></i>
+            </div>
+          ` : `
+            <div class="w-28 h-28 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center mb-4">
+              <i class="fas fa-user text-5xl"></i>
+            </div>
+          `}
+          <h2 class="text-2xl font-bold">${artist.name}</h2>
+          ${artist.bio ? `<p class="text-gray-400 text-sm mt-1">${artist.bio}</p>` : ''}
+        </div>
+
+        <!-- Status notice banner -->
+        <div class="bg-gray-800 border border-gray-600 rounded-2xl p-5 mb-6 text-center">
+          <div class="text-5xl mb-3">${msg.icon}</div>
+          <h3 class="text-xl font-black text-white mb-2">${artist.name} não está aceitando pedidos no momento</h3>
+          <p class="text-gray-400 text-sm leading-relaxed">${msg.subtitle}</p>
+        </div>
+
+        <!-- Tip invitation -->
+        <div class="bg-gradient-to-br from-yellow-900/40 to-orange-900/30 border border-yellow-600/60 rounded-2xl p-5 mb-6 text-center">
+          <div class="text-3xl mb-2">💛</div>
+          <p class="text-yellow-200 font-semibold text-base">
+            Fique à vontade para deixar uma gorjeta mesmo assim!
+          </p>
+          <p class="text-yellow-300/70 text-xs mt-1">Seu apoio faz a diferença para o artista 🎶</p>
+        </div>
+
+        <!-- Tip Form -->
+        <div class="bg-gray-800 rounded-2xl p-6" id="tipFormSection">
+          <h3 class="text-lg font-bold mb-4 flex items-center gap-2">
+            <i class="fas fa-hand-holding-heart text-yellow-400"></i>
+            Enviar Gorjeta para ${artist.name}
+          </h3>
+
+          <form id="tipOnlyForm" onsubmit="submitTipOnly(event)" class="space-y-4">
+            <!-- Amount presets -->
+            <div>
+              <label class="block text-sm font-semibold text-gray-300 mb-2">Escolha um valor</label>
+              <div class="grid grid-cols-4 gap-2 mb-3">
+                <button type="button" onclick="setBlockedTip(5)"  class="tip-preset bg-gray-700 hover:bg-yellow-600 px-3 py-3 rounded-xl font-bold transition text-sm">R$ 5</button>
+                <button type="button" onclick="setBlockedTip(10)" class="tip-preset bg-gray-700 hover:bg-yellow-600 px-3 py-3 rounded-xl font-bold transition text-sm">R$ 10</button>
+                <button type="button" onclick="setBlockedTip(20)" class="tip-preset bg-gray-700 hover:bg-yellow-600 px-3 py-3 rounded-xl font-bold transition text-sm">R$ 20</button>
+                <button type="button" onclick="setBlockedTip(50)" class="tip-preset bg-gray-700 hover:bg-yellow-600 px-3 py-3 rounded-xl font-bold transition text-sm">R$ 50</button>
+              </div>
+              <div class="relative">
+                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 font-semibold">R$</span>
+                <input
+                  type="number"
+                  id="blockedTipAmount"
+                  class="w-full pl-10 pr-4 py-3 rounded-xl bg-gray-700 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-yellow-500 text-white text-lg font-bold"
+                  placeholder="Ou digite o valor"
+                  min="1"
+                  step="1"
+                >
+              </div>
+            </div>
+
+            <!-- Sender name -->
+            <div>
+              <label class="block text-sm font-semibold text-gray-300 mb-2">Seu nome (opcional)</label>
+              <input
+                type="text"
+                id="blockedTipName"
+                class="w-full px-4 py-3 rounded-xl bg-gray-700 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-yellow-500 text-white"
+                placeholder="Anônimo"
+              >
+            </div>
+
+            <!-- Message -->
+            <div>
+              <label class="block text-sm font-semibold text-gray-300 mb-2">Mensagem (opcional)</label>
+              <textarea
+                id="blockedTipMessage"
+                class="w-full px-4 py-3 rounded-xl bg-gray-700 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-yellow-500 text-white resize-none"
+                rows="2"
+                placeholder="Deixe um recado para o artista..."
+              ></textarea>
+            </div>
+
+            <!-- Submit -->
+            <button
+              type="submit"
+              class="w-full bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 px-6 py-4 rounded-xl font-black text-lg transition shadow-lg text-gray-900"
+            >
+              <i class="fas fa-heart mr-2"></i>
+              Enviar Gorjeta via PIX
+            </button>
+          </form>
+        </div>
+
+        <!-- Success tip state (hidden by default) -->
+        <div id="tipSuccessSection" class="hidden bg-gray-800 rounded-2xl p-8 text-center">
+          <div class="text-6xl mb-4">🎉</div>
+          <h3 class="text-2xl font-black text-white mb-2">Gorjeta enviada!</h3>
+          <p class="text-gray-400 mb-6">Obrigado pelo seu apoio a <strong>${artist.name}</strong>!</p>
+          <button onclick="resetTipForm()" class="bg-gray-700 hover:bg-gray-600 px-6 py-3 rounded-xl font-semibold transition">
+            <i class="fas fa-redo mr-2"></i>Enviar outra gorjeta
+          </button>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- PIX payment overlay (injected dynamically) -->
+    <div id="pixOverlay" class="hidden fixed inset-0 bg-black/90 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div class="bg-gray-800 rounded-2xl p-6 max-w-sm w-full text-center">
+        <div id="pixOverlayContent"></div>
+      </div>
+    </div>
+  `;
+}
+
+// Set tip amount on blocked page preset buttons
+function setBlockedTip(amount) {
+  const input = document.getElementById('blockedTipAmount');
+  if (input) {
+    input.value = amount;
+    // Highlight selected button
+    document.querySelectorAll('.tip-preset').forEach(btn => {
+      btn.classList.remove('bg-yellow-600');
+      btn.classList.add('bg-gray-700');
+    });
+    event.target.classList.remove('bg-gray-700');
+    event.target.classList.add('bg-yellow-600');
+  }
+}
+
+// Submit standalone tip (on blocked page)
+async function submitTipOnly(event) {
+  event.preventDefault();
+
+  const amount = parseFloat(document.getElementById('blockedTipAmount').value);
+  const name   = document.getElementById('blockedTipName').value.trim() || 'Anônimo';
+  const msg    = document.getElementById('blockedTipMessage').value.trim();
+
+  if (!amount || amount < 1) {
+    showBlockedError('Por favor, informe um valor para a gorjeta.');
+    return;
+  }
+
+  const btn = event.target.querySelector('[type="submit"]');
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Processando...';
+
+  try {
+    const response = await axios.post(\`/api/artists/\${ARTIST_SLUG}/tips\`, {
+      amount,
+      sender_name: name,
+      message: msg || \`Gorjeta para \${artist.name}\`,
+      payment_method: 'pix'
+    });
+
+    const pixData = response.data.pix_data;
+    const tipId   = response.data.id;
+
+    if (!pixData || !pixData.key) {
+      showBlockedError('Artista ainda não configurou dados bancários para receber gorjetas.');
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fas fa-heart mr-2"></i>Enviar Gorjeta via PIX';
+      return;
+    }
+
+    // Redirect to payment page just like normal flow
+    window.location.href = response.data.payment_url;
+
+  } catch (e) {
+    const errMsg = e.response?.data?.error || 'Erro ao processar gorjeta. Tente novamente.';
+    showBlockedError(errMsg);
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fas fa-heart mr-2"></i>Enviar Gorjeta via PIX';
+  }
+}
+
+// Reset tip form to initial state
+function resetTipForm() {
+  document.getElementById('tipSuccessSection').classList.add('hidden');
+  document.getElementById('tipFormSection').classList.remove('hidden');
+  const form = document.getElementById('tipOnlyForm');
+  if (form) form.reset();
+}
+
+// Show error on blocked page
+function showBlockedError(message) {
+  const existing = document.getElementById('blockedErrorMsg');
+  if (existing) existing.remove();
+
+  const el = document.createElement('div');
+  el.id = 'blockedErrorMsg';
+  el.className = 'bg-red-900/60 border border-red-500 text-red-200 px-4 py-3 rounded-xl text-sm mt-3';
+  el.innerHTML = \`<i class="fas fa-exclamation-circle mr-2"></i>\${message}\`;
+
+  const form = document.getElementById('tipOnlyForm');
+  if (form) form.appendChild(el);
+  setTimeout(() => el.remove(), 5000);
 }
 
 // Show request modal
@@ -635,7 +899,16 @@ async function submitRequest(event) {
       card.classList.remove('ring-4', 'ring-yellow-400');
     });
   } catch (error) {
-    showError(error.response?.data?.error || 'Erro ao enviar pedido');
+    const errData = error.response?.data;
+    // If server says limit reached or closed, reload artist and show blocked page
+    if (errData?.limit_reached || errData?.closed) {
+      closeModal('requestModal');
+      // Reload artist data to get updated counts
+      await loadArtist();
+      renderBlockedPage();
+    } else {
+      showError(errData?.error || 'Erro ao enviar pedido');
+    }
   }
 }
 

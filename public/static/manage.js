@@ -218,6 +218,8 @@ function renderTabContent() {
     } else if (pixKeyInput && pixKeyInput.value) {
       formatCPF(pixKeyInput);
     }
+  } else if (currentTab === 'show') {
+    content.innerHTML = renderShowTab();
   } else if (currentTab === 'qrcode') {
     content.innerHTML = renderQRCodeTab();
   }
@@ -650,6 +652,204 @@ function renderRepertoireTab() {
       </div>
     </div>
   `;
+}
+
+// ======================
+// Show Tab — Controle do Show
+// ======================
+
+function renderShowTab() {
+  const isOpen = showSettings.requests_open;
+  const maxReq = showSettings.max_requests || 0;
+  const todayCount = artist.today_requests_count || 0;
+  const limitActive = maxReq > 0;
+  const limitReached = limitActive && todayCount >= maxReq;
+
+  return `
+    <div class="max-w-2xl mx-auto">
+      <h2 class="text-2xl font-bold mb-6">
+        <i class="fas fa-sliders-h mr-2"></i>
+        Controle do Show
+      </h2>
+
+      <!-- Status Banner -->
+      <div class="rounded-xl p-5 mb-6 flex items-center gap-4 ${isOpen ? 'bg-green-900/40 border border-green-600' : 'bg-red-900/40 border border-red-600'}">
+        <div class="text-4xl">${isOpen ? '🟢' : '🔴'}</div>
+        <div class="flex-1">
+          <div class="font-bold text-lg ${isOpen ? 'text-green-300' : 'text-red-300'}">
+            ${isOpen ? 'Aceitando pedidos' : 'Pedidos fechados'}
+          </div>
+          <div class="text-sm text-gray-400">
+            ${isOpen
+              ? (limitActive
+                  ? `${todayCount} de ${maxReq} pedidos usados hoje`
+                  : 'Sem limite de pedidos')
+              : 'O QR Code mostrará mensagem de encerramento'}
+          </div>
+        </div>
+        <button
+          onclick="toggleRequestsOpen()"
+          class="${isOpen ? 'bg-red-600 hover:bg-red-700' : 'bg-green-600 hover:bg-green-700'} px-5 py-2 rounded-lg font-bold transition text-white"
+        >
+          ${isOpen ? '🔴 Fechar Pedidos' : '🟢 Abrir Pedidos'}
+        </button>
+      </div>
+
+      <!-- Progress Bar (only when limit is set) -->
+      ${limitActive ? `
+      <div class="bg-gray-800 rounded-xl p-5 mb-6">
+        <div class="flex justify-between items-center mb-2">
+          <span class="text-sm font-semibold text-gray-300">
+            <i class="fas fa-chart-bar mr-2 text-purple-400"></i>
+            Pedidos hoje
+          </span>
+          <span class="font-bold text-lg ${limitReached ? 'text-red-400' : 'text-white'}">
+            ${todayCount} / ${maxReq}
+          </span>
+        </div>
+        <div class="w-full bg-gray-700 rounded-full h-4">
+          <div
+            class="h-4 rounded-full transition-all duration-500 ${limitReached ? 'bg-red-500' : todayCount / maxReq > 0.75 ? 'bg-yellow-500' : 'bg-green-500'}"
+            style="width: ${Math.min(100, maxReq > 0 ? Math.round((todayCount / maxReq) * 100) : 0)}%"
+          ></div>
+        </div>
+        ${limitReached ? `
+        <p class="text-red-400 text-sm mt-2 font-semibold">
+          <i class="fas fa-lock mr-1"></i>
+          Limite atingido! Novos pedidos estão bloqueados automaticamente.
+        </p>` : ''}
+      </div>
+      ` : ''}
+
+      <!-- Settings Form -->
+      <div class="bg-gray-800 rounded-xl p-6">
+        <h3 class="text-lg font-bold mb-4">
+          <i class="fas fa-cog mr-2 text-purple-400"></i>
+          Configurar Limite de Pedidos
+        </h3>
+
+        <form onsubmit="handleSaveShowSettings(event)" class="space-y-5">
+          <div>
+            <label class="flex items-center gap-3 cursor-pointer mb-3">
+              <div class="relative">
+                <input
+                  type="checkbox"
+                  id="limitToggle"
+                  class="sr-only"
+                  ${limitActive ? 'checked' : ''}
+                  onchange="toggleLimitInput(this)"
+                >
+                <div id="limitToggleTrack" class="w-12 h-6 rounded-full transition ${limitActive ? 'bg-purple-600' : 'bg-gray-600'}"></div>
+                <div id="limitToggleThumb" class="absolute top-1 left-1 w-4 h-4 bg-white rounded-full shadow transition-transform ${limitActive ? 'translate-x-6' : ''}"></div>
+              </div>
+              <span class="font-semibold">Ativar limite de pedidos</span>
+            </label>
+            <p class="text-xs text-gray-400">
+              Quando ativado, o artista pode definir quantos pedidos aceitar no show. Ao atingir o limite, o QR Code mostrará mensagem de encerramento.
+            </p>
+          </div>
+
+          <div id="maxRequestsInput" style="display: ${limitActive ? 'block' : 'none'}">
+            <label class="block text-sm font-semibold mb-2">
+              <i class="fas fa-list-ol mr-1 text-purple-400"></i>
+              Número máximo de pedidos no show de hoje
+            </label>
+            <div class="flex items-center gap-3">
+              <button type="button" onclick="adjustMax(-5)" class="bg-gray-700 hover:bg-gray-600 w-10 h-10 rounded-lg font-bold text-lg transition">−</button>
+              <input
+                type="number"
+                id="maxRequestsValue"
+                value="${maxReq || 20}"
+                min="1"
+                max="999"
+                class="flex-1 text-center px-4 py-2 rounded-lg bg-gray-700 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-purple-500 text-xl font-bold"
+              >
+              <button type="button" onclick="adjustMax(5)" class="bg-gray-700 hover:bg-gray-600 w-10 h-10 rounded-lg font-bold text-lg transition">+</button>
+            </div>
+            <p class="text-xs text-gray-400 mt-1">Sugestão: 20–50 pedidos por show</p>
+          </div>
+
+          <button
+            type="submit"
+            class="w-full bg-purple-600 hover:bg-purple-700 px-6 py-3 rounded-lg font-semibold transition"
+          >
+            <i class="fas fa-save mr-2"></i>
+            Salvar Configurações
+          </button>
+        </form>
+      </div>
+
+      <!-- Info Card -->
+      <div class="bg-blue-900/30 border border-blue-700 rounded-xl p-4 mt-6">
+        <p class="text-blue-200 text-sm">
+          <i class="fas fa-info-circle mr-2 text-blue-400"></i>
+          <strong>Como funciona:</strong> Quando o cliente escanear o QR Code e o limite estiver atingido (ou os pedidos fechados), ele verá uma tela informando que o artista não está aceitando mais pedidos hoje. Você pode reabrir a qualquer momento clicando em <strong>"Abrir Pedidos"</strong>.
+        </p>
+      </div>
+    </div>
+  `;
+}
+
+// Toggle +/- max requests
+function adjustMax(delta) {
+  const input = document.getElementById('maxRequestsValue');
+  if (!input) return;
+  const current = parseInt(input.value) || 20;
+  input.value = Math.max(1, current + delta);
+}
+
+// Toggle visibility of limit input
+function toggleLimitInput(checkbox) {
+  const container = document.getElementById('maxRequestsInput');
+  const track = document.getElementById('limitToggleTrack');
+  const thumb = document.getElementById('limitToggleThumb');
+  if (!container) return;
+  if (checkbox.checked) {
+    container.style.display = 'block';
+    if (track) { track.classList.remove('bg-gray-600'); track.classList.add('bg-purple-600'); }
+    if (thumb) thumb.classList.add('translate-x-6');
+  } else {
+    container.style.display = 'none';
+    if (track) { track.classList.remove('bg-purple-600'); track.classList.add('bg-gray-600'); }
+    if (thumb) thumb.classList.remove('translate-x-6');
+  }
+}
+
+// Toggle open/close requests
+async function toggleRequestsOpen() {
+  const newState = showSettings.requests_open ? 0 : 1;
+  try {
+    await axios.put(`/api/artists/${artist.slug}/show-settings`, {
+      max_requests: showSettings.max_requests,
+      requests_open: newState
+    });
+    showSettings.requests_open = newState;
+    artist.requests_open = newState;
+    showSuccess(newState ? '🟢 Pedidos abertos!' : '🔴 Pedidos fechados!');
+    renderTabContent();
+  } catch (e) {
+    showError('Erro ao atualizar configurações');
+  }
+}
+
+// Save show settings
+async function handleSaveShowSettings(event) {
+  event.preventDefault();
+  const limitEnabled = document.getElementById('limitToggle').checked;
+  const maxVal = limitEnabled ? (parseInt(document.getElementById('maxRequestsValue').value) || 20) : 0;
+
+  try {
+    await axios.put(`/api/artists/${artist.slug}/show-settings`, {
+      max_requests: maxVal,
+      requests_open: showSettings.requests_open
+    });
+    showSettings.max_requests = maxVal;
+    artist.max_requests = maxVal;
+    showSuccess('✅ Configurações salvas!');
+    renderTabContent();
+  } catch (e) {
+    showError('Erro ao salvar configurações');
+  }
 }
 
 // Render Bank Tab
