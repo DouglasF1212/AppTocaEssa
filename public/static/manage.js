@@ -5,6 +5,7 @@ let artist = null;
 let songs = [];
 let bankAccount = null;
 let currentTab = 'profile';
+let showSettings = { requests_open: 1, max_requests: 0 };
 
 // Configure axios: send cookies + interceptor that reads session_id fresh on every request
 axios.defaults.withCredentials = true;
@@ -58,8 +59,26 @@ async function checkAuthentication() {
 async function loadData() {
   await Promise.all([
     loadSongs(),
-    loadBankAccount()
+    loadBankAccount(),
+    loadShowSettings()
   ]);
+}
+
+// Load show settings (requests_open, max_requests)
+async function loadShowSettings() {
+  try {
+    const response = await axios.get(`/api/artists/${artist.slug}`);
+    showSettings = {
+      requests_open: response.data.requests_open ?? 1,
+      max_requests: response.data.max_requests ?? 0
+    };
+    // keep artist object in sync
+    artist.requests_open = showSettings.requests_open;
+    artist.max_requests = showSettings.max_requests;
+    artist.today_requests_count = response.data.today_requests_count ?? 0;
+  } catch (error) {
+    showSettings = { requests_open: 1, max_requests: 0 };
+  }
 }
 
 // Load songs
@@ -164,6 +183,14 @@ function renderPage() {
               <i class="fas fa-qrcode mr-2"></i>
               Meu QR Code
             </button>
+            <button 
+              onclick="switchTab('show')" 
+              id="tab-show"
+              class="px-6 py-3 font-semibold transition whitespace-nowrap ${currentTab === 'show' ? 'bg-gray-900 text-white' : 'text-gray-400 hover:text-white'}"
+            >
+              <i class="fas fa-sliders-h mr-2"></i>
+              Controle do Show
+            </button>
           </div>
         </div>
       </div>
@@ -175,6 +202,13 @@ function renderPage() {
     </div>
   `;
   
+  // Check URL hash to auto-activate tab (e.g. /manage#show)
+  const hash = window.location.hash.replace('#', '');
+  const validTabs = ['profile', 'repertoire', 'bank', 'qrcode', 'show'];
+  if (hash && validTabs.includes(hash)) {
+    currentTab = hash;
+  }
+
   renderTabContent();
 }
 
@@ -185,12 +219,18 @@ function switchTab(tab) {
   // Update tab buttons
   document.querySelectorAll('[id^="tab-"]').forEach(btn => {
     if (btn.id === `tab-${tab}`) {
-      btn.className = 'px-6 py-3 font-semibold transition bg-gray-900 text-white';
+      btn.className = 'px-6 py-3 font-semibold transition bg-gray-900 text-white whitespace-nowrap';
     } else {
-      btn.className = 'px-6 py-3 font-semibold transition text-gray-400 hover:text-white';
+      btn.className = 'px-6 py-3 font-semibold transition text-gray-400 hover:text-white whitespace-nowrap';
     }
   });
   
+  // Refresh show settings when entering the show tab
+  if (tab === 'show') {
+    loadShowSettings().then(() => renderTabContent());
+    return;
+  }
+
   renderTabContent();
 }
 

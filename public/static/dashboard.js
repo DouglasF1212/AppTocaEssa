@@ -20,6 +20,8 @@ async function init() {
     await loadRequests();
     await loadTips();
     renderPage();
+    // Update dynamic elements that depend on the rendered DOM
+    updateRequestsStatusBadge();
     
     // Auto-refresh every 5 seconds
     setInterval(() => {
@@ -457,7 +459,7 @@ function updateRequestsStatusBadge() {
         ${isOpen ? '🔴 Fechar Pedidos' : '🟢 Abrir Pedidos'}
       </button>
       <a
-        href="/manage"
+        href="/manage#show"
         class="bg-gray-600 hover:bg-gray-500 px-4 py-2 rounded-lg text-sm font-semibold transition text-white"
       >
         <i class="fas fa-cog mr-1"></i> Configurar
