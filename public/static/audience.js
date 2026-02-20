@@ -6,6 +6,22 @@ let selectedSong = null;
 let myRequests = []; // Track user's requests
 let statusCheckInterval = null;
 
+// Show fatal error on the app div (replaces spinner)
+function showFatalError(message) {
+  const app = document.getElementById('app');
+  if (app) {
+    app.innerHTML = `
+      <div class="min-h-screen flex flex-col items-center justify-center px-4 text-center">
+        <div class="text-5xl mb-4">😕</div>
+        <h2 class="text-xl font-bold mb-2">Erro ao carregar</h2>
+        <p class="text-gray-400 mb-6">${message}</p>
+        <button onclick="location.reload()" class="bg-purple-600 hover:bg-purple-700 px-6 py-3 rounded-xl font-semibold transition">
+          <i class="fas fa-redo mr-2"></i>Tentar novamente
+        </button>
+      </div>`;
+  }
+}
+
 // Initialize
 async function init() {
   try {
@@ -25,22 +41,24 @@ async function init() {
 
     // Poll artist status every 10 seconds — re-render immediately if blocked
     setInterval(async () => {
-      const wasBlocked = !document.getElementById('requestModal');
-      await loadArtist();
-      if (isRequestsBlocked()) {
-        renderBlockedPage();
-        return;
-      }
-      // If we were on the blocked page and it just reopened, show normal page
-      if (wasBlocked) {
+      try {
+        const wasBlocked = !document.getElementById('requestModal');
+        await loadArtist();
+        if (isRequestsBlocked()) {
+          renderBlockedPage();
+          return;
+        }
+        // If we were on the blocked page and it just reopened, show normal page
+        if (wasBlocked) {
+          await loadSongs();
+          renderPage();
+          loadMyRequests();
+          renderMyRequestsSection();
+          return;
+        }
+        // Normal refresh: update songs in background
         await loadSongs();
-        renderPage();
-        loadMyRequests();
-        renderMyRequestsSection();
-        return;
-      }
-      // Normal refresh: update songs in background
-      await loadSongs();
+      } catch (e) { /* ignore poll errors */ }
     }, 10000);
 
     // Check for request status updates every 8 seconds
@@ -49,7 +67,8 @@ async function init() {
     // First check right away (after 2s to let page settle)
     setTimeout(checkRequestStatusUpdates, 2000);
   } catch (error) {
-    showError('Erro ao carregar dados');
+    console.error('init error:', error);
+    showFatalError('Não foi possível carregar o repertório. Verifique sua conexão.');
   }
 }
 
@@ -966,5 +985,4 @@ function showError(message) {
   setTimeout(() => toast.remove(), 3000);
 }
 
-// Initialize on page load
-init();
+// Note: init() is called from the HTML page via <script>init()</script>
