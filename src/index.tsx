@@ -2659,6 +2659,119 @@ app.get('/admin/panel', (c) => {
   `)
 })
 
+// Admin artists full-page listing
+app.get('/admin/artists', (c) => {
+  return c.html(`
+    <!DOCTYPE html>
+    <html lang="pt-BR">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Artistas - Admin TOCA ESSA</title>
+        <script src="https://cdn.tailwindcss.com"></script>
+        <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
+        <style>
+          body { background: linear-gradient(135deg, #4c1d95 0%, #312e81 50%, #1e3a5f 100%); min-height: 100vh; }
+          .table-row:hover { background: rgba(255,255,255,0.05); }
+          .sort-btn { cursor: pointer; user-select: none; }
+          .sort-btn:hover { color: #a78bfa; }
+          .badge-approved { background: rgba(22,163,74,0.2); color: #4ade80; }
+          .badge-paid     { background: rgba(202,138,4,0.2); color: #fbbf24; }
+          .badge-pending  { background: rgba(107,114,128,0.2); color: #9ca3af; }
+          .badge-rejected { background: rgba(220,38,38,0.2); color: #f87171; }
+        </style>
+    </head>
+    <body class="text-white">
+      <!-- Top bar -->
+      <div style="background:rgba(0,0,0,0.4);border-bottom:1px solid rgba(255,255,255,0.1);padding:14px 24px;display:flex;align-items:center;justify-content:space-between;">
+        <div style="display:flex;align-items:center;gap:16px;">
+          <a href="/admin/panel" style="color:#a78bfa;text-decoration:none;font-size:0.9rem;">
+            <i class="fas fa-arrow-left mr-2"></i>Painel Admin
+          </a>
+          <span style="color:rgba(255,255,255,0.3);">|</span>
+          <span style="font-weight:700;font-size:1.1rem;"><i class="fas fa-guitar mr-2 text-purple-400"></i>Lista de Artistas</span>
+        </div>
+        <div id="auth-status" style="font-size:0.8rem;color:#9ca3af;"></div>
+      </div>
+
+      <div style="padding:24px;max-width:1400px;margin:0 auto;">
+        <!-- Header + search -->
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;margin-bottom:24px;">
+          <div>
+            <h1 style="font-size:1.8rem;font-weight:700;margin:0;">Artistas Cadastrados</h1>
+            <p id="subtitle" style="color:#9ca3af;margin:4px 0 0;font-size:0.9rem;">Carregando...</p>
+          </div>
+          <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center;">
+            <input id="searchInput" type="text" placeholder="Buscar por nome ou slug..."
+              oninput="filterArtists()"
+              style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);border-radius:8px;padding:10px 16px;color:white;width:260px;outline:none;"
+            >
+            <select id="statusFilter" onchange="filterArtists()"
+              style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);border-radius:8px;padding:10px 14px;color:white;outline:none;">
+              <option value="">Todos os status</option>
+              <option value="approved">Aprovados</option>
+              <option value="paid">Pagos</option>
+              <option value="pending">Pendentes</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Stats cards -->
+        <div id="statsCards" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:16px;margin-bottom:24px;"></div>
+
+        <!-- Table -->
+        <div style="background:rgba(0,0,0,0.3);border:1px solid rgba(255,255,255,0.1);border-radius:12px;overflow:hidden;">
+          <div style="overflow-x:auto;">
+            <table style="width:100%;border-collapse:collapse;">
+              <thead>
+                <tr style="background:rgba(0,0,0,0.4);">
+                  <th class="sort-btn" onclick="sortBy('name')" style="padding:14px 16px;text-align:left;font-size:0.85rem;font-weight:600;white-space:nowrap;">
+                    Nome <i id="sort-name" class="fas fa-sort ml-1 text-gray-500"></i>
+                  </th>
+                  <th class="sort-btn" onclick="sortBy('slug')" style="padding:14px 16px;text-align:left;font-size:0.85rem;font-weight:600;white-space:nowrap;">
+                    Slug <i id="sort-slug" class="fas fa-sort ml-1 text-gray-500"></i>
+                  </th>
+                  <th class="sort-btn" onclick="sortBy('license_status')" style="padding:14px 16px;text-align:left;font-size:0.85rem;font-weight:600;white-space:nowrap;">
+                    Status <i id="sort-license_status" class="fas fa-sort ml-1 text-gray-500"></i>
+                  </th>
+                  <th class="sort-btn" onclick="sortBy('license_paid_date')" style="padding:14px 16px;text-align:left;font-size:0.85rem;font-weight:600;white-space:nowrap;">
+                    Dt. Pagamento <i id="sort-license_paid_date" class="fas fa-sort ml-1 text-gray-500"></i>
+                  </th>
+                  <th class="sort-btn" onclick="sortBy('song_count')" style="padding:14px 16px;text-align:center;font-size:0.85rem;font-weight:600;white-space:nowrap;">
+                    Músicas <i id="sort-song_count" class="fas fa-sort ml-1 text-gray-500"></i>
+                  </th>
+                  <th class="sort-btn" onclick="sortBy('request_count')" style="padding:14px 16px;text-align:center;font-size:0.85rem;font-weight:600;white-space:nowrap;">
+                    Pedidos <i id="sort-request_count" class="fas fa-sort ml-1 text-gray-500"></i>
+                  </th>
+                  <th class="sort-btn" onclick="sortBy('created_at')" style="padding:14px 16px;text-align:left;font-size:0.85rem;font-weight:600;white-space:nowrap;">
+                    Cadastro <i id="sort-created_at" class="fas fa-sort-down ml-1 text-purple-400"></i>
+                  </th>
+                  <th style="padding:14px 16px;text-align:left;font-size:0.85rem;font-weight:600;">Ações</th>
+                </tr>
+              </thead>
+              <tbody id="artistsTableBody">
+                <tr>
+                  <td colspan="8" style="padding:40px;text-align:center;color:#9ca3af;">
+                    <i class="fas fa-spinner fa-spin mr-2"></i>Carregando artistas...
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div id="pagination" style="padding:16px;border-top:1px solid rgba(255,255,255,0.08);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
+            <span id="paginationInfo" style="color:#9ca3af;font-size:0.85rem;"></span>
+            <div id="paginationButtons" style="display:flex;gap:8px;"></div>
+          </div>
+        </div>
+      </div>
+
+      <script src="https://cdn.jsdelivr.net/npm/axios@1.6.0/dist/axios.min.js"></script>
+      <script src="/static/admin-artists.js?v=1"></script>
+    </body>
+    </html>
+  `)
+})
+
 // Artist management page
 app.get('/manage', (c) => {
   return c.html(`
