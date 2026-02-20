@@ -2895,7 +2895,7 @@ app.get('/payment/:slug/:tipId', async (c) => {
           const ARTIST_SLUG = '${slug}';
           const TIP_ID = '${tipId}';
         </script>
-        <script src="/static/pix-generator.js?v=2"></script>
+        <script src="/static/pix-generator.js?v=3"></script>
         <script src="/static/payment.js?v=2"></script>
         <script>init()</script>
     <script>
@@ -3080,7 +3080,7 @@ app.get('/:slug', (c) => {
         <script>
           const ARTIST_SLUG = '${slug}';
         </script>
-        <script src="/static/pix-generator.js?v=2"></script>
+        <script src="/static/pix-generator.js?v=3"></script>
         <script src="/static/audience.js?v=9"></script>
         <script>init()</script>
         
