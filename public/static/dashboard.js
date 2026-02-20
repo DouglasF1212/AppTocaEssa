@@ -5,6 +5,14 @@ let requests = [];
 let tips = [];
 let autoRefresh = true;
 
+// Send session_id cookie + header on every request (same setup as manage.js)
+axios.defaults.withCredentials = true;
+axios.interceptors.request.use(function(config) {
+  const sid = localStorage.getItem('session_id');
+  if (sid) config.headers['X-Session-ID'] = sid;
+  return config;
+});
+
 // Initialize
 async function init() {
   try {

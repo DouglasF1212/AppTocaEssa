@@ -5,6 +5,7 @@ let users = [];
 let stats = {};
 let pendingLicenses = [];
 let systemConfig = {};
+let artistsList = [];
 
 // Configure axios with credentials + localStorage session fallback (interceptor reads fresh on every request)
 axios.defaults.withCredentials = true;
@@ -31,7 +32,8 @@ async function init() {
     loadStats(),
     loadUsers(),
     loadPendingLicenses(),
-    loadSystemConfig()
+    loadSystemConfig(),
+    loadArtistsList()
   ]);
 
   renderNavigation();
@@ -77,6 +79,16 @@ async function loadPendingLicenses() {
   }
 }
 
+// Load artists list (detailed, from /api/admin/artists)
+async function loadArtistsList() {
+  try {
+    const response = await axios.get('/api/admin/artists');
+    artistsList = response.data;
+  } catch (error) {
+    artistsList = [];
+  }
+}
+
 // Load system config
 async function loadSystemConfig() {
   try {
@@ -94,7 +106,7 @@ function renderNavigation() {
     { id: 'dashboard',  icon: 'fas fa-chart-line', label: 'Dashboard' },
     { id: 'licenses',   icon: 'fas fa-id-card',    label: 'Licenças', badge: pendingLicenses.length },
     { id: 'users',      icon: 'fas fa-users',       label: 'Usuários' },
-    { id: 'artists',    icon: 'fas fa-guitar',      label: 'Artistas' },
+    { id: 'artists',    icon: 'fas fa-guitar',      label: 'Artistas', badge: stats.total_artists || null },
     { id: 'settings',   icon: 'fas fa-cog',         label: 'Configurações' }
   ];
 
@@ -120,6 +132,7 @@ async function navigateTo(page) {
     else if (page === 'dashboard') await loadStats();
     else if (page === 'licenses')  await loadPendingLicenses();
     else if (page === 'settings')  await loadSystemConfig();
+    else if (page === 'artists')   await loadArtistsList();
   } catch(e) {}
   renderPage();
 }
@@ -360,39 +373,86 @@ function renderUsers() {
 // =====================
 // ARTISTAS
 // =====================
+function formatDate(dateStr) {
+  if (!dateStr) return '-';
+  try {
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return '-';
+    return d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+  } catch(e) { return '-'; }
+}
+
 function renderArtists() {
-  const artists = users.filter(u => u.role === 'artist');
+  const list = artistsList.length > 0 ? artistsList : users.filter(u => u.role === 'artist').map(u => ({
+    name: u.full_name,
+    slug: u.artist_slug || '-',
+    license_status: u.license_status,
+    license_paid_date: u.license_paid_date || u.license_paid_at || null,
+    song_count: '-',
+    request_count: '-',
+    email: u.email,
+    created_at: u.created_at
+  }));
+
+  const rows = list.map(a => {
+    const statusLabel = a.license_status === 'approved' ? '✅ Aprovado'
+      : a.license_status === 'paid'     ? '⏳ Pago'
+      : a.license_status === 'pending'  ? '🕐 Pendente'
+      : '🔴 ' + (a.license_status || 'N/A');
+    const statusClass = a.license_status === 'approved' ? 'bg-green-600/20 text-green-400'
+      : a.license_status === 'paid'    ? 'bg-yellow-600/20 text-yellow-400'
+      : 'bg-gray-600/20 text-gray-400';
+    const slug = a.slug || '-';
+    const licenseDate = formatDate(a.license_paid_date || a.license_approved_date);
+    const songs = a.song_count !== undefined ? a.song_count : '-';
+    const reqs  = a.request_count !== undefined ? a.request_count : '-';
+    return `
+      <tr class="hover:bg-gray-700/50 transition">
+        <td class="px-4 py-3 font-semibold">${a.name || a.full_name || '-'}</td>
+        <td class="px-4 py-3 text-sm text-gray-300 font-mono">${slug}</td>
+        <td class="px-4 py-3">
+          <span class="px-2 py-1 rounded text-xs font-semibold ${statusClass}">${statusLabel}</span>
+        </td>
+        <td class="px-4 py-3 text-sm text-gray-300">${licenseDate}</td>
+        <td class="px-4 py-3 text-center text-sm">
+          <span class="bg-blue-900/40 text-blue-300 px-2 py-1 rounded font-semibold">${songs}</span>
+        </td>
+        <td class="px-4 py-3 text-center text-sm">
+          <span class="bg-purple-900/40 text-purple-300 px-2 py-1 rounded font-semibold">${reqs}</span>
+        </td>
+        <td class="px-4 py-3 text-xs text-gray-400">${formatDate(a.created_at)}</td>
+        <td class="px-4 py-3">
+          ${slug !== '-' ? `<a href="/dashboard/${slug}" target="_blank" class="text-purple-400 hover:text-purple-300 text-xs mr-2"><i class="fas fa-external-link-alt"></i> Dashboard</a>` : ''}
+        </td>
+      </tr>
+    `;
+  }).join('');
+
   return `
     <div>
-      <h2 class="text-3xl font-bold mb-8"><i class="fas fa-guitar mr-3"></i>Artistas (${artists.length})</h2>
+      <div class="flex items-center justify-between mb-6">
+        <h2 class="text-3xl font-bold"><i class="fas fa-guitar mr-3"></i>Artistas (${list.length})</h2>
+        <a href="/admin/artists" class="bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded-lg transition font-semibold text-sm">
+          <i class="fas fa-expand-alt mr-2"></i>Página Completa
+        </a>
+      </div>
       <div class="bg-gray-800 rounded-xl border border-gray-700 overflow-hidden">
         <div class="overflow-x-auto">
-          <table class="w-full">
+          <table class="w-full text-sm">
             <thead class="bg-gray-900">
               <tr>
-                <th class="px-6 py-4 text-left text-sm font-semibold">Nome</th>
-                <th class="px-6 py-4 text-left text-sm font-semibold">Email</th>
-                <th class="px-6 py-4 text-left text-sm font-semibold">Nome Artístico</th>
-                <th class="px-6 py-4 text-left text-sm font-semibold">Licença</th>
+                <th class="px-4 py-3 text-left font-semibold">Nome</th>
+                <th class="px-4 py-3 text-left font-semibold">Slug</th>
+                <th class="px-4 py-3 text-left font-semibold">Status</th>
+                <th class="px-4 py-3 text-left font-semibold">Dt. Pagamento</th>
+                <th class="px-4 py-3 text-center font-semibold">Músicas</th>
+                <th class="px-4 py-3 text-center font-semibold">Pedidos</th>
+                <th class="px-4 py-3 text-left font-semibold">Cadastro</th>
+                <th class="px-4 py-3 text-left font-semibold">Ações</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-gray-700">
-              ${artists.map(a => `
-                <tr class="hover:bg-gray-700/50">
-                  <td class="px-6 py-4 font-semibold">${a.full_name}</td>
-                  <td class="px-6 py-4 text-sm text-gray-300">${a.email}</td>
-                  <td class="px-6 py-4 text-sm">${a.artist_name || '-'}</td>
-                  <td class="px-6 py-4">
-                    <span class="px-2 py-1 rounded text-xs font-semibold
-                      ${a.license_status === 'approved' ? 'bg-green-600/20 text-green-400' :
-                        a.license_status === 'paid'     ? 'bg-yellow-600/20 text-yellow-400' :
-                                                          'bg-gray-600/20 text-gray-400'}">
-                      ${a.license_status === 'approved' ? '✅ Aprovada' :
-                        a.license_status === 'paid'     ? '⏳ Aguardando' : '🕐 Pendente'}
-                    </span>
-                  </td>
-                </tr>
-              `).join('')}
+              ${rows || '<tr><td colspan="8" class="px-4 py-8 text-center text-gray-400">Nenhum artista encontrado</td></tr>'}
             </tbody>
           </table>
         </div>
