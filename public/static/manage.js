@@ -204,15 +204,11 @@ function renderTabContent() {
     content.innerHTML = renderRepertoireTab();
   } else if (currentTab === 'bank') {
     content.innerHTML = renderBankTab();
-    // Garante que os campos corretos sejam exibidos com base no tipo selecionado
-    // e aplica a máscara de CPF se houver valor
-    setTimeout(() => {
-      toggleBankFields();
-      const pixKeyInput = document.getElementById('pixKey');
-      if (pixKeyInput && pixKeyInput.value) {
-        formatCPF(pixKeyInput);
-      }
-    }, 0);
+    // Aplica máscara de CPF se houver valor salvo
+    const pixKeyInput = document.getElementById('pixKey');
+    if (pixKeyInput && pixKeyInput.value) {
+      formatCPF(pixKeyInput);
+    }
   } else if (currentTab === 'qrcode') {
     content.innerHTML = renderQRCodeTab();
   }
@@ -649,6 +645,10 @@ function renderRepertoireTab() {
 
 // Render Bank Tab
 function renderBankTab() {
+  // Determina qual tipo está ativo com base nos dados salvos
+  const isPix = !bankAccount || bankAccount.account_type === 'pix' || bankAccount.account_type === null;
+  const isBankAccount = bankAccount && bankAccount.account_type === 'bank_account';
+
   return `
     <div class="max-w-2xl mx-auto">
       <h2 class="text-2xl font-bold mb-6">
@@ -670,12 +670,12 @@ function renderBankTab() {
             onchange="toggleBankFields()"
             class="w-full px-4 py-2 rounded-lg bg-gray-700 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-purple-500"
           >
-            <option value="pix" ${!bankAccount || bankAccount.account_type === 'pix' ? 'selected' : ''}>PIX</option>
-            <option value="bank_account" ${bankAccount?.account_type === 'bank_account' ? 'selected' : ''}>Conta Bancária</option>
+            <option value="pix" ${!isBankAccount ? 'selected' : ''}>PIX</option>
+            <option value="bank_account" ${isBankAccount ? 'selected' : ''}>Conta Bancária</option>
           </select>
         </div>
         
-        <div id="pixFields">
+        <div id="pixFields" style="display: ${isBankAccount ? 'none' : 'block'}">
           <div class="mb-4">
             <label class="block text-sm font-semibold mb-2">Tipo de Chave PIX *</label>
             <input 
@@ -705,7 +705,7 @@ function renderBankTab() {
           </div>
         </div>
         
-        <div id="bankFields" class="space-y-4">
+        <div id="bankFields" class="space-y-4" style="display: ${isBankAccount ? 'block' : 'none'}">
           <div>
             <label class="block text-sm font-semibold mb-2">Banco *</label>
             <input 
@@ -795,12 +795,14 @@ function toggleBankFields() {
   const pixFields = document.getElementById('pixFields');
   const bankFields = document.getElementById('bankFields');
   
+  if (!pixFields || !bankFields) return;
+
   if (accountType === 'pix') {
-    pixFields.classList.remove('hidden');
-    bankFields.classList.add('hidden');
+    pixFields.style.display = 'block';
+    bankFields.style.display = 'none';
   } else {
-    pixFields.classList.add('hidden');
-    bankFields.classList.remove('hidden');
+    pixFields.style.display = 'none';
+    bankFields.style.display = 'block';
   }
 }
 
