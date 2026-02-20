@@ -740,6 +740,25 @@ app.post('/api/artists/:slug/requests', async (c) => {
   })
 })
 
+// Get single request status (public — for client to check their own request)
+app.get('/api/requests/:id', async (c) => {
+  const id = c.req.param('id')
+
+  const request = await c.env.DB.prepare(`
+    SELECT sr.id, sr.status, sr.requester_name, s.title as song_title, s.artist_name as song_artist,
+           sr.created_at, sr.updated_at
+    FROM song_requests sr
+    LEFT JOIN songs s ON sr.song_id = s.id
+    WHERE sr.id = ?
+  `).bind(id).first()
+
+  if (!request) {
+    return c.json({ error: 'Pedido não encontrado' }, 404)
+  }
+
+  return c.json(request)
+})
+
 // Update request status
 app.patch('/api/requests/:id', async (c) => {
   const id = c.req.param('id')
