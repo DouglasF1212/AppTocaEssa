@@ -1927,7 +1927,7 @@ app.get('/', (c) => {
         navigator.serviceWorker.getRegistrations().then(regs => {
           regs.forEach(r => r.unregister());
         }).then(() => {
-          navigator.serviceWorker.register('/sw.js?v=6')
+          navigator.serviceWorker.register('/sw.js?v=8')
             .then(reg => console.log('✅ SW registrado:', reg.scope))
             .catch(err => console.log('SW erro:', err));
         });
@@ -2238,7 +2238,7 @@ app.get('/login', (c) => {
     <body class="bg-gradient-to-br from-purple-900 via-indigo-900 to-blue-900 text-white min-h-screen">
         <div id="app"></div>
         <script src="https://cdn.jsdelivr.net/npm/axios@1.6.0/dist/axios.min.js"></script>
-        <script src="/static/auth.js"></script>
+        <script src="/static/auth.js?v=2"></script>
         <script>renderLoginPage()</script>
     <script>
       if ('serviceWorker' in navigator) {
@@ -2247,7 +2247,7 @@ app.get('/login', (c) => {
         navigator.serviceWorker.getRegistrations().then(regs => {
           regs.forEach(r => r.unregister());
         }).then(() => {
-          navigator.serviceWorker.register('/sw.js?v=6')
+          navigator.serviceWorker.register('/sw.js?v=8')
             .then(reg => console.log('✅ SW registrado:', reg.scope))
             .catch(err => console.log('SW erro:', err));
         });
@@ -2306,7 +2306,7 @@ app.get('/register', (c) => {
     <body class="bg-gradient-to-br from-purple-900 via-indigo-900 to-blue-900 text-white min-h-screen">
         <div id="app"></div>
         <script src="https://cdn.jsdelivr.net/npm/axios@1.6.0/dist/axios.min.js"></script>
-        <script src="/static/auth.js"></script>
+        <script src="/static/auth.js?v=2"></script>
         <script>renderRegisterPage()</script>
     <script>
       if ('serviceWorker' in navigator) {
@@ -2315,7 +2315,7 @@ app.get('/register', (c) => {
         navigator.serviceWorker.getRegistrations().then(regs => {
           regs.forEach(r => r.unregister());
         }).then(() => {
-          navigator.serviceWorker.register('/sw.js?v=6')
+          navigator.serviceWorker.register('/sw.js?v=8')
             .then(reg => console.log('✅ SW registrado:', reg.scope))
             .catch(err => console.log('SW erro:', err));
         });
@@ -2374,7 +2374,7 @@ app.get('/license-payment', (c) => {
     <body class="bg-gradient-to-br from-purple-900 via-indigo-900 to-blue-900 text-white min-h-screen">
         <div id="app"></div>
         <script src="https://cdn.jsdelivr.net/npm/axios@1.6.0/dist/axios.min.js"></script>
-        <script src="/static/license-payment-new.js"></script>
+        <script src="/static/license-payment-new.js?v=2"></script>
         <script>init()</script>
     <script>
       if ('serviceWorker' in navigator) {
@@ -2383,7 +2383,7 @@ app.get('/license-payment', (c) => {
         navigator.serviceWorker.getRegistrations().then(regs => {
           regs.forEach(r => r.unregister());
         }).then(() => {
-          navigator.serviceWorker.register('/sw.js?v=6')
+          navigator.serviceWorker.register('/sw.js?v=8')
             .then(reg => console.log('✅ SW registrado:', reg.scope))
             .catch(err => console.log('SW erro:', err));
         });
@@ -2519,7 +2519,7 @@ app.get('/admin/login', (c) => {
         navigator.serviceWorker.getRegistrations().then(regs => {
           regs.forEach(r => r.unregister());
         }).then(() => {
-          navigator.serviceWorker.register('/sw.js?v=6')
+          navigator.serviceWorker.register('/sw.js?v=8')
             .then(reg => console.log('✅ SW registrado:', reg.scope))
             .catch(err => console.log('SW erro:', err));
         });
@@ -2663,7 +2663,7 @@ app.get('/admin/panel', (c) => {
         navigator.serviceWorker.getRegistrations().then(regs => {
           regs.forEach(r => r.unregister());
         }).then(() => {
-          navigator.serviceWorker.register('/sw.js?v=6')
+          navigator.serviceWorker.register('/sw.js?v=8')
             .then(reg => console.log('✅ SW registrado:', reg.scope))
             .catch(err => console.log('SW erro:', err));
         });
@@ -2842,7 +2842,7 @@ app.get('/manage', (c) => {
         </div>
         
         <script src="https://cdn.jsdelivr.net/npm/axios@1.6.0/dist/axios.min.js"></script>
-        <script src="/static/manage.js"></script>
+        <script src="/static/manage.js?v=8"></script>
         <script>init()</script>
     <script>
       if ('serviceWorker' in navigator) {
@@ -2851,7 +2851,7 @@ app.get('/manage', (c) => {
         navigator.serviceWorker.getRegistrations().then(regs => {
           regs.forEach(r => r.unregister());
         }).then(() => {
-          navigator.serviceWorker.register('/sw.js?v=6')
+          navigator.serviceWorker.register('/sw.js?v=8')
             .then(reg => console.log('✅ SW registrado:', reg.scope))
             .catch(err => console.log('SW erro:', err));
         });
@@ -2936,8 +2936,8 @@ app.get('/payment/:slug/:tipId', async (c) => {
           const ARTIST_SLUG = '${slug}';
           const TIP_ID = '${tipId}';
         </script>
-        <script src="/static/pix-generator.js"></script>
-        <script src="/static/payment.js"></script>
+        <script src="/static/pix-generator.js?v=2"></script>
+        <script src="/static/payment.js?v=2"></script>
         <script>init()</script>
     <script>
       if ('serviceWorker' in navigator) {
@@ -2946,7 +2946,7 @@ app.get('/payment/:slug/:tipId', async (c) => {
         navigator.serviceWorker.getRegistrations().then(regs => {
           regs.forEach(r => r.unregister());
         }).then(() => {
-          navigator.serviceWorker.register('/sw.js?v=6')
+          navigator.serviceWorker.register('/sw.js?v=8')
             .then(reg => console.log('✅ SW registrado:', reg.scope))
             .catch(err => console.log('SW erro:', err));
         });
@@ -3016,7 +3016,7 @@ app.get('/dashboard/:slug', (c) => {
         <script>
           const ARTIST_SLUG = '${slug}';
         </script>
-        <script src="/static/dashboard.js"></script>
+        <script src="/static/dashboard.js?v=8"></script>
         <script>init()</script>
     <script>
       if ('serviceWorker' in navigator) {
@@ -3025,7 +3025,7 @@ app.get('/dashboard/:slug', (c) => {
         navigator.serviceWorker.getRegistrations().then(regs => {
           regs.forEach(r => r.unregister());
         }).then(() => {
-          navigator.serviceWorker.register('/sw.js?v=6')
+          navigator.serviceWorker.register('/sw.js?v=8')
             .then(reg => console.log('✅ SW registrado:', reg.scope))
             .catch(err => console.log('SW erro:', err));
         });
@@ -3133,8 +3133,8 @@ app.get('/:slug', (c) => {
         <script>
           const ARTIST_SLUG = '${slug}';
         </script>
-        <script src="/static/pix-generator.js"></script>
-        <script src="/static/audience.js"></script>
+        <script src="/static/pix-generator.js?v=2"></script>
+        <script src="/static/audience.js?v=8"></script>
         <script>init()</script>
         
         <!-- PWA Service Worker -->
@@ -3144,7 +3144,7 @@ app.get('/:slug', (c) => {
             navigator.serviceWorker.getRegistrations().then(regs => {
               regs.forEach(r => r.unregister());
             }).then(() => {
-              navigator.serviceWorker.register('/sw.js?v=6')
+              navigator.serviceWorker.register('/sw.js?v=8')
                 .then((reg) => console.log('✅ Service Worker registrado'))
                 .catch((err) => console.log('❌ Service Worker falhou:', err));
             });
@@ -3157,7 +3157,7 @@ app.get('/:slug', (c) => {
         navigator.serviceWorker.getRegistrations().then(regs => {
           regs.forEach(r => r.unregister());
         }).then(() => {
-          navigator.serviceWorker.register('/sw.js?v=6')
+          navigator.serviceWorker.register('/sw.js?v=8')
             .then(reg => console.log('✅ SW registrado:', reg.scope))
             .catch(err => console.log('SW erro:', err));
         });
