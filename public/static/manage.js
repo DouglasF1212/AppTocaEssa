@@ -1421,5 +1421,4 @@ renderTabContent = function() {
   }
 };
 
-// Initialize on page load
-init();
+// Note: init() is called from the HTML page via <script>init()</script>

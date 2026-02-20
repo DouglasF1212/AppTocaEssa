@@ -721,10 +721,10 @@ async function submitTipOnly(event) {
   btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Processando...';
 
   try {
-    const response = await axios.post(\`/api/artists/\${ARTIST_SLUG}/tips\`, {
+    const response = await axios.post(`/api/artists/${ARTIST_SLUG}/tips`, {
       amount,
       sender_name: name,
-      message: msg || \`Gorjeta para \${artist.name}\`,
+      message: msg || `Gorjeta para ${artist.name}`,
       payment_method: 'pix'
     });
 
@@ -765,7 +765,7 @@ function showBlockedError(message) {
   const el = document.createElement('div');
   el.id = 'blockedErrorMsg';
   el.className = 'bg-red-900/60 border border-red-500 text-red-200 px-4 py-3 rounded-xl text-sm mt-3';
-  el.innerHTML = \`<i class="fas fa-exclamation-circle mr-2"></i>\${message}\`;
+  el.innerHTML = `<i class="fas fa-exclamation-circle mr-2"></i>${message}`;
 
   const form = document.getElementById('tipOnlyForm');
   if (form) form.appendChild(el);
