@@ -204,13 +204,15 @@ function renderTabContent() {
     content.innerHTML = renderRepertoireTab();
   } else if (currentTab === 'bank') {
     content.innerHTML = renderBankTab();
-    // Format CPF field if it has value
+    // Garante que os campos corretos sejam exibidos com base no tipo selecionado
+    // e aplica a máscara de CPF se houver valor
     setTimeout(() => {
+      toggleBankFields();
       const pixKeyInput = document.getElementById('pixKey');
       if (pixKeyInput && pixKeyInput.value) {
         formatCPF(pixKeyInput);
       }
-    }, 100);
+    }, 0);
   } else if (currentTab === 'qrcode') {
     content.innerHTML = renderQRCodeTab();
   }
@@ -673,7 +675,7 @@ function renderBankTab() {
           </select>
         </div>
         
-        <div id="pixFields" class="${!bankAccount || bankAccount.account_type === 'pix' ? '' : 'hidden'}">
+        <div id="pixFields">
           <div class="mb-4">
             <label class="block text-sm font-semibold mb-2">Tipo de Chave PIX *</label>
             <input 
@@ -690,7 +692,7 @@ function renderBankTab() {
             <input 
               type="text" 
               id="pixKey" 
-              value="${bankAccount?.pix_key || user?.document || ''}"
+              value="${bankAccount?.pix_key || ''}"
               class="w-full px-4 py-2 rounded-lg bg-gray-700 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-purple-500"
               placeholder="000.000.000-00"
               maxlength="14"
@@ -703,7 +705,7 @@ function renderBankTab() {
           </div>
         </div>
         
-        <div id="bankFields" class="${bankAccount?.account_type === 'bank_account' ? '' : 'hidden'} space-y-4">
+        <div id="bankFields" class="space-y-4">
           <div>
             <label class="block text-sm font-semibold mb-2">Banco *</label>
             <input 
