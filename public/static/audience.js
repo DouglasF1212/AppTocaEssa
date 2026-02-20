@@ -334,8 +334,10 @@ async function loadArtist() {
 // Check if requests are blocked (closed or limit reached)
 function isRequestsBlocked() {
   if (!artist) return false;
-  // Requests closed by the artist
-  if (artist.requests_open === 0) return true;
+  // requests_open: 1 = open, 0 = closed, null/undefined = treat as open (columns may not exist on old DB)
+  // Use != 1 to catch both 0 and any falsy value that isn't the explicit "open" state
+  const isOpen = artist.requests_open == null ? true : artist.requests_open == 1;
+  if (!isOpen) return true;
   // Limit reached
   if (artist.max_requests > 0 && artist.today_requests_count >= artist.max_requests) return true;
   return false;
@@ -343,8 +345,9 @@ function isRequestsBlocked() {
 
 // Get block reason message
 function getBlockMessage() {
-  if (!artist) return '';
-  if (artist.requests_open === 0) {
+  if (!artist) return null;
+  const isOpen = artist.requests_open == null ? true : artist.requests_open == 1;
+  if (!isOpen) {
     return {
       icon: '🎤',
       title: 'Pedidos Encerrados',

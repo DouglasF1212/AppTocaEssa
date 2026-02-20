@@ -747,17 +747,24 @@ app.put('/api/artists/:slug/show-settings', async (c) => {
 app.post('/api/artists/:slug/requests', async (c) => {
   const slug = c.req.param('slug')
   const { song_id, requester_name, requester_message, tip_amount, tip_message } = await c.req.json()
-  
+
+  // Self-healing: ensure columns exist (production DB may not have them yet)
+  try { await c.env.DB.prepare(`ALTER TABLE artists ADD COLUMN max_requests INTEGER DEFAULT 0`).run() } catch (_) {}
+  try { await c.env.DB.prepare(`ALTER TABLE artists ADD COLUMN requests_open INTEGER DEFAULT 1`).run() } catch (_) {}
+
   const artist = await c.env.DB.prepare(`
-    SELECT id, max_requests, requests_open FROM artists WHERE slug = ? AND active = 1
+    SELECT id,
+           COALESCE(max_requests, 0)  AS max_requests,
+           COALESCE(requests_open, 1) AS requests_open
+    FROM artists WHERE slug = ? AND active = 1
   `).bind(slug).first() as any
   
   if (!artist) {
     return c.json({ error: 'Artista não encontrado' }, 404)
   }
 
-  // Check if requests are open
-  if (artist.requests_open === 0) {
+  // Check if requests are open (0 = closed, 1 = open)
+  if (artist.requests_open == 0) {
     return c.json({ error: 'O artista não está aceitando pedidos no momento', closed: true }, 403)
   }
 
