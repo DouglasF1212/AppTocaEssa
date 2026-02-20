@@ -10,24 +10,38 @@ let statusCheckInterval = null;
 async function init() {
   try {
     await loadArtist();
-    await loadSongs();
-    renderPage();
 
-    // Load user's requests from localStorage
-    loadMyRequests();
-
-    // Render "my requests" section immediately
-    renderMyRequestsSection();
-
-    // Poll for song list and artist status updates every 30 seconds
-    setInterval(async () => {
-      await loadArtist();
+    // If already blocked on load, show blocked page immediately — don't load songs
+    if (isRequestsBlocked()) {
+      renderBlockedPage();
+    } else {
       await loadSongs();
-      // If status changed to blocked, re-render page
+      renderPage();
+      // Load user's requests from localStorage
+      loadMyRequests();
+      // Render "my requests" section immediately
+      renderMyRequestsSection();
+    }
+
+    // Poll artist status every 10 seconds — re-render immediately if blocked
+    setInterval(async () => {
+      const wasBlocked = !document.getElementById('requestModal');
+      await loadArtist();
       if (isRequestsBlocked()) {
         renderBlockedPage();
+        return;
       }
-    }, 30000);
+      // If we were on the blocked page and it just reopened, show normal page
+      if (wasBlocked) {
+        await loadSongs();
+        renderPage();
+        loadMyRequests();
+        renderMyRequestsSection();
+        return;
+      }
+      // Normal refresh: update songs in background
+      await loadSongs();
+    }, 10000);
 
     // Check for request status updates every 8 seconds
     statusCheckInterval = setInterval(checkRequestStatusUpdates, 8000);
@@ -493,7 +507,14 @@ function filterSongs() {
 }
 
 // Select a song
-function selectSong(songId) {
+async function selectSong(songId) {
+  // Check if requests are still open before allowing selection
+  await loadArtist();
+  if (isRequestsBlocked()) {
+    renderBlockedPage();
+    return;
+  }
+
   selectedSong = songs.find(s => s.id === songId);
 
   const songCards = document.querySelectorAll('.song-card');
@@ -733,7 +754,14 @@ function showBlockedError(message) {
 }
 
 // Show request modal
-function showRequestModal() {
+async function showRequestModal() {
+  // Always re-check artist status before opening the modal
+  await loadArtist();
+  if (isRequestsBlocked()) {
+    renderBlockedPage();
+    return;
+  }
+
   const modal = document.getElementById('requestModal');
   const content = document.getElementById('requestContent');
 
