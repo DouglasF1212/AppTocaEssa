@@ -1642,6 +1642,155 @@ app.get('/api/admin/stats', async (c) => {
 })
 
 // ======================
+// API Routes - Notifications
+// ======================
+
+// Self-healing: create notifications table if missing
+async function ensureNotificationsTable(db: any) {
+  await db.prepare(`
+    CREATE TABLE IF NOT EXISTS notifications (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id INTEGER,
+      title TEXT NOT NULL,
+      message TEXT NOT NULL,
+      type TEXT DEFAULT 'info',
+      link TEXT,
+      read_at TEXT,
+      created_at TEXT DEFAULT (datetime('now')),
+      expires_at TEXT
+    )
+  `).run().catch(() => {})
+}
+
+// Admin: send notification to all or specific user
+app.post('/api/admin/notifications', async (c) => {
+  const adminSession = await checkAdminAuth(c)
+  if (!adminSession) return c.json({ error: 'Acesso negado' }, 403)
+
+  const { user_id, title, message, type = 'info', link = null } = await c.req.json()
+
+  if (!title?.trim() || !message?.trim()) {
+    return c.json({ error: 'Título e mensagem são obrigatórios' }, 400)
+  }
+
+  await ensureNotificationsTable(c.env.DB)
+
+  if (user_id) {
+    // Send to specific user
+    const user = await c.env.DB.prepare(`SELECT id FROM users WHERE id = ?`).bind(user_id).first()
+    if (!user) return c.json({ error: 'Usuário não encontrado' }, 404)
+
+    await c.env.DB.prepare(`
+      INSERT INTO notifications (user_id, title, message, type, link)
+      VALUES (?, ?, ?, ?, ?)
+    `).bind(user_id, title.trim(), message.trim(), type, link).run()
+
+    return c.json({ success: true, sent_to: 'user', user_id })
+  } else {
+    // Broadcast to all non-admin users
+    const { results: allUsers } = await c.env.DB.prepare(
+      `SELECT id FROM users WHERE role != 'admin'`
+    ).all()
+
+    if (allUsers.length === 0) return c.json({ success: true, sent_to: 'all', count: 0 })
+
+    // Batch insert
+    for (const user of allUsers) {
+      await c.env.DB.prepare(`
+        INSERT INTO notifications (user_id, title, message, type, link)
+        VALUES (?, ?, ?, ?, ?)
+      `).bind(user.id, title.trim(), message.trim(), type, link).run()
+    }
+
+    return c.json({ success: true, sent_to: 'all', count: allUsers.length })
+  }
+})
+
+// Admin: list all notifications (for management)
+app.get('/api/admin/notifications', async (c) => {
+  const adminSession = await checkAdminAuth(c)
+  if (!adminSession) return c.json({ error: 'Acesso negado' }, 403)
+
+  await ensureNotificationsTable(c.env.DB)
+
+  const { results } = await c.env.DB.prepare(`
+    SELECT n.*, u.full_name as user_name, u.email as user_email
+    FROM notifications n
+    LEFT JOIN users u ON n.user_id = u.id
+    ORDER BY n.created_at DESC
+    LIMIT 200
+  `).all()
+
+  return c.json(results)
+})
+
+// Admin: delete notification
+app.delete('/api/admin/notifications/:id', async (c) => {
+  const adminSession = await checkAdminAuth(c)
+  if (!adminSession) return c.json({ error: 'Acesso negado' }, 403)
+
+  const id = c.req.param('id')
+  await ensureNotificationsTable(c.env.DB)
+  await c.env.DB.prepare(`DELETE FROM notifications WHERE id = ?`).bind(id).run()
+  return c.json({ success: true })
+})
+
+// Admin: delete all notifications (broadcast ones)
+app.delete('/api/admin/notifications', async (c) => {
+  const adminSession = await checkAdminAuth(c)
+  if (!adminSession) return c.json({ error: 'Acesso negado' }, 403)
+
+  await ensureNotificationsTable(c.env.DB)
+  await c.env.DB.prepare(`DELETE FROM notifications`).run()
+  return c.json({ success: true })
+})
+
+// User: get my notifications (unread)
+app.get('/api/notifications', async (c) => {
+  const session = await checkAuth(c)
+  if (!session) return c.json({ error: 'Não autenticado' }, 401)
+
+  await ensureNotificationsTable(c.env.DB)
+
+  const { results } = await c.env.DB.prepare(`
+    SELECT id, title, message, type, link, read_at, created_at
+    FROM notifications
+    WHERE user_id = ? AND (expires_at IS NULL OR expires_at > datetime('now'))
+    ORDER BY created_at DESC
+    LIMIT 50
+  `).bind(session.user_id).all()
+
+  return c.json(results)
+})
+
+// User: mark notification as read
+app.put('/api/notifications/:id/read', async (c) => {
+  const session = await checkAuth(c)
+  if (!session) return c.json({ error: 'Não autenticado' }, 401)
+
+  const id = c.req.param('id')
+  await ensureNotificationsTable(c.env.DB)
+  await c.env.DB.prepare(`
+    UPDATE notifications SET read_at = datetime('now')
+    WHERE id = ? AND user_id = ?
+  `).bind(id, session.user_id).run()
+  return c.json({ success: true })
+})
+
+// User: mark all notifications as read
+app.put('/api/notifications/read-all', async (c) => {
+  const session = await checkAuth(c)
+  if (!session) return c.json({ error: 'Não autenticado' }, 401)
+
+  await ensureNotificationsTable(c.env.DB)
+  await c.env.DB.prepare(`
+    UPDATE notifications SET read_at = datetime('now')
+    WHERE user_id = ? AND read_at IS NULL
+  `).bind(session.user_id).run()
+  return c.json({ success: true })
+})
+
+// ======================
 // API Routes - QR Code
 // ======================
 
