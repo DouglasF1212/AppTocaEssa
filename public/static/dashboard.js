@@ -16,6 +16,7 @@ async function init() {
     // Auto-refresh every 5 seconds
     setInterval(() => {
       if (autoRefresh) {
+        loadArtist();   // refresh today_requests_count
         loadRequests();
         loadTips();
       }
@@ -29,6 +30,7 @@ async function init() {
 async function loadArtist() {
   const response = await axios.get(`/api/artists/${ARTIST_SLUG}`);
   artist = response.data;
+  updateRequestsStatusBadge();
 }
 
 // Load requests
@@ -78,7 +80,7 @@ function renderPage() {
       
       <div class="container mx-auto px-4 py-6">
         <!-- Stats Cards -->
-        <div class="grid md:grid-cols-4 gap-4 mb-6">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
           <div class="bg-gradient-to-br from-purple-600 to-purple-800 rounded-xl p-6">
             <div class="text-3xl font-bold" id="statPending">0</div>
             <div class="text-sm text-purple-200">Pedidos Pendentes</div>
@@ -95,6 +97,11 @@ function renderPage() {
             <div class="text-3xl font-bold" id="statTips">R$ 0</div>
             <div class="text-sm text-yellow-200">Total em Gorjetas</div>
           </div>
+        </div>
+
+        <!-- Requests Status Bar -->
+        <div id="requestsStatusBar" class="rounded-xl p-4 mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+          <!-- dynamically updated -->
         </div>
         
         <div class="grid lg:grid-cols-3 gap-6">
@@ -171,6 +178,9 @@ function updateRequestsDisplay() {
   document.getElementById('statPending').textContent = pending;
   document.getElementById('statAccepted').textContent = accepted;
   document.getElementById('statPlayed').textContent = played;
+
+  // Also update the status bar
+  updateRequestsStatusBadge();
   
   if (requests.length === 0) {
     container.innerHTML = '<p class="text-center text-gray-400 py-8">Nenhum pedido ainda</p>';
@@ -390,10 +400,87 @@ function showError(message) {
   toast.className = 'fixed top-4 right-4 bg-red-600 text-white px-6 py-4 rounded-lg shadow-lg z-50';
   toast.innerHTML = `<i class="fas fa-exclamation-circle mr-2"></i>${message}`;
   document.body.appendChild(toast);
-  
-  setTimeout(() => {
-    toast.remove();
-  }, 3000);
+  setTimeout(() => toast.remove(), 3000);
+}
+
+// ============================================================
+// Requests open/close status bar
+// ============================================================
+function updateRequestsStatusBadge() {
+  const bar = document.getElementById('requestsStatusBar');
+  if (!bar || !artist) return;
+
+  const isOpen = artist.requests_open !== 0;
+  const maxReq = artist.max_requests || 0;
+  const todayCount = artist.today_requests_count || 0;
+  const limitActive = maxReq > 0;
+  const limitReached = limitActive && todayCount >= maxReq;
+  const effectivelyClosed = !isOpen || limitReached;
+
+  const pct = limitActive ? Math.min(100, Math.round((todayCount / maxReq) * 100)) : 0;
+  const barColor = limitReached ? 'bg-red-500' : pct > 75 ? 'bg-yellow-500' : 'bg-green-500';
+
+  bar.className = `rounded-xl p-4 mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 ${effectivelyClosed ? 'bg-red-900/30 border border-red-700' : 'bg-green-900/30 border border-green-700'}`;
+
+  bar.innerHTML = `
+    <div class="flex items-center gap-3 flex-1 min-w-0">
+      <span class="text-2xl">${effectivelyClosed ? '🔴' : '🟢'}</span>
+      <div class="flex-1 min-w-0">
+        <div class="font-bold ${effectivelyClosed ? 'text-red-300' : 'text-green-300'}">
+          ${!isOpen ? 'Pedidos Fechados' : limitReached ? 'Limite Atingido!' : 'Aceitando Pedidos'}
+        </div>
+        <div class="text-sm text-gray-400">
+          ${limitActive
+            ? `${todayCount} de ${maxReq} pedidos usados hoje`
+            : 'Sem limite definido'}
+        </div>
+        ${limitActive ? `
+          <div class="w-full bg-gray-700 rounded-full h-2 mt-1">
+            <div class="h-2 rounded-full transition-all ${barColor}" style="width:${pct}%"></div>
+          </div>
+        ` : ''}
+      </div>
+    </div>
+    <div class="flex gap-2 flex-shrink-0">
+      <button
+        onclick="toggleRequestsOpenDashboard()"
+        class="${isOpen ? 'bg-red-600 hover:bg-red-700' : 'bg-green-600 hover:bg-green-700'} px-4 py-2 rounded-lg font-bold text-sm transition text-white"
+      >
+        ${isOpen ? '🔴 Fechar Pedidos' : '🟢 Abrir Pedidos'}
+      </button>
+      <a
+        href="/manage"
+        class="bg-gray-600 hover:bg-gray-500 px-4 py-2 rounded-lg text-sm font-semibold transition text-white"
+      >
+        <i class="fas fa-cog mr-1"></i> Configurar
+      </a>
+    </div>
+  `;
+}
+
+async function toggleRequestsOpenDashboard() {
+  if (!artist) return;
+  const newState = artist.requests_open ? 0 : 1;
+  try {
+    await axios.put(`/api/artists/${ARTIST_SLUG}/show-settings`, {
+      max_requests: artist.max_requests || 0,
+      requests_open: newState
+    });
+    artist.requests_open = newState;
+    updateRequestsStatusBadge();
+    showSuccess(newState ? '🟢 Pedidos abertos!' : '🔴 Pedidos fechados!');
+  } catch (e) {
+    showError('Erro ao atualizar configurações');
+  }
+}
+
+// Show success message
+function showSuccess(message) {
+  const toast = document.createElement('div');
+  toast.className = 'fixed top-4 right-4 bg-green-600 text-white px-6 py-4 rounded-lg shadow-lg z-50';
+  toast.innerHTML = `<i class="fas fa-check-circle mr-2"></i>${message}`;
+  document.body.appendChild(toast);
+  setTimeout(() => toast.remove(), 3000);
 }
 
 // Initialize on page load

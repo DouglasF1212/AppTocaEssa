@@ -19,8 +19,15 @@ async function init() {
     // Render "my requests" section immediately
     renderMyRequestsSection();
 
-    // Poll for song list updates every 30 seconds
-    setInterval(loadSongs, 30000);
+    // Poll for song list and artist status updates every 30 seconds
+    setInterval(async () => {
+      await loadArtist();
+      await loadSongs();
+      // If status changed to blocked, re-render page
+      if (isRequestsBlocked()) {
+        renderBlockedPage();
+      }
+    }, 30000);
 
     // Check for request status updates every 8 seconds
     statusCheckInterval = setInterval(checkRequestStatusUpdates, 8000);
@@ -324,6 +331,38 @@ async function loadArtist() {
   artist = response.data;
 }
 
+// Check if requests are blocked (closed or limit reached)
+function isRequestsBlocked() {
+  if (!artist) return false;
+  // Requests closed by the artist
+  if (artist.requests_open === 0) return true;
+  // Limit reached
+  if (artist.max_requests > 0 && artist.today_requests_count >= artist.max_requests) return true;
+  return false;
+}
+
+// Get block reason message
+function getBlockMessage() {
+  if (!artist) return '';
+  if (artist.requests_open === 0) {
+    return {
+      icon: '🎤',
+      title: 'Pedidos Encerrados',
+      subtitle: 'O artista encerrou os pedidos de música por hoje.',
+      detail: 'Obrigado por participar! Até a próxima! 🎶'
+    };
+  }
+  if (artist.max_requests > 0 && artist.today_requests_count >= artist.max_requests) {
+    return {
+      icon: '🎵',
+      title: 'Limite de Pedidos Atingido',
+      subtitle: `${artist.name} já recebeu ${artist.max_requests} pedidos hoje — limite máximo do show!`,
+      detail: 'Não é possível enviar mais pedidos hoje. Obrigado por participar! 🙏'
+    };
+  }
+  return null;
+}
+
 // Load songs
 async function loadSongs() {
   const response = await axios.get(`/api/artists/${ARTIST_SLUG}/songs`);
@@ -343,6 +382,11 @@ async function loadSongs() {
 
 // Render the page
 function renderPage() {
+  // If requests are blocked, show special full-screen message
+  if (isRequestsBlocked()) {
+    renderBlockedPage();
+    return;
+  }
   const app = document.getElementById('app');
   app.innerHTML = `
     <div class="container mx-auto px-4 py-8 max-w-6xl">
@@ -463,6 +507,48 @@ function selectSong(songId) {
   if (!modal.classList.contains('hidden')) {
     showRequestModal();
   }
+}
+
+// Render full-screen blocked page (no more requests today)
+function renderBlockedPage() {
+  const app = document.getElementById('app');
+  const msg = getBlockMessage();
+  if (!msg) { renderPage(); return; }
+
+  app.innerHTML = `
+    <div class="min-h-screen flex flex-col items-center justify-center bg-gray-900 px-6 text-center">
+      <!-- Artist photo -->
+      ${artist.photo_url ? `
+        <img src="${artist.photo_url}" alt="${artist.name}"
+          class="w-28 h-28 rounded-full object-cover border-4 border-purple-500 shadow-xl mb-6"
+          onerror="this.style.display='none'">
+      ` : `
+        <div class="w-28 h-28 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center mb-6">
+          <i class="fas fa-user text-5xl"></i>
+        </div>
+      `}
+
+      <!-- Artist name -->
+      <h1 class="text-3xl font-bold mb-1">${artist.name}</h1>
+      <p class="text-gray-400 mb-8">${artist.bio || 'Show ao vivo'}</p>
+
+      <!-- Block card -->
+      <div class="bg-gray-800 border border-gray-600 rounded-3xl p-8 max-w-sm w-full shadow-2xl">
+        <div class="text-7xl mb-4">${msg.icon}</div>
+        <h2 class="text-2xl font-black text-white mb-3">${msg.title}</h2>
+        <p class="text-gray-300 mb-3 leading-relaxed">${msg.subtitle}</p>
+        <p class="text-gray-400 text-sm">${msg.detail}</p>
+      </div>
+
+      <!-- TOCA ESSA branding -->
+      <div class="mt-10 text-center">
+        <div class="text-3xl font-black bg-gradient-to-r from-yellow-400 via-pink-500 to-purple-500 bg-clip-text text-transparent">
+          TOCA ESSA
+        </div>
+        <p class="text-xs text-gray-500 mt-1">Conectando artistas e público</p>
+      </div>
+    </div>
+  `;
 }
 
 // Show request modal
@@ -635,7 +721,16 @@ async function submitRequest(event) {
       card.classList.remove('ring-4', 'ring-yellow-400');
     });
   } catch (error) {
-    showError(error.response?.data?.error || 'Erro ao enviar pedido');
+    const errData = error.response?.data;
+    // If server says limit reached or closed, reload artist and show blocked page
+    if (errData?.limit_reached || errData?.closed) {
+      closeModal('requestModal');
+      // Reload artist data to get updated counts
+      await loadArtist();
+      renderBlockedPage();
+    } else {
+      showError(errData?.error || 'Erro ao enviar pedido');
+    }
   }
 }
 

@@ -390,8 +390,21 @@ app.get('/api/artists/:slug', async (c) => {
   if (!artist) {
     return c.json({ error: 'Artista não encontrado' }, 404)
   }
-  
-  return c.json(artist)
+
+  // Count today's requests (pending + accepted + played — everything except rejected)
+  const todayCount = await c.env.DB.prepare(`
+    SELECT COUNT(*) as count FROM song_requests
+    WHERE artist_id = ?
+      AND status != 'rejected'
+      AND date(created_at) = date('now')
+  `).bind(artist.id).first() as any
+
+  return c.json({
+    ...artist,
+    today_requests_count: todayCount?.count ?? 0,
+    max_requests: (artist as any).max_requests ?? 0,
+    requests_open: (artist as any).requests_open ?? 1,
+  })
 })
 
 // Update artist profile
@@ -692,17 +705,70 @@ app.get('/api/artists/:slug/requests', async (c) => {
   return c.json(results)
 })
 
+// Update show settings (max requests and open/close requests)
+app.put('/api/artists/:slug/show-settings', async (c) => {
+  const session = await checkAuth(c)
+  if (!session) return c.json({ error: 'Não autenticado' }, 401)
+
+  const slug = c.req.param('slug')
+  const { max_requests, requests_open } = await c.req.json()
+
+  // Verify ownership
+  const artist = await c.env.DB.prepare(`
+    SELECT id FROM artists WHERE slug = ? AND user_id = ?
+  `).bind(slug, session.user_id).first()
+
+  if (!artist) return c.json({ error: 'Artista não encontrado ou sem permissão' }, 404)
+
+  await c.env.DB.prepare(`
+    UPDATE artists SET
+      max_requests = ?,
+      requests_open = ?,
+      updated_at = CURRENT_TIMESTAMP
+    WHERE id = ?
+  `).bind(
+    max_requests !== undefined ? Math.max(0, parseInt(max_requests) || 0) : 0,
+    requests_open !== undefined ? (requests_open ? 1 : 0) : 1,
+    artist.id
+  ).run()
+
+  return c.json({ success: true, max_requests, requests_open })
+})
+
 // Create a song request
 app.post('/api/artists/:slug/requests', async (c) => {
   const slug = c.req.param('slug')
   const { song_id, requester_name, requester_message, tip_amount, tip_message } = await c.req.json()
   
   const artist = await c.env.DB.prepare(`
-    SELECT id FROM artists WHERE slug = ? AND active = 1
-  `).bind(slug).first()
+    SELECT id, max_requests, requests_open FROM artists WHERE slug = ? AND active = 1
+  `).bind(slug).first() as any
   
   if (!artist) {
     return c.json({ error: 'Artista não encontrado' }, 404)
+  }
+
+  // Check if requests are open
+  if (artist.requests_open === 0) {
+    return c.json({ error: 'O artista não está aceitando pedidos no momento', closed: true }, 403)
+  }
+
+  // Check daily request limit
+  if (artist.max_requests && artist.max_requests > 0) {
+    const todayCount = await c.env.DB.prepare(`
+      SELECT COUNT(*) as count FROM song_requests
+      WHERE artist_id = ?
+        AND status != 'rejected'
+        AND date(created_at) = date('now')
+    `).bind(artist.id).first() as any
+
+    if ((todayCount?.count ?? 0) >= artist.max_requests) {
+      return c.json({ 
+        error: 'O artista atingiu o limite de pedidos para hoje', 
+        limit_reached: true,
+        max_requests: artist.max_requests 
+      }, 403)
+    }
   }
   
   const song = await c.env.DB.prepare(`
