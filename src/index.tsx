@@ -3081,7 +3081,7 @@ app.get('/:slug', (c) => {
           const ARTIST_SLUG = '${slug}';
         </script>
         <script src="/static/pix-generator.js?v=2"></script>
-        <script src="/static/audience.js?v=8"></script>
+        <script src="/static/audience.js?v=9"></script>
         <script>init()</script>
         
         <!-- PWA Service Worker -->
