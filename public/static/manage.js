@@ -204,9 +204,18 @@ function renderTabContent() {
     content.innerHTML = renderRepertoireTab();
   } else if (currentTab === 'bank') {
     content.innerHTML = renderBankTab();
-    // Aplica máscara de CPF se houver valor salvo
+    // Após renderizar, sincroniza o campo pixKey com accountHolderDocument
     const pixKeyInput = document.getElementById('pixKey');
-    if (pixKeyInput && pixKeyInput.value) {
+    const docInput = document.getElementById('accountHolderDocument');
+    if (pixKeyInput && docInput) {
+      // Se pixKey estiver vazio mas houver CPF no titular, copia para pixKey
+      if (!pixKeyInput.value && docInput.value) {
+        pixKeyInput.value = docInput.value;
+      }
+      // Aplica máscara
+      if (pixKeyInput.value) formatCPF(pixKeyInput);
+      if (docInput.value) formatCPF(docInput);
+    } else if (pixKeyInput && pixKeyInput.value) {
       formatCPF(pixKeyInput);
     }
   } else if (currentTab === 'qrcode') {
@@ -692,15 +701,16 @@ function renderBankTab() {
             <input 
               type="text" 
               id="pixKey" 
-              value="${bankAccount?.pix_key || ''}"
+              value="${bankAccount?.pix_key || bankAccount?.account_holder_document || ''}"
               class="w-full px-4 py-2 rounded-lg bg-gray-700 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-purple-500"
               placeholder="000.000.000-00"
               maxlength="14"
               oninput="formatCPF(this)"
+              readonly
             >
             <p class="text-xs text-gray-400 mt-1">
               <i class="fas fa-info-circle mr-1"></i>
-              Digite os 11 dígitos do CPF (formatação automática)
+              Preenchido automaticamente com o CPF do titular acima
             </p>
           </div>
         </div>
@@ -772,9 +782,15 @@ function renderBankTab() {
             id="accountHolderDocument" 
             required
             value="${bankAccount?.account_holder_document || ''}"
+            oninput="syncPixKeyWithDocument(this)"
             class="w-full px-4 py-2 rounded-lg bg-gray-700 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-purple-500"
             placeholder="000.000.000-00"
+            maxlength="14"
           >
+          <p class="text-xs text-gray-400 mt-1">
+            <i class="fas fa-info-circle mr-1"></i>
+            Digite os 11 dígitos do CPF — será usado como chave PIX automaticamente
+          </p>
         </div>
         
         <button 
@@ -870,34 +886,24 @@ async function handleSaveBankAccount(event) {
   };
   
   if (accountType === 'pix') {
-    const pixKey = document.getElementById('pixKey').value.trim();
-    
-    console.log('🔍 Validando PIX:', {
-      original: pixKey,
-      length: pixKey.length
-    });
+    // pixKey é readonly e espelha accountHolderDocument; usa o documento como fonte primária
+    const docValue = document.getElementById('accountHolderDocument').value.trim();
+    const pixKeyEl = document.getElementById('pixKey');
+    const pixKeyValue = (pixKeyEl ? pixKeyEl.value.trim() : '') || docValue;
     
     // Validar CPF (somente números, 11 dígitos)
-    const cpfClean = pixKey.replace(/\D/g, '');
-    
-    console.log('🔍 CPF limpo:', {
-      cleaned: cpfClean,
-      length: cpfClean.length
-    });
+    const cpfClean = pixKeyValue.replace(/\D/g, '');
     
     if (cpfClean.length !== 11) {
       showError(`CPF deve ter exatamente 11 dígitos (você digitou ${cpfClean.length})`);
-      console.error('❌ CPF inválido - tamanho:', cpfClean.length);
       return;
     }
     
     if (!/^\d+$/.test(cpfClean)) {
       showError('CPF deve conter apenas números');
-      console.error('❌ CPF inválido - contém caracteres não numéricos');
       return;
     }
     
-    console.log('✅ CPF válido:', cpfClean);
     data.pix_key = cpfClean;
     data.pix_key_type = 'cpf';  // Fixo como CPF
   } else {
@@ -1149,6 +1155,21 @@ function formatCPF(input) {
   }
   
   input.value = value;
+}
+
+// Sincroniza o campo CPF/CNPJ do titular com a chave PIX (quando tipo é PIX)
+function syncPixKeyWithDocument(input) {
+  // Aplica máscara ao campo de documento
+  formatCPF(input);
+  
+  // Se o tipo de conta for PIX, sincroniza com o campo pixKey
+  const accountType = document.getElementById('accountType');
+  if (accountType && accountType.value === 'pix') {
+    const pixKeyInput = document.getElementById('pixKey');
+    if (pixKeyInput) {
+      pixKeyInput.value = input.value;
+    }
+  }
 }
 
 // Load QR Code when tab is opened
