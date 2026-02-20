@@ -484,14 +484,4 @@ async function toggleRequestsOpenDashboard() {
   }
 }
 
-// Show success message
-function showSuccess(message) {
-  const toast = document.createElement('div');
-  toast.className = 'fixed top-4 right-4 bg-green-600 text-white px-6 py-4 rounded-lg shadow-lg z-50';
-  toast.innerHTML = `<i class="fas fa-check-circle mr-2"></i>${message}`;
-  document.body.appendChild(toast);
-  setTimeout(() => toast.remove(), 3000);
-}
-
-// Initialize on page load
-init();
+// Note: init() is called from the HTML page via <script>init()</script>
