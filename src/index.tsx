@@ -720,6 +720,14 @@ app.put('/api/artists/:slug/show-settings', async (c) => {
 
   if (!artist) return c.json({ error: 'Artista não encontrado ou sem permissão' }, 404)
 
+  // Ensure columns exist (self-healing migration for production databases)
+  try {
+    await c.env.DB.prepare(`ALTER TABLE artists ADD COLUMN max_requests INTEGER DEFAULT 0`).run()
+  } catch (_) { /* column already exists */ }
+  try {
+    await c.env.DB.prepare(`ALTER TABLE artists ADD COLUMN requests_open INTEGER DEFAULT 1`).run()
+  } catch (_) { /* column already exists */ }
+
   await c.env.DB.prepare(`
     UPDATE artists SET
       max_requests = ?,
