@@ -6,6 +6,7 @@ let stats = {};
 let pendingLicenses = [];
 let systemConfig = {};
 let artistsList = [];
+let notifications = [];
 
 // Configure axios with credentials + localStorage session fallback (interceptor reads fresh on every request)
 axios.defaults.withCredentials = true;
@@ -99,15 +100,25 @@ async function loadSystemConfig() {
   }
 }
 
+async function loadNotifications() {
+  try {
+    const response = await axios.get('/api/admin/notifications');
+    notifications = response.data;
+  } catch (error) {
+    notifications = [];
+  }
+}
+
 // Render navigation
 function renderNavigation() {
   const nav = document.getElementById('admin-nav');
   const navItems = [
-    { id: 'dashboard',  icon: 'fas fa-chart-line', label: 'Dashboard' },
-    { id: 'licenses',   icon: 'fas fa-id-card',    label: 'Licenças', badge: pendingLicenses.length },
-    { id: 'users',      icon: 'fas fa-users',       label: 'Usuários' },
-    { id: 'artists',    icon: 'fas fa-guitar',      label: 'Artistas', badge: stats.total_artists || null },
-    { id: 'settings',   icon: 'fas fa-cog',         label: 'Configurações' }
+    { id: 'dashboard',      icon: 'fas fa-chart-line',  label: 'Dashboard' },
+    { id: 'licenses',       icon: 'fas fa-id-card',     label: 'Licenças', badge: pendingLicenses.length },
+    { id: 'users',          icon: 'fas fa-users',        label: 'Usuários' },
+    { id: 'artists',        icon: 'fas fa-guitar',       label: 'Artistas', badge: stats.total_artists || null },
+    { id: 'notifications',  icon: 'fas fa-bell',         label: 'Notificações' },
+    { id: 'settings',       icon: 'fas fa-cog',          label: 'Configurações' }
   ];
 
   nav.innerHTML = navItems.map(item => {
@@ -128,11 +139,12 @@ async function navigateTo(page) {
   currentPage = page;
   renderNavigation();
   try {
-    if (page === 'users')      await loadUsers();
-    else if (page === 'dashboard') await loadStats();
-    else if (page === 'licenses')  await loadPendingLicenses();
-    else if (page === 'settings')  await loadSystemConfig();
-    else if (page === 'artists')   await loadArtistsList();
+    if (page === 'users')           await loadUsers();
+    else if (page === 'dashboard')  await loadStats();
+    else if (page === 'licenses')   await loadPendingLicenses();
+    else if (page === 'settings')   await loadSystemConfig();
+    else if (page === 'artists')    await loadArtistsList();
+    else if (page === 'notifications') await loadNotifications();
   } catch(e) {}
   renderPage();
 }
@@ -140,11 +152,12 @@ async function navigateTo(page) {
 // Render main content
 function renderPage() {
   const content = document.getElementById('admin-content');
-  if      (currentPage === 'dashboard') content.innerHTML = renderDashboard();
-  else if (currentPage === 'licenses')  content.innerHTML = renderLicenses();
-  else if (currentPage === 'users')     content.innerHTML = renderUsers();
-  else if (currentPage === 'artists')   content.innerHTML = renderArtists();
-  else if (currentPage === 'settings')  content.innerHTML = renderSettings();
+  if      (currentPage === 'dashboard')     content.innerHTML = renderDashboard();
+  else if (currentPage === 'licenses')      content.innerHTML = renderLicenses();
+  else if (currentPage === 'users')         content.innerHTML = renderUsers();
+  else if (currentPage === 'artists')       content.innerHTML = renderArtists();
+  else if (currentPage === 'notifications') content.innerHTML = renderNotifications();
+  else if (currentPage === 'settings')      content.innerHTML = renderSettings();
 }
 
 // =====================
@@ -347,7 +360,17 @@ function renderUsers() {
                     </span>
                   </td>
                   <td class="px-6 py-4">
-                    <div class="flex items-center justify-center gap-2">
+                    <div class="flex items-center justify-center gap-2 flex-wrap">
+                      ${user.artist_slug ? `
+                        <a href="/${user.artist_slug}" target="_blank"
+                          class="bg-purple-600 hover:bg-purple-700 px-3 py-1 rounded text-sm transition inline-flex items-center gap-1" title="Ver perfil como cliente">
+                          <i class="fas fa-eye"></i>
+                        </a>
+                      ` : ''}
+                      <button onclick="showSendNotificationModal(${user.id}, '${user.full_name.replace(/'/g,"\\'")}')"
+                        class="bg-blue-600 hover:bg-blue-700 px-3 py-1 rounded text-sm transition" title="Enviar notificação">
+                        <i class="fas fa-bell"></i>
+                      </button>
                       <button onclick="showChangePasswordModal(${user.id}, '${user.full_name.replace(/'/g,"\\'")}')"
                         class="bg-yellow-600 hover:bg-yellow-700 px-3 py-1 rounded text-sm transition" title="Alterar Senha">
                         <i class="fas fa-key"></i>
@@ -459,6 +482,226 @@ function renderArtists() {
       </div>
     </div>
   `;
+}
+
+// =====================
+// NOTIFICAÇÕES
+// =====================
+function renderNotifications() {
+  const typeLabels = { info: '💬 Info', warning: '⚠️ Aviso', success: '✅ Sucesso', error: '🔴 Urgente' };
+  const typeBadge  = { info: 'bg-blue-600/20 text-blue-300 border-blue-600', warning: 'bg-yellow-600/20 text-yellow-300 border-yellow-600', success: 'bg-green-600/20 text-green-300 border-green-600', error: 'bg-red-600/20 text-red-300 border-red-600' };
+  return `
+    <div>
+      <div class="flex items-center justify-between mb-8 flex-wrap gap-4">
+        <h2 class="text-3xl font-bold"><i class="fas fa-bell mr-3"></i>Notificações</h2>
+        <div class="flex gap-3 flex-wrap">
+          <button onclick="showSendNotificationModal(null, null)"
+            class="bg-purple-600 hover:bg-purple-700 px-5 py-2 rounded-lg transition font-semibold flex items-center gap-2">
+            <i class="fas fa-broadcast-tower"></i> Enviar para Todos
+          </button>
+          <button onclick="deleteAllNotifications()"
+            class="bg-red-700 hover:bg-red-800 px-4 py-2 rounded-lg transition font-semibold flex items-center gap-2">
+            <i class="fas fa-trash"></i> Limpar Tudo
+          </button>
+        </div>
+      </div>
+
+      <!-- Stats row -->
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+        <div class="bg-gray-800 rounded-xl p-4 border border-gray-700 text-center">
+          <p class="text-3xl font-black text-purple-400">${notifications.length}</p>
+          <p class="text-gray-400 text-sm mt-1">Total Enviadas</p>
+        </div>
+        <div class="bg-gray-800 rounded-xl p-4 border border-gray-700 text-center">
+          <p class="text-3xl font-black text-yellow-400">${notifications.filter(n => !n.read_at).length}</p>
+          <p class="text-gray-400 text-sm mt-1">Não Lidas</p>
+        </div>
+        <div class="bg-gray-800 rounded-xl p-4 border border-gray-700 text-center">
+          <p class="text-3xl font-black text-green-400">${notifications.filter(n => n.read_at).length}</p>
+          <p class="text-gray-400 text-sm mt-1">Lidas</p>
+        </div>
+        <div class="bg-gray-800 rounded-xl p-4 border border-gray-700 text-center">
+          <p class="text-3xl font-black text-blue-400">${notifications.filter(n => !n.user_id).length}</p>
+          <p class="text-gray-400 text-sm mt-1">Broadcasts</p>
+        </div>
+      </div>
+
+      <!-- Notifications table -->
+      <div class="bg-gray-800 rounded-xl border border-gray-700 overflow-hidden">
+        ${notifications.length === 0 ? `
+          <div class="text-center py-16 text-gray-400">
+            <i class="fas fa-bell-slash text-5xl mb-4 block opacity-30"></i>
+            <p class="text-lg">Nenhuma notificação enviada ainda.</p>
+            <button onclick="showSendNotificationModal(null,null)" class="mt-4 bg-purple-600 hover:bg-purple-700 px-6 py-2 rounded-lg transition font-semibold">
+              <i class="fas fa-paper-plane mr-2"></i>Enviar primeira notificação
+            </button>
+          </div>
+        ` : `
+          <div class="overflow-x-auto">
+            <table class="w-full">
+              <thead class="bg-gray-900">
+                <tr>
+                  <th class="px-5 py-4 text-left text-sm font-semibold">Destinatário</th>
+                  <th class="px-5 py-4 text-left text-sm font-semibold">Título</th>
+                  <th class="px-5 py-4 text-left text-sm font-semibold">Mensagem</th>
+                  <th class="px-5 py-4 text-left text-sm font-semibold">Tipo</th>
+                  <th class="px-5 py-4 text-left text-sm font-semibold">Status</th>
+                  <th class="px-5 py-4 text-left text-sm font-semibold">Data</th>
+                  <th class="px-5 py-4 text-center text-sm font-semibold">Ação</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-gray-700">
+                ${notifications.map(n => `
+                  <tr class="hover:bg-gray-700/50 transition">
+                    <td class="px-5 py-3 text-sm">
+                      ${n.user_id
+                        ? `<span class="flex items-center gap-1"><i class="fas fa-user text-purple-400"></i> ${n.user_name || '#'+n.user_id}<br><span class="text-xs text-gray-400">${n.user_email || ''}</span></span>`
+                        : `<span class="flex items-center gap-1 text-yellow-300"><i class="fas fa-broadcast-tower"></i> Todos</span>`}
+                    </td>
+                    <td class="px-5 py-3 font-semibold text-sm max-w-[150px] truncate">${n.title}</td>
+                    <td class="px-5 py-3 text-sm text-gray-300 max-w-[200px] truncate" title="${n.message.replace(/"/g,'&quot;')}">${n.message}</td>
+                    <td class="px-5 py-3">
+                      <span class="px-2 py-1 rounded text-xs font-semibold border ${typeBadge[n.type] || typeBadge.info}">
+                        ${typeLabels[n.type] || n.type}
+                      </span>
+                    </td>
+                    <td class="px-5 py-3">
+                      ${n.read_at
+                        ? `<span class="text-green-400 text-xs"><i class="fas fa-check-double mr-1"></i>Lida</span>`
+                        : `<span class="text-yellow-400 text-xs"><i class="fas fa-clock mr-1"></i>Não lida</span>`}
+                    </td>
+                    <td class="px-5 py-3 text-xs text-gray-400">${new Date(n.created_at).toLocaleString('pt-BR')}</td>
+                    <td class="px-5 py-3 text-center">
+                      <button onclick="deleteNotification(${n.id})"
+                        class="bg-red-700 hover:bg-red-800 px-3 py-1 rounded text-sm transition" title="Excluir">
+                        <i class="fas fa-trash"></i>
+                      </button>
+                    </td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          </div>
+        `}
+      </div>
+    </div>
+  `;
+}
+
+function showSendNotificationModal(userId, userName) {
+  const isAll = !userId;
+  const modal = document.createElement('div');
+  modal.id = 'notificationModal';
+  modal.className = 'fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4';
+  modal.innerHTML = `
+    <div class="bg-gray-900 rounded-2xl p-8 max-w-lg w-full border border-gray-700 max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between mb-6">
+        <h3 class="text-2xl font-bold">
+          <i class="fas fa-bell mr-2 text-purple-400"></i>
+          ${isAll ? 'Enviar para Todos os Usuários' : `Notificar ${userName}`}
+        </h3>
+        <button onclick="closeModal('notificationModal')" class="text-gray-400 hover:text-white text-xl"><i class="fas fa-times"></i></button>
+      </div>
+      ${isAll ? `
+        <div class="bg-yellow-900/40 border border-yellow-600/50 rounded-xl p-4 mb-5 text-sm text-yellow-200">
+          <i class="fas fa-broadcast-tower mr-2"></i>
+          Esta notificação será enviada para <strong>todos os artistas cadastrados</strong>.
+        </div>
+      ` : ''}
+      <form onsubmit="sendNotification(event, ${userId || 'null'})" class="space-y-4">
+        <div>
+          <label class="block text-sm font-semibold mb-2">Tipo</label>
+          <select id="notifType" class="w-full bg-gray-800 border border-gray-600 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-purple-500">
+            <option value="info">💬 Informação</option>
+            <option value="success">✅ Sucesso / Novidade</option>
+            <option value="warning">⚠️ Aviso</option>
+            <option value="error">🔴 Urgente</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-semibold mb-2">Título <span class="text-red-400">*</span></label>
+          <input type="text" id="notifTitle" required maxlength="80"
+            class="w-full bg-gray-800 border border-gray-600 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-purple-500"
+            placeholder="Ex: Nova funcionalidade disponível">
+        </div>
+        <div>
+          <label class="block text-sm font-semibold mb-2">Mensagem <span class="text-red-400">*</span></label>
+          <textarea id="notifMessage" required rows="4" maxlength="500"
+            class="w-full bg-gray-800 border border-gray-600 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-purple-500 resize-none"
+            placeholder="Escreva a mensagem completa aqui..."></textarea>
+          <p class="text-xs text-gray-500 mt-1">Máximo 500 caracteres</p>
+        </div>
+        <div>
+          <label class="block text-sm font-semibold mb-2">Link (opcional)</label>
+          <input type="text" id="notifLink"
+            class="w-full bg-gray-800 border border-gray-600 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-purple-500"
+            placeholder="Ex: /manage#show ou https://...">
+        </div>
+        <div class="flex gap-4 mt-6">
+          <button type="button" onclick="closeModal('notificationModal')"
+            class="flex-1 bg-gray-700 hover:bg-gray-600 px-6 py-3 rounded-lg transition">Cancelar</button>
+          <button type="submit" id="notifSubmitBtn"
+            class="flex-1 bg-purple-600 hover:bg-purple-700 px-6 py-3 rounded-lg transition font-semibold">
+            <i class="fas fa-paper-plane mr-2"></i>${isAll ? 'Enviar para Todos' : 'Enviar Notificação'}
+          </button>
+        </div>
+      </form>
+    </div>
+  `;
+  document.body.appendChild(modal);
+}
+
+async function sendNotification(event, userId) {
+  event.preventDefault();
+  const btn = document.getElementById('notifSubmitBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Enviando...';
+  try {
+    const payload = {
+      title:   document.getElementById('notifTitle').value.trim(),
+      message: document.getElementById('notifMessage').value.trim(),
+      type:    document.getElementById('notifType').value,
+      link:    document.getElementById('notifLink').value.trim() || null,
+    };
+    if (userId) payload.user_id = userId;
+    const res = await axios.post('/api/admin/notifications', payload);
+    closeModal('notificationModal');
+    if (res.data.sent_to === 'all') {
+      showSuccess(`✅ Notificação enviada para ${res.data.count} usuários!`);
+    } else {
+      showSuccess('✅ Notificação enviada com sucesso!');
+    }
+    await loadNotifications();
+    renderPage();
+  } catch (error) {
+    showError(error.response?.data?.error || 'Erro ao enviar notificação');
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fas fa-paper-plane mr-2"></i>Enviar';
+  }
+}
+
+async function deleteNotification(id) {
+  if (!confirm('Excluir esta notificação?')) return;
+  try {
+    await axios.delete(`/api/admin/notifications/${id}`);
+    showSuccess('Notificação excluída.');
+    await loadNotifications();
+    renderPage();
+  } catch(e) {
+    showError('Erro ao excluir notificação');
+  }
+}
+
+async function deleteAllNotifications() {
+  if (!confirm('Limpar TODAS as notificações? Esta ação não pode ser desfeita.')) return;
+  try {
+    await axios.delete('/api/admin/notifications');
+    showSuccess('Todas as notificações foram removidas.');
+    await loadNotifications();
+    renderPage();
+  } catch(e) {
+    showError('Erro ao limpar notificações');
+  }
 }
 
 // =====================

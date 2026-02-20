@@ -4,6 +4,7 @@ let artist = null;
 let requests = [];
 let tips = [];
 let autoRefresh = true;
+let userNotifications = [];
 
 // Send session_id cookie + header on every request (same setup as manage.js)
 axios.defaults.withCredentials = true;
@@ -12,6 +13,107 @@ axios.interceptors.request.use(function(config) {
   if (sid) config.headers['X-Session-ID'] = sid;
   return config;
 });
+
+// ========================
+// NOTIFICATIONS SYSTEM
+// ========================
+async function loadUserNotifications() {
+  try {
+    const res = await axios.get('/api/notifications');
+    userNotifications = res.data;
+    updateNotifBadge();
+  } catch(e) { /* ignore */ }
+}
+
+function updateNotifBadge() {
+  const badge = document.getElementById('notifBadge');
+  if (!badge) return;
+  const unread = userNotifications.filter(n => !n.read_at).length;
+  if (unread > 0) {
+    badge.textContent = unread > 9 ? '9+' : unread;
+    badge.classList.remove('hidden');
+  } else {
+    badge.classList.add('hidden');
+  }
+}
+
+function showNotificationsPanel() {
+  const existing = document.getElementById('notifPanel');
+  if (existing) { existing.remove(); return; }
+
+  const typeIcon = { info: 'fas fa-info-circle text-blue-400', warning: 'fas fa-exclamation-triangle text-yellow-400', success: 'fas fa-check-circle text-green-400', error: 'fas fa-times-circle text-red-400' };
+  const typeBg   = { info: 'border-blue-600/40', warning: 'border-yellow-600/40', success: 'border-green-600/40', error: 'border-red-600/40' };
+
+  const panel = document.createElement('div');
+  panel.id = 'notifPanel';
+  panel.className = 'fixed top-16 right-4 w-80 max-w-[95vw] bg-gray-800 border border-gray-700 rounded-2xl shadow-2xl z-50 overflow-hidden max-h-[70vh] flex flex-col';
+  panel.innerHTML = `
+    <div class="flex items-center justify-between px-5 py-4 border-b border-gray-700 flex-shrink-0">
+      <h3 class="font-bold text-lg"><i class="fas fa-bell mr-2 text-purple-400"></i>Notificações</h3>
+      <div class="flex gap-2">
+        ${userNotifications.some(n => !n.read_at) ? `
+          <button onclick="markAllNotifRead()" class="text-xs text-gray-400 hover:text-white bg-gray-700 hover:bg-gray-600 px-2 py-1 rounded transition">Marcar lidas</button>
+        ` : ''}
+        <button onclick="document.getElementById('notifPanel').remove()" class="text-gray-400 hover:text-white"><i class="fas fa-times"></i></button>
+      </div>
+    </div>
+    <div class="overflow-y-auto flex-1">
+      ${userNotifications.length === 0 ? `
+        <div class="text-center py-12 text-gray-400 px-4">
+          <i class="fas fa-bell-slash text-4xl mb-3 block opacity-30"></i>
+          <p>Nenhuma notificação</p>
+        </div>
+      ` : userNotifications.map(n => `
+        <div class="px-5 py-4 border-b border-gray-700/50 border-l-4 ${typeBg[n.type] || typeBg.info} ${n.read_at ? 'opacity-60' : 'bg-gray-700/30'} cursor-pointer hover:bg-gray-700/50 transition"
+          onclick="markNotifRead(${n.id}, this)">
+          <div class="flex items-start gap-3">
+            <i class="${typeIcon[n.type] || typeIcon.info} mt-0.5 flex-shrink-0"></i>
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center justify-between gap-2">
+                <p class="font-semibold text-sm truncate">${n.title}</p>
+                ${!n.read_at ? '<span class="w-2 h-2 rounded-full bg-blue-400 flex-shrink-0"></span>' : ''}
+              </div>
+              <p class="text-gray-300 text-xs mt-1 leading-relaxed">${n.message}</p>
+              ${n.link ? `<a href="${n.link}" class="text-purple-400 hover:text-purple-300 text-xs mt-1 inline-flex items-center gap-1"><i class="fas fa-arrow-right"></i> Ver detalhes</a>` : ''}
+              <p class="text-gray-500 text-xs mt-1">${new Date(n.created_at).toLocaleString('pt-BR')}</p>
+            </div>
+          </div>
+        </div>
+      `).join('')}
+    </div>
+  `;
+  document.body.appendChild(panel);
+
+  // Close when clicking outside
+  setTimeout(() => {
+    document.addEventListener('click', function closePanel(e) {
+      if (!panel.contains(e.target) && !document.getElementById('notifBell')?.contains(e.target)) {
+        panel.remove();
+        document.removeEventListener('click', closePanel);
+      }
+    });
+  }, 100);
+}
+
+async function markNotifRead(id, el) {
+  try {
+    await axios.put(`/api/notifications/${id}/read`);
+    const n = userNotifications.find(n => n.id === id);
+    if (n) n.read_at = new Date().toISOString();
+    updateNotifBadge();
+    if (el) el.classList.add('opacity-60');
+  } catch(e) {}
+}
+
+async function markAllNotifRead() {
+  try {
+    await axios.put('/api/notifications/read-all');
+    userNotifications.forEach(n => n.read_at = new Date().toISOString());
+    updateNotifBadge();
+    const panel = document.getElementById('notifPanel');
+    if (panel) { panel.remove(); showNotificationsPanel(); }
+  } catch(e) {}
+}
 
 // Initialize
 async function init() {
@@ -22,6 +124,8 @@ async function init() {
     renderPage();
     // Update dynamic elements that depend on the rendered DOM
     updateRequestsStatusBadge();
+    // Load notifications after page render so badge DOM exists
+    loadUserNotifications();
     
     // Auto-refresh every 5 seconds
     setInterval(() => {
@@ -31,6 +135,8 @@ async function init() {
         loadTips();
       }
     }, 5000);
+    // Refresh notifications every 30 seconds
+    setInterval(loadUserNotifications, 30000);
   } catch (error) {
     showError('Erro ao carregar dados');
   }
@@ -79,6 +185,11 @@ function renderPage() {
                 <input type="checkbox" id="autoRefreshToggle" ${autoRefresh ? 'checked' : ''} onchange="toggleAutoRefresh()" class="mr-2">
                 <span class="text-sm">Auto-atualizar</span>
               </label>
+              <button onclick="showNotificationsPanel()" id="notifBell"
+                class="relative bg-gray-700 hover:bg-gray-600 p-2 rounded-lg transition" title="Notificações">
+                <i class="fas fa-bell text-lg"></i>
+                <span id="notifBadge" class="hidden absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold"></span>
+              </button>
               <button onclick="window.open('/${ARTIST_SLUG}', '_blank')" class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg text-sm font-semibold transition">
                 <i class="fas fa-external-link-alt mr-2"></i>
                 Ver Página Pública
