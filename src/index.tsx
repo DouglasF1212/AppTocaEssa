@@ -1922,15 +1922,9 @@ app.get('/', (c) => {
         </div>
     <script>
       if ('serviceWorker' in navigator) {
-        // Limpa caches antigos e registra SW novo
-        caches.keys().then(keys => keys.forEach(k => caches.delete(k)));
-        navigator.serviceWorker.getRegistrations().then(regs => {
-          regs.forEach(r => r.unregister());
-        }).then(() => {
-          navigator.serviceWorker.register('/sw.js?v=8')
-            .then(reg => console.log('✅ SW registrado:', reg.scope))
-            .catch(err => console.log('SW erro:', err));
-        });
+        navigator.serviceWorker.register('/sw.js?v=8')
+          .then(reg => console.log('✅ SW registrado:', reg.scope))
+          .catch(err => console.log('SW erro:', err));
       }
     </script>
     </body>
@@ -2242,15 +2236,9 @@ app.get('/login', (c) => {
         <script>renderLoginPage()</script>
     <script>
       if ('serviceWorker' in navigator) {
-        // Limpa caches antigos e registra SW novo
-        caches.keys().then(keys => keys.forEach(k => caches.delete(k)));
-        navigator.serviceWorker.getRegistrations().then(regs => {
-          regs.forEach(r => r.unregister());
-        }).then(() => {
-          navigator.serviceWorker.register('/sw.js?v=8')
-            .then(reg => console.log('✅ SW registrado:', reg.scope))
-            .catch(err => console.log('SW erro:', err));
-        });
+        navigator.serviceWorker.register('/sw.js?v=8')
+          .then(reg => console.log('✅ SW registrado:', reg.scope))
+          .catch(err => console.log('SW erro:', err));
       }
     </script>
     </body>
@@ -2310,15 +2298,9 @@ app.get('/register', (c) => {
         <script>renderRegisterPage()</script>
     <script>
       if ('serviceWorker' in navigator) {
-        // Limpa caches antigos e registra SW novo
-        caches.keys().then(keys => keys.forEach(k => caches.delete(k)));
-        navigator.serviceWorker.getRegistrations().then(regs => {
-          regs.forEach(r => r.unregister());
-        }).then(() => {
-          navigator.serviceWorker.register('/sw.js?v=8')
-            .then(reg => console.log('✅ SW registrado:', reg.scope))
-            .catch(err => console.log('SW erro:', err));
-        });
+        navigator.serviceWorker.register('/sw.js?v=8')
+          .then(reg => console.log('✅ SW registrado:', reg.scope))
+          .catch(err => console.log('SW erro:', err));
       }
     </script>
     </body>
@@ -2378,15 +2360,9 @@ app.get('/license-payment', (c) => {
         <script>init()</script>
     <script>
       if ('serviceWorker' in navigator) {
-        // Limpa caches antigos e registra SW novo
-        caches.keys().then(keys => keys.forEach(k => caches.delete(k)));
-        navigator.serviceWorker.getRegistrations().then(regs => {
-          regs.forEach(r => r.unregister());
-        }).then(() => {
-          navigator.serviceWorker.register('/sw.js?v=8')
-            .then(reg => console.log('✅ SW registrado:', reg.scope))
-            .catch(err => console.log('SW erro:', err));
-        });
+        navigator.serviceWorker.register('/sw.js?v=8')
+          .then(reg => console.log('✅ SW registrado:', reg.scope))
+          .catch(err => console.log('SW erro:', err));
       }
     </script>
     </body>
@@ -2514,15 +2490,9 @@ app.get('/admin/login', (c) => {
         </script>
     <script>
       if ('serviceWorker' in navigator) {
-        // Limpa caches antigos e registra SW novo
-        caches.keys().then(keys => keys.forEach(k => caches.delete(k)));
-        navigator.serviceWorker.getRegistrations().then(regs => {
-          regs.forEach(r => r.unregister());
-        }).then(() => {
-          navigator.serviceWorker.register('/sw.js?v=8')
-            .then(reg => console.log('✅ SW registrado:', reg.scope))
-            .catch(err => console.log('SW erro:', err));
-        });
+        navigator.serviceWorker.register('/sw.js?v=8')
+          .then(reg => console.log('✅ SW registrado:', reg.scope))
+          .catch(err => console.log('SW erro:', err));
       }
     </script>
     </body>
@@ -2659,14 +2629,9 @@ app.get('/admin/panel', (c) => {
         <script src="/static/admin-panel.js?v=6"></script>
     <script>
       if ('serviceWorker' in navigator) {
-        caches.keys().then(keys => keys.forEach(k => caches.delete(k)));
-        navigator.serviceWorker.getRegistrations().then(regs => {
-          regs.forEach(r => r.unregister());
-        }).then(() => {
-          navigator.serviceWorker.register('/sw.js?v=8')
-            .then(reg => console.log('✅ SW registrado:', reg.scope))
-            .catch(err => console.log('SW erro:', err));
-        });
+        navigator.serviceWorker.register('/sw.js?v=8')
+          .then(reg => console.log('✅ SW registrado:', reg.scope))
+          .catch(err => console.log('SW erro:', err));
       }
     </script>
     </body>
@@ -2846,15 +2811,9 @@ app.get('/manage', (c) => {
         <script>init()</script>
     <script>
       if ('serviceWorker' in navigator) {
-        // Limpa caches antigos e registra SW novo
-        caches.keys().then(keys => keys.forEach(k => caches.delete(k)));
-        navigator.serviceWorker.getRegistrations().then(regs => {
-          regs.forEach(r => r.unregister());
-        }).then(() => {
-          navigator.serviceWorker.register('/sw.js?v=8')
-            .then(reg => console.log('✅ SW registrado:', reg.scope))
-            .catch(err => console.log('SW erro:', err));
-        });
+        navigator.serviceWorker.register('/sw.js?v=8')
+          .then(reg => console.log('✅ SW registrado:', reg.scope))
+          .catch(err => console.log('SW erro:', err));
       }
     </script>
     </body>
@@ -2941,15 +2900,9 @@ app.get('/payment/:slug/:tipId', async (c) => {
         <script>init()</script>
     <script>
       if ('serviceWorker' in navigator) {
-        // Limpa caches antigos e registra SW novo
-        caches.keys().then(keys => keys.forEach(k => caches.delete(k)));
-        navigator.serviceWorker.getRegistrations().then(regs => {
-          regs.forEach(r => r.unregister());
-        }).then(() => {
-          navigator.serviceWorker.register('/sw.js?v=8')
-            .then(reg => console.log('✅ SW registrado:', reg.scope))
-            .catch(err => console.log('SW erro:', err));
-        });
+        navigator.serviceWorker.register('/sw.js?v=8')
+          .then(reg => console.log('✅ SW registrado:', reg.scope))
+          .catch(err => console.log('SW erro:', err));
       }
     </script>
     </body>
@@ -3020,15 +2973,9 @@ app.get('/dashboard/:slug', (c) => {
         <script>init()</script>
     <script>
       if ('serviceWorker' in navigator) {
-        // Limpa caches antigos e registra SW novo
-        caches.keys().then(keys => keys.forEach(k => caches.delete(k)));
-        navigator.serviceWorker.getRegistrations().then(regs => {
-          regs.forEach(r => r.unregister());
-        }).then(() => {
-          navigator.serviceWorker.register('/sw.js?v=8')
-            .then(reg => console.log('✅ SW registrado:', reg.scope))
-            .catch(err => console.log('SW erro:', err));
-        });
+        navigator.serviceWorker.register('/sw.js?v=8')
+          .then(reg => console.log('✅ SW registrado:', reg.scope))
+          .catch(err => console.log('SW erro:', err));
       }
     </script>
     </body>
@@ -3140,29 +3087,11 @@ app.get('/:slug', (c) => {
         <!-- PWA Service Worker -->
         <script>
           if ('serviceWorker' in navigator) {
-            caches.keys().then(keys => keys.forEach(k => caches.delete(k)));
-            navigator.serviceWorker.getRegistrations().then(regs => {
-              regs.forEach(r => r.unregister());
-            }).then(() => {
-              navigator.serviceWorker.register('/sw.js?v=8')
-                .then((reg) => console.log('✅ Service Worker registrado'))
-                .catch((err) => console.log('❌ Service Worker falhou:', err));
-            });
+            navigator.serviceWorker.register('/sw.js?v=8')
+              .then(reg => console.log('✅ SW registrado:', reg.scope))
+              .catch(err => console.log('SW erro:', err));
           }
         </script>
-    <script>
-      if ('serviceWorker' in navigator) {
-        // Limpa caches antigos e registra SW novo
-        caches.keys().then(keys => keys.forEach(k => caches.delete(k)));
-        navigator.serviceWorker.getRegistrations().then(regs => {
-          regs.forEach(r => r.unregister());
-        }).then(() => {
-          navigator.serviceWorker.register('/sw.js?v=8')
-            .then(reg => console.log('✅ SW registrado:', reg.scope))
-            .catch(err => console.log('SW erro:', err));
-        });
-      }
-    </script>
     </body>
     </html>
   `)
