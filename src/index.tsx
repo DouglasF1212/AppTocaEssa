@@ -3248,5 +3248,8 @@ app.get('/:slug', (c) => {
 
 export default app
 import plaque from "./routes/plaque"
-
+app.use(
+  "/styles/*",
+  serveStatic({ root: "./src" })
+)
 app.route("/plaque", plaque)
