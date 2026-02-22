@@ -5,57 +5,71 @@ import { serveStatic } from "hono/cloudflare-workers"
 import plaque from "./routes/plaque"
 
 type Bindings = {
-  DB: D1Database;
-  PHOTOS: R2Bucket;
+  DB: D1Database
+  PHOTOS: R2Bucket
 }
 
 const app = new Hono<{ Bindings: Bindings }>()
 
-// Redireciona apptocaessa.com.br (sem www) para www.apptocaessa.com.br
-app.use('*', async (c, next) => {
-  const host = c.req.header('host') || ''
-  if (host === 'apptocaessa.com.br') {
-    return c.redirect('https://www.apptocaessa.com.br' + c.req.path, 301)
+// 🔁 Redireciona domínio sem www para www
+app.use("*", async (c, next) => {
+  const host = c.req.header("host") || ""
+  if (host === "apptocaessa.com.br") {
+    return c.redirect("https://www.apptocaessa.com.br" + c.req.path, 301)
   }
   await next()
 })
 
-// Enable CORS
-app.use('/api/*', cors())
+// 🌐 CORS para API
+app.use("/api/*", cors())
 
-// Serve static files
-app.use('/static/*', serveStatic({ root: './public' }))
+// 🎨 CSS e assets da plaquinha
+app.use(
+  "/styles/*",
+  serveStatic({ root: "./src" })
+)
 
-// Serve PWA manifest manually
-app.get('/manifest.json', (c) => {
+// 🖼️ Assets públicos (icons, PWA, etc)
+app.use(
+  "/static/*",
+  serveStatic({ root: "./public" })
+)
+
+// 🎤 Rota da plaquinha
+app.route("/plaque", plaque)
+
+// 📱 Manifest PWA
+app.get("/manifest.json", (c) => {
   return c.json({
-    "name": "TOCA ESSA",
-    "short_name": "TOCA ESSA",
-    "description": "Plataforma de interação ao vivo entre artistas e público",
-    "start_url": "/",
-    "display": "standalone",
-    "background_color": "#1a0b2e",
-    "theme_color": "#8b5cf6",
-    "orientation": "portrait",
-    "icons": [
+    name: "TOCA ESSA",
+    short_name: "TOCA ESSA",
+    description: "Plataforma de interação ao vivo entre artistas e público",
+    start_url: "/",
+    display: "standalone",
+    background_color: "#1a0b2e",
+    theme_color: "#8b5cf6",
+    orientation: "portrait",
+    icons: [
       {
-        "src": "/icon-192.png",
-        "sizes": "192x192",
-        "type": "image/png",
-        "purpose": "any maskable"
+        src: "/static/icon-192.png",
+        sizes: "192x192",
+        type: "image/png",
+        purpose: "any maskable"
       },
       {
-        "src": "/icon-512.png",
-        "sizes": "512x512",
-        "type": "image/png",
-        "purpose": "any maskable"
+        src: "/static/icon-512.png",
+        sizes: "512x512",
+        type: "image/png",
+        purpose: "any maskable"
       }
     ],
-    "categories": ["music", "entertainment"],
-    "lang": "pt-BR",
-    "dir": "ltr"
+    categories: ["music", "entertainment"],
+    lang: "pt-BR",
+    dir: "ltr"
   })
 })
+
+export default app
 
 // Serve PWA icons using serveStatic with correct path
 app.get('/icon-192.png', serveStatic({ path: 'icon-192.png', root: './public' }))
