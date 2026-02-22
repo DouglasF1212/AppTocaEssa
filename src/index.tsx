@@ -1,7 +1,8 @@
-import { serveStatic } from "hono/cloudflare-workers"import { Hono } from 'hono'
-import { cors } from 'hono/cors'
-import { serveStatic } from 'hono/cloudflare-workers'
-import { setCookie, getCookie } from 'hono/cookie'
+import { Hono } from "hono"
+import { cors } from "hono/cors"
+import { serveStatic } from "hono/cloudflare-workers"
+
+import plaque from "./routes/plaque"
 
 type Bindings = {
   DB: D1Database;
