@@ -3247,3 +3247,6 @@ app.get('/:slug', (c) => {
 })
 
 export default app
+import plaque from "./routes/plaque"
+
+app.route("/plaque", plaque)
