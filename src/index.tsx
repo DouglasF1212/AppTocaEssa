@@ -1,4 +1,4 @@
-import { Hono } from 'hono'
+import { serveStatic } from "hono/cloudflare-workers"import { Hono } from 'hono'
 import { cors } from 'hono/cors'
 import { serveStatic } from 'hono/cloudflare-workers'
 import { setCookie, getCookie } from 'hono/cookie'
