@@ -2424,45 +2424,7 @@ app.get('/login', (c) => {
         <div id="app"></div>
         <script src="https://cdn.jsdelivr.net/npm/axios@1.6.0/dist/axios.min.js"></script>
         <script src="/static/auth.js?v=4"></script>
-        <script>
-          renderLoginPage()
-
-          // Fallback: garante botão de mostrar/ocultar senha mesmo com cache antigo de auth.js
-          ;(() => {
-            const passwordInput = document.getElementById('password')
-            if (!passwordInput) return
-
-            const existingToggle = document.querySelector('[data-toggle-password="password"]')
-            if (existingToggle) return
-
-            const wrapper = document.createElement('div')
-            wrapper.className = 'relative'
-            passwordInput.classList.add('pr-12')
-
-            const parent = passwordInput.parentElement
-            if (!parent) return
-            parent.insertBefore(wrapper, passwordInput)
-            wrapper.appendChild(passwordInput)
-
-            const btn = document.createElement('button')
-            btn.type = 'button'
-            btn.className = 'absolute inset-y-0 right-0 px-4 text-gray-300 hover:text-white'
-            btn.setAttribute('aria-label', 'Mostrar senha')
-            btn.setAttribute('title', 'Mostrar senha')
-            btn.innerHTML = '<i class="fas fa-eye"></i>'
-
-            btn.addEventListener('click', () => {
-              const showingPassword = passwordInput.type === 'text'
-              passwordInput.type = showingPassword ? 'password' : 'text'
-              const icon = btn.querySelector('i')
-              if (icon) icon.className = showingPassword ? 'fas fa-eye' : 'fas fa-eye-slash'
-              btn.setAttribute('aria-label', showingPassword ? 'Mostrar senha' : 'Ocultar senha')
-              btn.setAttribute('title', showingPassword ? 'Mostrar senha' : 'Ocultar senha')
-            })
-
-            wrapper.appendChild(btn)
-          })()
-        </script>
+        <script>renderLoginPage()</script>
     <script>
       if ('serviceWorker' in navigator) {
         navigator.serviceWorker.register('/sw.js?v=8')
@@ -2524,45 +2486,7 @@ app.get('/register', (c) => {
         <div id="app"></div>
         <script src="https://cdn.jsdelivr.net/npm/axios@1.6.0/dist/axios.min.js"></script>
         <script src="/static/auth.js?v=4"></script>
-        <script>
-          renderRegisterPage()
-
-          // Fallback equivalente para cadastro
-          ;(() => {
-            const passwordInput = document.getElementById('password')
-            if (!passwordInput) return
-
-            const existingToggle = document.querySelector('[data-toggle-password="password"]')
-            if (existingToggle) return
-
-            const wrapper = document.createElement('div')
-            wrapper.className = 'relative'
-            passwordInput.classList.add('pr-12')
-
-            const parent = passwordInput.parentElement
-            if (!parent) return
-            parent.insertBefore(wrapper, passwordInput)
-            wrapper.appendChild(passwordInput)
-
-            const btn = document.createElement('button')
-            btn.type = 'button'
-            btn.className = 'absolute inset-y-0 right-0 px-4 text-gray-300 hover:text-white'
-            btn.setAttribute('aria-label', 'Mostrar senha')
-            btn.setAttribute('title', 'Mostrar senha')
-            btn.innerHTML = '<i class="fas fa-eye"></i>'
-
-            btn.addEventListener('click', () => {
-              const showingPassword = passwordInput.type === 'text'
-              passwordInput.type = showingPassword ? 'password' : 'text'
-              const icon = btn.querySelector('i')
-              if (icon) icon.className = showingPassword ? 'fas fa-eye' : 'fas fa-eye-slash'
-              btn.setAttribute('aria-label', showingPassword ? 'Mostrar senha' : 'Ocultar senha')
-              btn.setAttribute('title', showingPassword ? 'Mostrar senha' : 'Ocultar senha')
-            })
-
-            wrapper.appendChild(btn)
-          })()
-        </script>
+        <script>renderRegisterPage()</script>
     <script>
       if ('serviceWorker' in navigator) {
         navigator.serviceWorker.register('/sw.js?v=8')
