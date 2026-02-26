@@ -1,9 +1,12 @@
 // public/static/auth.js
 // Authentication Pages - Login & Register
 
+// =========================
 // Render Login Page
+// =========================
 function renderLoginPage() {
   const app = document.getElementById('app');
+  if (!app) return;
 
   app.innerHTML = `
     <div class="container mx-auto px-4 py-16">
@@ -24,9 +27,9 @@ function renderLoginPage() {
           <form id="loginForm" onsubmit="handleLogin(event)" class="space-y-4">
             <div>
               <label class="block text-sm font-semibold mb-2">Email</label>
-              <input
-                type="email"
-                id="email"
+              <input 
+                type="email" 
+                id="email" 
                 required
                 class="w-full px-4 py-3 rounded-lg bg-white/20 border border-white/30 focus:outline-none focus:ring-2 focus:ring-purple-500 text-white"
                 placeholder="seu@email.com"
@@ -35,16 +38,14 @@ function renderLoginPage() {
 
             <div>
               <label class="block text-sm font-semibold mb-2">Senha</label>
-
               <div class="relative">
-                <input
-                  type="password"
-                  id="password"
+                <input 
+                  type="password" 
+                  id="password" 
                   required
                   class="w-full px-4 py-3 pr-12 rounded-lg bg-white/20 border border-white/30 focus:outline-none focus:ring-2 focus:ring-purple-500 text-white"
                   placeholder="********"
                 >
-
                 <button
                   type="button"
                   id="togglePasswordLogin"
@@ -57,8 +58,8 @@ function renderLoginPage() {
               </div>
             </div>
 
-            <button
-              type="submit"
+            <button 
+              type="submit" 
               class="w-full bg-purple-600 hover:bg-purple-700 px-6 py-3 rounded-lg font-semibold transition"
             >
               <i class="fas fa-sign-in-alt mr-2"></i>
@@ -67,9 +68,9 @@ function renderLoginPage() {
           </form>
 
           <div class="mt-4 text-center">
-            <a
-              href="#"
-              onclick="showForgotPasswordModal(); return false;"
+            <a 
+              href="#" 
+              onclick="showForgotPasswordModal(); return false;" 
               class="text-sm text-blue-400 hover:text-blue-300"
             >
               <i class="fas fa-question-circle mr-1"></i>
@@ -100,9 +101,12 @@ function renderLoginPage() {
   setupPasswordToggle('password', 'togglePasswordLogin');
 }
 
+// =========================
 // Render Register Page
+// =========================
 function renderRegisterPage() {
   const app = document.getElementById('app');
+  if (!app) return;
 
   app.innerHTML = `
     <div class="container mx-auto px-4 py-8">
@@ -128,7 +132,6 @@ function renderRegisterPage() {
           </h2>
 
           <form id="registerForm" onsubmit="handleRegister(event)" class="space-y-4">
-            <!-- Personal Info -->
             <div class="border-b border-gray-600 pb-4">
               <h3 class="text-lg font-bold mb-3">
                 <i class="fas fa-user mr-2"></i>
@@ -138,9 +141,9 @@ function renderRegisterPage() {
               <div class="space-y-3">
                 <div>
                   <label class="block text-sm font-semibold mb-2">Nome Completo *</label>
-                  <input
-                    type="text"
-                    id="full_name"
+                  <input 
+                    type="text" 
+                    id="full_name" 
                     required
                     class="w-full px-4 py-3 rounded-lg bg-white/20 border border-white/30 focus:outline-none focus:ring-2 focus:ring-purple-500 text-white"
                     placeholder="João Silva"
@@ -149,9 +152,9 @@ function renderRegisterPage() {
 
                 <div>
                   <label class="block text-sm font-semibold mb-2">Nome Artístico *</label>
-                  <input
-                    type="text"
-                    id="artist_name"
+                  <input 
+                    type="text" 
+                    id="artist_name" 
                     required
                     class="w-full px-4 py-3 rounded-lg bg-white/20 border border-white/30 focus:outline-none focus:ring-2 focus:ring-purple-500 text-white"
                     placeholder="Como você quer ser chamado"
@@ -161,9 +164,9 @@ function renderRegisterPage() {
 
                 <div>
                   <label class="block text-sm font-semibold mb-2">Email *</label>
-                  <input
-                    type="email"
-                    id="email"
+                  <input 
+                    type="email" 
+                    id="email" 
                     required
                     class="w-full px-4 py-3 rounded-lg bg-white/20 border border-white/30 focus:outline-none focus:ring-2 focus:ring-purple-500 text-white"
                     placeholder="seu@email.com"
@@ -171,17 +174,15 @@ function renderRegisterPage() {
                 </div>
 
                 <div>
-                  <label class="block text-sm font-semibold mb-2">Senha</label>
-
+                  <label class="block text-sm font-semibold mb-2">Senha *</label>
                   <div class="relative">
-                    <input
-                      type="password"
-                      id="password"
+                    <input 
+                      type="password" 
+                      id="password" 
                       required
                       class="w-full px-4 py-3 pr-12 rounded-lg bg-white/20 border border-white/30 focus:outline-none focus:ring-2 focus:ring-purple-500 text-white"
                       placeholder="********"
                     >
-
                     <button
                       type="button"
                       id="togglePasswordRegister"
@@ -196,8 +197,8 @@ function renderRegisterPage() {
 
                 <div>
                   <label class="block text-sm font-semibold mb-2">Bio (opcional)</label>
-                  <textarea
-                    id="bio"
+                  <textarea 
+                    id="bio" 
                     rows="2"
                     class="w-full px-4 py-3 rounded-lg bg-white/20 border border-white/30 focus:outline-none focus:ring-2 focus:ring-purple-500 text-white"
                     placeholder="Conte um pouco sobre você e seu estilo musical"
@@ -209,7 +210,6 @@ function renderRegisterPage() {
               </div>
             </div>
 
-            <!-- Payment Info -->
             <div class="pt-2 bg-gradient-to-r from-green-500/20 to-blue-500/20 p-6 rounded-xl border border-green-400/30">
               <div class="flex items-start gap-4">
                 <div class="text-4xl">💰</div>
@@ -236,8 +236,8 @@ function renderRegisterPage() {
               </div>
             </div>
 
-            <button
-              type="submit"
+            <button 
+              type="submit" 
               class="w-full bg-green-600 hover:bg-green-700 px-6 py-3 rounded-lg font-semibold transition"
             >
               <i class="fas fa-user-plus mr-2"></i>
@@ -268,7 +268,9 @@ function renderRegisterPage() {
   setupPasswordToggle('password', 'togglePasswordRegister');
 }
 
-// Toggle helper (single input + single button)
+// =========================
+// Password toggle (eye)
+// =========================
 function setupPasswordToggle(passwordInputId, toggleButtonId) {
   const input = document.getElementById(passwordInputId);
   const btn = document.getElementById(toggleButtonId);
@@ -276,18 +278,17 @@ function setupPasswordToggle(passwordInputId, toggleButtonId) {
 
   const icon = btn.querySelector('i');
 
+  // evita duplicar listener se renderizar de novo
+  if (btn.dataset.bound === '1') return;
+  btn.dataset.bound = '1';
+
   const sync = () => {
     const isHidden = input.type === 'password';
     btn.setAttribute('aria-label', isHidden ? 'Mostrar senha' : 'Ocultar senha');
     btn.title = isHidden ? 'Mostrar senha' : 'Ocultar senha';
-
-    if (icon) {
-      icon.classList.toggle('fa-eye', isHidden);
-      icon.classList.toggle('fa-eye-slash', !isHidden);
-    }
+    if (icon) icon.className = isHidden ? 'fas fa-eye' : 'fas fa-eye-slash';
   };
 
-  // não perder foco no mobile
   btn.addEventListener('mousedown', (e) => e.preventDefault());
 
   btn.addEventListener('click', () => {
@@ -299,79 +300,49 @@ function setupPasswordToggle(passwordInputId, toggleButtonId) {
   sync();
 }
 
+// =========================
 // Handle Login
+// =========================
 async function handleLogin(event) {
   event.preventDefault();
 
-  const emailEl = document.getElementById('email');
-  const passEl = document.getElementById('password');
-  const email = emailEl ? emailEl.value : '';
-  const password = passEl ? passEl.value : '';
-
+  const email = document.getElementById('email')?.value || '';
+  const password = document.getElementById('password')?.value || '';
   const btn = event.target?.querySelector?.('button[type="submit"]');
-  if (btn) {
-    btn.disabled = true;
-    btn.textContent = 'Entrando...';
-  }
+
+  if (btn) { btn.disabled = true; btn.textContent = 'Entrando...'; }
 
   try {
-    // axios precisa estar carregado no HTML
-    const response = await axios.post(
-      '/api/auth/login',
-      { email, password },
-      { withCredentials: true }
-    );
+    const response = await axios.post('/api/auth/login', { email, password }, { withCredentials: true });
 
     if (response?.data?.success) {
-      const user = response.data.user || {};
+      const user = response.data.user;
       const sid = response.data.session_id;
 
-      // Salva session_id em múltiplos storages para máxima compatibilidade mobile
       if (sid) {
         try { localStorage.setItem('session_id', sid); } catch (e) {}
         try { sessionStorage.setItem('session_id', sid); } catch (e) {}
-        document.cookie = `session_id=${sid}; path=/; max-age=${30 * 24 * 3600}; secure; samesite=None`;
+        document.cookie = `session_id=${sid}; path=/; max-age=${30*24*3600}; secure; samesite=None`;
       }
 
       try { localStorage.setItem('user_role', user.role); } catch (e) {}
       try { localStorage.setItem('license_status', user.license_status); } catch (e) {}
 
-      // Redireciona imediatamente
-      if (user.role === 'admin') {
-        window.location.replace('/admin/panel');
-        return;
-      }
-      if (user.license_status === 'approved') {
-        window.location.replace('/manage');
-        return;
-      }
-      window.location.replace('/license-payment');
-      return;
+      if (user.role === 'admin') return window.location.replace('/admin/panel');
+      if (user.license_status === 'approved') return window.location.replace('/manage');
+      return window.location.replace('/license-payment');
     }
 
-    // caso a API não retorne success true
-    if (btn) {
-      btn.disabled = false;
-      btn.innerHTML = '<i class="fas fa-sign-in-alt mr-2"></i>Entrar';
-    }
-    showError(response?.data?.error || 'Erro ao fazer login');
+    throw new Error(response?.data?.error || 'Erro ao fazer login');
   } catch (error) {
-    if (btn) {
-      btn.disabled = false;
-      btn.innerHTML = '<i class="fas fa-sign-in-alt mr-2"></i>Entrar';
-    }
-    showError(error?.response?.data?.error || 'Erro ao fazer login');
+    if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-sign-in-alt mr-2"></i>Entrar'; }
+    showError(error?.response?.data?.error || error?.message || 'Erro ao fazer login');
   }
 }
 
-// Format card number (mantido caso seja usado em outra tela)
-function formatCardNumber(input) {
-  let value = (input?.value || '').replace(/\s/g, '');
-  let formattedValue = value.match(/.{1,4}/g)?.join(' ') || value;
-  if (input) input.value = formattedValue;
-}
-
+// =========================
 // Handle Register
+// =========================
 async function handleRegister(event) {
   event.preventDefault();
 
@@ -382,79 +353,56 @@ async function handleRegister(event) {
   const bio = document.getElementById('bio')?.value || '';
 
   try {
-    const response = await axios.post('/api/auth/register', {
-      full_name,
-      artist_name,
-      email,
-      password,
-      bio
-    });
+    const response = await axios.post('/api/auth/register', { full_name, artist_name, email, password, bio });
 
     if (response?.data?.success) {
       if (response.data.payment_required) {
         showSuccess('Conta criada! Redirecionando para pagamento da licença...');
-
-        // credenciais temporárias para login automático
-        try { sessionStorage.setItem('pending_email', email); } catch (e) {}
-        try { sessionStorage.setItem('pending_password', password); } catch (e) {}
-
-        setTimeout(() => {
-          window.location.href = '/license-payment';
-        }, 2000);
+        try { sessionStorage.setItem('pending_email', email); } catch(e) {}
+        try { sessionStorage.setItem('pending_password', password); } catch(e) {}
+        setTimeout(() => window.location.href = '/license-payment', 2000);
       } else {
         showSuccess('Conta criada com sucesso! Faça login para continuar.');
-        setTimeout(() => {
-          window.location.href = '/login';
-        }, 2000);
+        setTimeout(() => window.location.href = '/login', 2000);
       }
       return;
     }
 
-    showError(response?.data?.error || 'Erro ao criar conta');
+    throw new Error(response?.data?.error || 'Erro ao criar conta');
   } catch (error) {
-    showError(error?.response?.data?.error || 'Erro ao criar conta');
+    showError(error?.response?.data?.error || error?.message || 'Erro ao criar conta');
   }
 }
 
-// Show success message
+// =========================
+// Toast helpers
+// =========================
 function showSuccess(message) {
   const toast = document.createElement('div');
-  toast.className =
-    'fixed top-4 right-4 bg-green-600 text-white px-6 py-4 rounded-lg shadow-lg z-50 animate-bounce';
+  toast.className = 'fixed top-4 right-4 bg-green-600 text-white px-6 py-4 rounded-lg shadow-lg z-50 animate-bounce';
   toast.innerHTML = `<i class="fas fa-check-circle mr-2"></i>${message}`;
   document.body.appendChild(toast);
-
-  setTimeout(() => {
-    toast.remove();
-  }, 3000);
+  setTimeout(() => toast.remove(), 3000);
 }
 
-// Show error message
 function showError(message) {
   const toast = document.createElement('div');
-  toast.className =
-    'fixed top-4 right-4 bg-red-600 text-white px-6 py-4 rounded-lg shadow-lg z-50';
+  toast.className = 'fixed top-4 right-4 bg-red-600 text-white px-6 py-4 rounded-lg shadow-lg z-50';
   toast.innerHTML = `<i class="fas fa-exclamation-circle mr-2"></i>${message}`;
   document.body.appendChild(toast);
-
-  setTimeout(() => {
-    toast.remove();
-  }, 4000);
+  setTimeout(() => toast.remove(), 4000);
 }
 
-// Show forgot password modal
+// =========================
+// Forgot password modal
+// =========================
 function showForgotPasswordModal() {
   const modal = document.createElement('div');
   modal.id = 'forgotPasswordModal';
-  modal.className =
-    'fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4';
-
+  modal.className = 'fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4';
   modal.innerHTML = `
     <div class="bg-gray-900 rounded-2xl p-8 max-w-md w-full border border-gray-700 relative">
-      <button
-        onclick="closeForgotPasswordModal()"
-        class="absolute top-4 right-4 text-gray-400 hover:text-white text-2xl"
-      >
+      <button onclick="closeForgotPasswordModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white text-2xl">
         <i class="fas fa-times"></i>
       </button>
 
@@ -496,25 +444,38 @@ function showForgotPasswordModal() {
         </p>
       </div>
 
-      <button
-        onclick="closeForgotPasswordModal()"
-        class="w-full mt-6 bg-gray-700 hover:bg-gray-600 px-6 py-3 rounded-lg font-semibold transition"
-      >
+      <button onclick="closeForgotPasswordModal()" class="w-full mt-6 bg-gray-700 hover:bg-gray-600 px-6 py-3 rounded-lg font-semibold transition">
         Fechar
       </button>
     </div>
   `;
-
   document.body.appendChild(modal);
 
-  // Close on background click
   modal.addEventListener('click', (e) => {
     if (e.target === modal) closeForgotPasswordModal();
   });
 }
 
-// Close forgot password modal
 function closeForgotPasswordModal() {
   const modal = document.getElementById('forgotPasswordModal');
   if (modal) modal.remove();
 }
+
+// =========================
+// Make sure handlers exist globally (for inline HTML handlers)
+// =========================
+window.renderLoginPage = renderLoginPage;
+window.renderRegisterPage = renderRegisterPage;
+window.handleLogin = handleLogin;
+window.handleRegister = handleRegister;
+window.showForgotPasswordModal = showForgotPasswordModal;
+window.closeForgotPasswordModal = closeForgotPasswordModal;
+
+// =========================
+// Auto-init: render correct screen by URL
+// =========================
+document.addEventListener('DOMContentLoaded', () => {
+  const p = window.location.pathname;
+  if (p === '/login') renderLoginPage();
+  if (p === '/register') renderRegisterPage();
+});
