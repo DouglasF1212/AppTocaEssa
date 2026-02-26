@@ -32,22 +32,27 @@ function renderLoginPage() {
             </div>
             
             <div>
-              <label class="block text-sm font-semibold mb-2">Senha</label>
-           <div class="relative">
-  <input 
-    type="password" 
-    id="password" 
-    required
-    class="w-full px-4 py-3 pr-12 rounded-lg bg-white/20 border border-white/30 focus:outline-none focus:ring-2 focus:ring-purple-500 text-white"
-  />
+  <label class="block text-sm font-semibold mb-2">Senha</label>
 
-  <button
-    type="button"
-    aria-label="Mostrar/ocultar senha"
-    aria-pressed="false"
-    onclick="togglePasswordVisibility('password', this)"
-    class="absolute right-3 top-1/2 -translate-y-1/2 text-white/80 hover:text-white"
-  >👁</button>
+  <div class="relative">
+    <input 
+      type="password" 
+      id="password" 
+      required
+      class="w-full px-4 py-3 pr-12 rounded-lg bg-white/20 border border-white/30 focus:outline-none focus:ring-2 focus:ring-purple-500 text-white"
+      placeholder="********"
+    >
+
+    <button
+      type="button"
+      id="togglePasswordLogin"
+      class="absolute inset-y-0 right-0 flex items-center px-4 text-gray-300 hover:text-white"
+      aria-label="Mostrar senha"
+      title="Mostrar senha"
+    >
+      <i class="fas fa-eye"></i>
+    </button>
+  </div>
 </div>
             
             <button 
