@@ -33,13 +33,24 @@ function renderLoginPage() {
             
             <div>
               <label class="block text-sm font-semibold mb-2">Senha</label>
-              <input 
-                type="password" 
-                id="password" 
-                required
-                class="w-full px-4 py-3 rounded-lg bg-white/20 border border-white/30 focus:outline-none focus:ring-2 focus:ring-purple-500 text-white"
-                placeholder="********"
-              >
+              <div class="relative">
+                <input 
+                  type="password" 
+                  id="password" 
+                  required
+                  class="w-full px-4 py-3 pr-12 rounded-lg bg-white/20 border border-white/30 focus:outline-none focus:ring-2 focus:ring-purple-500 text-white"
+                  placeholder="********"
+                >
+                <button
+                  type="button"
+                  data-toggle-password="password"
+                  class="absolute inset-y-0 right-0 px-4 text-gray-300 hover:text-white"
+                  aria-label="Mostrar senha"
+                  title="Mostrar senha"
+                >
+                  <i class="fas fa-eye"></i>
+                </button>
+              </div>
             </div>
             
             <button 
@@ -81,6 +92,7 @@ function renderLoginPage() {
       </div>
     </div>
   `;
+  setupPasswordToggles();
 }
 
 // Render Register Page
@@ -154,14 +166,25 @@ function renderRegisterPage() {
                 
                 <div>
                   <label class="block text-sm font-semibold mb-2">Senha *</label>
-                  <input 
-                    type="password" 
-                    id="password" 
-                    required
-                    minlength="6"
-                    class="w-full px-4 py-3 rounded-lg bg-white/20 border border-white/30 focus:outline-none focus:ring-2 focus:ring-purple-500 text-white"
-                    placeholder="Mínimo 6 caracteres"
-                  >
+                  <div class="relative">
+                    <input 
+                      type="password" 
+                      id="password" 
+                      required
+                      minlength="6"
+                      class="w-full px-4 py-3 pr-12 rounded-lg bg-white/20 border border-white/30 focus:outline-none focus:ring-2 focus:ring-purple-500 text-white"
+                      placeholder="Mínimo 6 caracteres"
+                    >
+                    <button
+                      type="button"
+                      data-toggle-password="password"
+                      class="absolute inset-y-0 right-0 px-4 text-gray-300 hover:text-white"
+                      aria-label="Mostrar senha"
+                      title="Mostrar senha"
+                    >
+                      <i class="fas fa-eye"></i>
+                    </button>
+                  </div>
                 </div>
                 
                 <div>
@@ -234,6 +257,27 @@ function renderRegisterPage() {
       </div>
     </div>
   `;
+  setupPasswordToggles();
+}
+
+function setupPasswordToggles() {
+  const toggleButtons = document.querySelectorAll('[data-toggle-password]');
+
+  toggleButtons.forEach((button) => {
+    button.addEventListener('click', () => {
+      const inputId = button.getAttribute('data-toggle-password');
+      const input = document.getElementById(inputId);
+      const icon = button.querySelector('i');
+
+      if (!input || !icon) return;
+
+      const showingPassword = input.type === 'text';
+      input.type = showingPassword ? 'password' : 'text';
+      icon.className = showingPassword ? 'fas fa-eye' : 'fas fa-eye-slash';
+      button.setAttribute('aria-label', showingPassword ? 'Mostrar senha' : 'Ocultar senha');
+      button.setAttribute('title', showingPassword ? 'Mostrar senha' : 'Ocultar senha');
+    });
+  });
 }
 
 // Handle Login
