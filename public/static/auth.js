@@ -4,6 +4,11 @@
 function renderLoginPage() {
   const app = document.getElementById('app');
   app.innerHTML = `
+  setupPasswordToggle('password', 'togglePasswordRegister');
+   ...
+`;
+
+setupPasswordToggle('password', 'togglePasswordLogin');
     <div class="container mx-auto px-4 py-16">
       <div class="max-w-md mx-auto">
         <div class="text-center mb-8">
@@ -167,27 +172,28 @@ function renderRegisterPage() {
                 </div>
                 
                 <div>
-                  <label class="block text-sm font-semibold mb-2">Senha *</label>
-                  <div class="relative">
-                    <input 
-                      type="password" 
-                      id="password" 
-                      required
-                      minlength="6"
-                      class="w-full px-4 py-3 pr-12 rounded-lg bg-white/20 border border-white/30 focus:outline-none focus:ring-2 focus:ring-purple-500 text-white"
-                      placeholder="Mínimo 6 caracteres"
-                    >
-                    <button
-                      type="button"
-                      data-toggle-password="password"
-                      class="absolute inset-y-0 right-0 px-4 text-gray-300 hover:text-white"
-                      aria-label="Mostrar senha"
-                      title="Mostrar senha"
-                    >
-                      <i class="fas fa-eye"></i>
-                    </button>
-                  </div>
-                </div>
+  <label class="block text-sm font-semibold mb-2">Senha</label>
+
+  <div class="relative">
+    <input 
+      type="password" 
+      id="password" 
+      required
+      class="w-full px-4 py-3 pr-12 rounded-lg bg-white/20 border border-white/30 focus:outline-none focus:ring-2 focus:ring-purple-500 text-white"
+      placeholder="********"
+    >
+
+    <button
+      type="button"
+      id="togglePasswordRegister"
+      class="absolute inset-y-0 right-0 flex items-center px-4 text-gray-300 hover:text-white"
+      aria-label="Mostrar senha"
+      title="Mostrar senha"
+    >
+      <i class="fas fa-eye"></i>
+    </button>
+  </div>
+</div>
                 
                 <div>
                   <label class="block text-sm font-semibold mb-2">Bio (opcional)</label>
@@ -473,4 +479,57 @@ function closeForgotPasswordModal() {
   if (modal) {
     modal.remove();
   }
+}
+function setupPasswordToggle(passwordInputId, toggleButtonId) {
+  const input = document.getElementById(passwordInputId);
+  const btn = document.getElementById(toggleButtonId);
+  if (!input || !btn) return;
+
+  const icon = btn.querySelector('i');
+
+  const sync = () => {
+    const isHidden = input.type === 'password';
+    btn.setAttribute('aria-label', isHidden ? 'Mostrar senha' : 'Ocultar senha');
+    btn.title = isHidden ? 'Mostrar senha' : 'Ocultar senha';
+
+    if (icon) {
+      icon.classList.toggle('fa-eye', isHidden);
+      icon.classList.toggle('fa-eye-slash', !isHidden);
+    }
+  };
+
+  btn.addEventListener('mousedown', (e) => e.preventDefault());
+
+  btn.addEventListener('click', () => {
+    input.type = (input.type === 'password') ? 'text' : 'password';
+    sync();
+    input.focus();
+  });
+function setupPasswordToggle(passwordInputId, toggleButtonId) {
+  const input = document.getElementById(passwordInputId);
+  const btn = document.getElementById(toggleButtonId);
+  if (!input || !btn) return;
+
+  const icon = btn.querySelector('i');
+
+  const sync = () => {
+    const isHidden = input.type === 'password';
+    btn.setAttribute('aria-label', isHidden ? 'Mostrar senha' : 'Ocultar senha');
+    btn.title = isHidden ? 'Mostrar senha' : 'Ocultar senha';
+
+    if (icon) {
+      icon.classList.toggle('fa-eye', isHidden);
+      icon.classList.toggle('fa-eye-slash', !isHidden);
+    }
+  };
+
+  btn.addEventListener('mousedown', (e) => e.preventDefault());
+
+  btn.addEventListener('click', () => {
+    input.type = (input.type === 'password') ? 'text' : 'password';
+    sync();
+    input.focus();
+  });
+
+  sync();
 }
