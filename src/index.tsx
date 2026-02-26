@@ -11,6 +11,14 @@ type Bindings = {
 
 const app = new Hono<{ Bindings: Bindings }>()
 
+app.onError((err, c) => {
+  console.error('UNHANDLED ERROR:', err);
+  return c.json(
+    { success: false, error: err?.message || String(err) },
+    500
+  );
+});
+
 // 🔁 Redireciona domínio sem www para www
 app.use("*", async (c, next) => {
   const host = c.req.header("host") || ""
