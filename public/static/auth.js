@@ -313,30 +313,41 @@ async function handleLogin(event) {
   if (btn) { btn.disabled = true; btn.textContent = 'Entrando...'; }
 
   try {
-    const response = await axios.post('/api/auth/login', { email, password }, { withCredentials: true });
+    const res = await fetch('/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include', // mantém cookie/sessão
+      body: JSON.stringify({ email, password })
+    });
 
-    if (response?.data?.success) {
-      const user = response.data.user;
-      const sid = response.data.session_id;
+    const data = await res.json().catch(() => ({}));
 
-      if (sid) {
-        try { localStorage.setItem('session_id', sid); } catch (e) {}
-        try { sessionStorage.setItem('session_id', sid); } catch (e) {}
-        document.cookie = `session_id=${sid}; path=/; max-age=${30*24*3600}; secure; samesite=None`;
-      }
-
-      try { localStorage.setItem('user_role', user.role); } catch (e) {}
-      try { localStorage.setItem('license_status', user.license_status); } catch (e) {}
-
-      if (user.role === 'admin') return window.location.replace('/admin/panel');
-      if (user.license_status === 'approved') return window.location.replace('/manage');
-      return window.location.replace('/license-payment');
+    if (!res.ok || !data?.success) {
+      throw new Error(data?.error || `Erro ao fazer login (${res.status})`);
     }
 
-    throw new Error(response?.data?.error || 'Erro ao fazer login');
+    const user = data.user || {};
+    const sid = data.session_id;
+
+    if (sid) {
+      try { localStorage.setItem('session_id', sid); } catch (e) {}
+      try { sessionStorage.setItem('session_id', sid); } catch (e) {}
+      document.cookie = `session_id=${sid}; path=/; max-age=${30*24*3600}; secure; samesite=None`;
+    }
+
+    try { localStorage.setItem('user_role', user.role); } catch (e) {}
+    try { localStorage.setItem('license_status', user.license_status); } catch (e) {}
+
+    if (user.role === 'admin') return window.location.replace('/admin/panel');
+    if (user.license_status === 'approved') return window.location.replace('/manage');
+    return window.location.replace('/license-payment');
+
   } catch (error) {
-    if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-sign-in-alt mr-2"></i>Entrar'; }
-    showError(error?.response?.data?.error || error?.message || 'Erro ao fazer login');
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fas fa-sign-in-alt mr-2"></i>Entrar';
+    }
+    showError(error?.message || 'Erro ao fazer login');
   }
 }
 
