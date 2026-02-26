@@ -2396,7 +2396,7 @@ app.get('/login', (c) => {
     <body class="bg-gradient-to-br from-purple-900 via-indigo-900 to-blue-900 text-white min-h-screen">
         <div id="app"></div>
         <script src="https://cdn.jsdelivr.net/npm/axios@1.6.0/dist/axios.min.js"></script>
-        <script src="/static/auth.js?v=2"></script>
+        <script src="/static/auth.js?v=3"></script>
         <script>renderLoginPage()</script>
     <script>
       if ('serviceWorker' in navigator) {
@@ -2458,7 +2458,7 @@ app.get('/register', (c) => {
     <body class="bg-gradient-to-br from-purple-900 via-indigo-900 to-blue-900 text-white min-h-screen">
         <div id="app"></div>
         <script src="https://cdn.jsdelivr.net/npm/axios@1.6.0/dist/axios.min.js"></script>
-        <script src="/static/auth.js?v=2"></script>
+        <script src="/static/auth.js?v=3"></script>
         <script>renderRegisterPage()</script>
     <script>
       if ('serviceWorker' in navigator) {
