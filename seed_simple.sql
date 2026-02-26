@@ -6,9 +6,9 @@ INSERT OR IGNORE INTO users (id, email, password_hash, full_name, role) VALUES
 
 -- Insert artist users (password: password123 for all)
 INSERT OR IGNORE INTO users (id, email, password_hash, full_name, role) VALUES 
-(2, 'joao@tocaessa.com', 'ef92b778bafe771e89245b89ecbb697e7a3b1649517a7c8656f55ae5fc22303a', 'João Silva', 'artist'),
-(3, 'maria@tocaessa.com', 'ef92b778bafe771e89245b89ecbb697e7a3b1649517a7c8656f55ae5fc22303a', 'Maria Santos', 'artist'),
-(4, 'contatodfns@gmail.com', 'ef92b778bafe771e89245b89ecbb697e7a3b1649517a7c8656f55ae5fc22303a', 'Douglas Felipe Nogueira da Silva', 'artist');
+(2, 'joao@tocaessa.com', 'ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f', 'João Silva', 'artist'),
+(3, 'maria@tocaessa.com', 'ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f', 'Maria Santos', 'artist'),
+(4, 'contatodfns@gmail.com', 'ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f', 'Douglas Felipe Nogueira da Silva', 'artist');
 
 -- Insert artist profiles
 INSERT OR IGNORE INTO artists (id, name, slug, bio, user_id, active, qr_code_data) VALUES 

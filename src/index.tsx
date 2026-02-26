@@ -1,6 +1,7 @@
 import { Hono } from "hono"
 import { cors } from "hono/cors"
 import { serveStatic } from "hono/cloudflare-workers"
+import { getCookie, setCookie } from "hono/cookie"
 
 import plaque from "./routes/plaque"
 
@@ -147,6 +148,20 @@ function generateSessionId(): string {
   return crypto.randomUUID()
 }
 
+function safeSetSessionCookie(c: any, sessionId: string) {
+  try {
+    setCookie(c, 'session_id', sessionId, {
+      httpOnly: false,
+      secure: true,
+      sameSite: 'None',
+      maxAge: 30 * 24 * 60 * 60,
+      path: '/'
+    })
+  } catch (error) {
+    console.error('⚠️ Falha ao definir cookie de sessão:', error)
+  }
+}
+
 // Check if user is authenticated
 async function checkAuth(c: any): Promise<any> {
   // Try cookie first
@@ -235,56 +250,77 @@ app.post('/api/auth/register', async (c) => {
 
 // Login
 app.post('/api/auth/login', async (c) => {
-  const { email, password } = await c.req.json()
+  try {
+    const { email, password } = await c.req.json()
+    const normalizedEmail = String(email || '').trim().toLowerCase()
+    const legacySeedPasswordHash = 'ef92b778bafe771e89245b89ecbb697e7a3b1649517a7c8656f55ae5fc22303a'
   
-  if (!email || !password) {
-    return c.json({ error: 'Email e senha são obrigatórios' }, 400)
+    if (!normalizedEmail || !password) {
+      return c.json({ error: 'Email e senha são obrigatórios' }, 400)
+    }
+  
+    // Hash password to compare
+    const passwordHash = await hashPassword(password)
+
+    // Find user by email first (permite compatibilidade com hash legado)
+    const user = await c.env.DB.prepare(`
+      SELECT u.*, a.slug as artist_slug
+      FROM users u
+      LEFT JOIN artists a ON a.user_id = u.id
+      WHERE lower(trim(u.email)) = ?
+      LIMIT 1
+    `).bind(normalizedEmail).first<any>()
+  
+    if (!user) {
+      return c.json({ error: 'Email ou senha incorretos' }, 401)
+    }
+
+    // Senha válida normal
+    let authenticated = user.password_hash === passwordHash
+
+    // Compatibilidade: alguns bancos antigos foram seedados com hash incorreto para "password123"
+    // Se bater o padrão legado, aceita o login e atualiza para o hash correto automaticamente.
+    if (!authenticated && password === 'password123' && user.password_hash === legacySeedPasswordHash) {
+      await c.env.DB.prepare(`
+        UPDATE users SET password_hash = ? WHERE id = ?
+      `).bind(passwordHash, user.id).run()
+      authenticated = true
+    }
+
+    if (!authenticated) {
+      return c.json({ error: 'Email ou senha incorretos' }, 401)
+    }
+  
+    // Create session — usar datetime SQLite para compatibilidade com a query de validação
+    const sessionId = generateSessionId()
+  
+    await c.env.DB.prepare(`
+      INSERT INTO sessions (id, user_id, expires_at)
+      VALUES (?, ?, datetime('now', '+30 days'))
+    `).bind(sessionId, user.id).run()
+  
+    // Set cookie (não bloqueia login se o navegador/edge rejeitar algum atributo)
+    safeSetSessionCookie(c, sessionId)
+  
+    return c.json({ 
+      success: true,
+      user: {
+        id: user.id,
+        email: user.email,
+        full_name: user.full_name,
+        role: user.role || 'artist',
+        license_status: user.license_status || 'pending',
+        artist_slug: user.artist_slug
+      },
+      session_id: sessionId
+    })
+  } catch (error: any) {
+    const message = String(error?.message || '')
+    if (message.includes('no such table')) {
+      return c.json({ error: 'Banco de dados não inicializado. Execute as migrations no ambiente.' }, 503)
+    }
+    return c.json({ error: 'Erro interno ao fazer login' }, 500)
   }
-  
-  // Hash password to compare
-  const passwordHash = await hashPassword(password)
-  
-  // Find user
-  const user = await c.env.DB.prepare(`
-    SELECT u.*, a.slug as artist_slug
-    FROM users u
-    LEFT JOIN artists a ON a.user_id = u.id
-    WHERE u.email = ? AND u.password_hash = ?
-  `).bind(email, passwordHash).first()
-  
-  if (!user) {
-    return c.json({ error: 'Email ou senha incorretos' }, 401)
-  }
-  
-  // Create session — usar datetime SQLite para compatibilidade com a query de validação
-  const sessionId = generateSessionId()
-  
-  await c.env.DB.prepare(`
-    INSERT INTO sessions (id, user_id, expires_at)
-    VALUES (?, ?, datetime('now', '+30 days'))
-  `).bind(sessionId, user.id).run()
-  
-  // Set cookie — sem httpOnly para que JS possa ler; SameSite=None para PWA mobile
-  setCookie(c, 'session_id', sessionId, {
-    httpOnly: false,
-    secure: true,
-    sameSite: 'None',
-    maxAge: 30 * 24 * 60 * 60,
-    path: '/'
-  })
-  
-  return c.json({ 
-    success: true,
-    user: {
-      id: user.id,
-      email: user.email,
-      full_name: user.full_name,
-      role: user.role || 'artist',
-      license_status: user.license_status || 'pending',
-      artist_slug: user.artist_slug
-    },
-    session_id: sessionId
-  })
 })
 
 // Logout
@@ -1128,13 +1164,8 @@ app.post('/api/admin/login', async (c) => {
     VALUES (?, ?, datetime('now', '+30 days'))
   `).bind(sessionId, user.id).run()
   
-  setCookie(c, 'session_id', sessionId, {
-    httpOnly: false,
-    secure: true,
-    sameSite: 'None',
-    maxAge: 30 * 24 * 60 * 60,
-    path: '/'
-  })
+  // Set cookie (não bloqueia login se o navegador/edge rejeitar algum atributo)
+  safeSetSessionCookie(c, sessionId)
   
   return c.json({ 
     id: user.id,
@@ -2396,7 +2427,7 @@ app.get('/login', (c) => {
     <body class="bg-gradient-to-br from-purple-900 via-indigo-900 to-blue-900 text-white min-h-screen">
         <div id="app"></div>
         <script src="https://cdn.jsdelivr.net/npm/axios@1.6.0/dist/axios.min.js"></script>
-        <script src="/static/auth.js?v=2"></script>
+        <script src="/static/auth.js?v=4"></script>
         <script>renderLoginPage()</script>
     <script>
       if ('serviceWorker' in navigator) {
@@ -2458,7 +2489,7 @@ app.get('/register', (c) => {
     <body class="bg-gradient-to-br from-purple-900 via-indigo-900 to-blue-900 text-white min-h-screen">
         <div id="app"></div>
         <script src="https://cdn.jsdelivr.net/npm/axios@1.6.0/dist/axios.min.js"></script>
-        <script src="/static/auth.js?v=2"></script>
+        <script src="/static/auth.js?v=4"></script>
         <script>renderRegisterPage()</script>
     <script>
       if ('serviceWorker' in navigator) {
@@ -2606,9 +2637,16 @@ app.get('/admin/login', (c) => {
                             <i class="fas fa-lock mr-2"></i>
                             Senha
                         </label>
-                        <input type="password" id="password" required
-                               class="w-full px-4 py-3 bg-white/5 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-blue-500"
-                               placeholder="••••••••">
+                        <div class="relative">
+                            <input type="password" id="password" required
+                                   class="w-full px-4 py-3 pr-12 bg-white/5 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-blue-500"
+                                   placeholder="••••••••">
+                            <button type="button" id="toggleAdminPassword"
+                                    class="absolute inset-y-0 right-0 px-4 text-gray-300 hover:text-white"
+                                    aria-label="Mostrar senha" title="Mostrar senha">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
                     </div>
                     
                     <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg transition font-bold">
@@ -2628,6 +2666,20 @@ app.get('/admin/login', (c) => {
         
         <script src="https://cdn.jsdelivr.net/npm/axios@1.6.0/dist/axios.min.js"></script>
         <script>
+            const adminPasswordInput = document.getElementById('password');
+            const toggleAdminPasswordButton = document.getElementById('toggleAdminPassword');
+
+            toggleAdminPasswordButton?.addEventListener('click', () => {
+                const showingPassword = adminPasswordInput.type === 'text';
+                adminPasswordInput.type = showingPassword ? 'password' : 'text';
+                const icon = toggleAdminPasswordButton.querySelector('i');
+                if (icon) {
+                    icon.className = showingPassword ? 'fas fa-eye' : 'fas fa-eye-slash';
+                }
+                toggleAdminPasswordButton.setAttribute('aria-label', showingPassword ? 'Mostrar senha' : 'Ocultar senha');
+                toggleAdminPasswordButton.setAttribute('title', showingPassword ? 'Mostrar senha' : 'Ocultar senha');
+            });
+
             document.getElementById('adminLoginForm').addEventListener('submit', async (e) => {
                 e.preventDefault();
                 const btn = e.target.querySelector('button[type="submit"]');
@@ -3260,11 +3312,3 @@ app.get('/:slug', (c) => {
     </html>
   `)
 })
-
-export default app
-import plaque from "./routes/plaque"
-app.use(
-  "/styles/*",
-  serveStatic({ root: "./src" })
-)
-app.route("/plaque", plaque)
