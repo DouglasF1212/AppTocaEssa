@@ -2396,8 +2396,46 @@ app.get('/login', (c) => {
     <body class="bg-gradient-to-br from-purple-900 via-indigo-900 to-blue-900 text-white min-h-screen">
         <div id="app"></div>
         <script src="https://cdn.jsdelivr.net/npm/axios@1.6.0/dist/axios.min.js"></script>
-        <script src="/static/auth.js?v=2"></script>
-        <script>renderLoginPage()</script>
+        <script src="/static/auth.js?v=4"></script>
+        <script>
+          renderLoginPage()
+
+          // Fallback: garante botão de mostrar/ocultar senha mesmo com cache antigo de auth.js
+          ;(() => {
+            const passwordInput = document.getElementById('password')
+            if (!passwordInput) return
+
+            const existingToggle = document.querySelector('[data-toggle-password="password"]')
+            if (existingToggle) return
+
+            const wrapper = document.createElement('div')
+            wrapper.className = 'relative'
+            passwordInput.classList.add('pr-12')
+
+            const parent = passwordInput.parentElement
+            if (!parent) return
+            parent.insertBefore(wrapper, passwordInput)
+            wrapper.appendChild(passwordInput)
+
+            const btn = document.createElement('button')
+            btn.type = 'button'
+            btn.className = 'absolute inset-y-0 right-0 px-4 text-gray-300 hover:text-white'
+            btn.setAttribute('aria-label', 'Mostrar senha')
+            btn.setAttribute('title', 'Mostrar senha')
+            btn.innerHTML = '<i class="fas fa-eye"></i>'
+
+            btn.addEventListener('click', () => {
+              const showingPassword = passwordInput.type === 'text'
+              passwordInput.type = showingPassword ? 'password' : 'text'
+              const icon = btn.querySelector('i')
+              if (icon) icon.className = showingPassword ? 'fas fa-eye' : 'fas fa-eye-slash'
+              btn.setAttribute('aria-label', showingPassword ? 'Mostrar senha' : 'Ocultar senha')
+              btn.setAttribute('title', showingPassword ? 'Mostrar senha' : 'Ocultar senha')
+            })
+
+            wrapper.appendChild(btn)
+          })()
+        </script>
     <script>
       if ('serviceWorker' in navigator) {
         navigator.serviceWorker.register('/sw.js?v=8')
@@ -2458,8 +2496,46 @@ app.get('/register', (c) => {
     <body class="bg-gradient-to-br from-purple-900 via-indigo-900 to-blue-900 text-white min-h-screen">
         <div id="app"></div>
         <script src="https://cdn.jsdelivr.net/npm/axios@1.6.0/dist/axios.min.js"></script>
-        <script src="/static/auth.js?v=2"></script>
-        <script>renderRegisterPage()</script>
+        <script src="/static/auth.js?v=4"></script>
+        <script>
+          renderRegisterPage()
+
+          // Fallback equivalente para cadastro
+          ;(() => {
+            const passwordInput = document.getElementById('password')
+            if (!passwordInput) return
+
+            const existingToggle = document.querySelector('[data-toggle-password="password"]')
+            if (existingToggle) return
+
+            const wrapper = document.createElement('div')
+            wrapper.className = 'relative'
+            passwordInput.classList.add('pr-12')
+
+            const parent = passwordInput.parentElement
+            if (!parent) return
+            parent.insertBefore(wrapper, passwordInput)
+            wrapper.appendChild(passwordInput)
+
+            const btn = document.createElement('button')
+            btn.type = 'button'
+            btn.className = 'absolute inset-y-0 right-0 px-4 text-gray-300 hover:text-white'
+            btn.setAttribute('aria-label', 'Mostrar senha')
+            btn.setAttribute('title', 'Mostrar senha')
+            btn.innerHTML = '<i class="fas fa-eye"></i>'
+
+            btn.addEventListener('click', () => {
+              const showingPassword = passwordInput.type === 'text'
+              passwordInput.type = showingPassword ? 'password' : 'text'
+              const icon = btn.querySelector('i')
+              if (icon) icon.className = showingPassword ? 'fas fa-eye' : 'fas fa-eye-slash'
+              btn.setAttribute('aria-label', showingPassword ? 'Mostrar senha' : 'Ocultar senha')
+              btn.setAttribute('title', showingPassword ? 'Mostrar senha' : 'Ocultar senha')
+            })
+
+            wrapper.appendChild(btn)
+          })()
+        </script>
     <script>
       if ('serviceWorker' in navigator) {
         navigator.serviceWorker.register('/sw.js?v=8')
@@ -2606,9 +2682,16 @@ app.get('/admin/login', (c) => {
                             <i class="fas fa-lock mr-2"></i>
                             Senha
                         </label>
-                        <input type="password" id="password" required
-                               class="w-full px-4 py-3 bg-white/5 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-blue-500"
-                               placeholder="••••••••">
+                        <div class="relative">
+                            <input type="password" id="password" required
+                                   class="w-full px-4 py-3 pr-12 bg-white/5 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-blue-500"
+                                   placeholder="••••••••">
+                            <button type="button" id="toggleAdminPassword"
+                                    class="absolute inset-y-0 right-0 px-4 text-gray-300 hover:text-white"
+                                    aria-label="Mostrar senha" title="Mostrar senha">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
                     </div>
                     
                     <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg transition font-bold">
@@ -2628,6 +2711,20 @@ app.get('/admin/login', (c) => {
         
         <script src="https://cdn.jsdelivr.net/npm/axios@1.6.0/dist/axios.min.js"></script>
         <script>
+            const adminPasswordInput = document.getElementById('password');
+            const toggleAdminPasswordButton = document.getElementById('toggleAdminPassword');
+
+            toggleAdminPasswordButton?.addEventListener('click', () => {
+                const showingPassword = adminPasswordInput.type === 'text';
+                adminPasswordInput.type = showingPassword ? 'password' : 'text';
+                const icon = toggleAdminPasswordButton.querySelector('i');
+                if (icon) {
+                    icon.className = showingPassword ? 'fas fa-eye' : 'fas fa-eye-slash';
+                }
+                toggleAdminPasswordButton.setAttribute('aria-label', showingPassword ? 'Mostrar senha' : 'Ocultar senha');
+                toggleAdminPasswordButton.setAttribute('title', showingPassword ? 'Mostrar senha' : 'Ocultar senha');
+            });
+
             document.getElementById('adminLoginForm').addEventListener('submit', async (e) => {
                 e.preventDefault();
                 const btn = e.target.querySelector('button[type="submit"]');
@@ -3261,10 +3358,3 @@ app.get('/:slug', (c) => {
   `)
 })
 
-export default app
-import plaque from "./routes/plaque"
-app.use(
-  "/styles/*",
-  serveStatic({ root: "./src" })
-)
-app.route("/plaque", plaque)
