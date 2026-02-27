@@ -5,6 +5,7 @@ let requests = [];
 let tips = [];
 let autoRefresh = true;
 let userNotifications = [];
+let customRequests = [];
 
 // Send session_id cookie + header on every request (same setup as manage.js)
 axios.defaults.withCredentials = true;
@@ -120,6 +121,7 @@ async function init() {
   try {
     await loadArtist();
     await loadRequests();
+    await loadCustomRequests();
     await loadTips();
     renderPage();
     // Update dynamic elements that depend on the rendered DOM
@@ -132,6 +134,7 @@ async function init() {
       if (autoRefresh) {
         loadArtist();   // refresh today_requests_count
         loadRequests();
+        loadCustomRequests();
         loadTips();
       }
     }, 5000);
@@ -154,6 +157,12 @@ async function loadRequests() {
   const response = await axios.get(`/api/artists/${ARTIST_SLUG}/requests`);
   requests = response.data;
   updateRequestsDisplay();
+}
+
+async function loadCustomRequests() {
+  const response = await axios.get(`/api/artists/${ARTIST_SLUG}/custom-requests`);
+  customRequests = response.data;
+  updateCustomRequestsDisplay();
 }
 
 // Load tips
@@ -247,6 +256,10 @@ function renderPage() {
                 </div>
               </div>
               
+              <div id="customRequestsContainer" class="space-y-3 mb-4">
+                <!-- Custom requests will be inserted here -->
+              </div>
+
               <div id="requestsContainer" class="space-y-3 max-h-[600px] overflow-y-auto">
                 <!-- Requests will be inserted here -->
               </div>
@@ -406,6 +419,70 @@ function updateRequestsDisplay() {
       </div>
     `;
   }).join('');
+}
+
+// Update custom requests display (songs outside repertoire)
+function updateCustomRequestsDisplay() {
+  const container = document.getElementById('customRequestsContainer');
+  if (!container) return;
+
+  const pending = customRequests.filter(r => r.status === 'pending');
+
+  if (pending.length === 0) {
+    container.innerHTML = '';
+    return;
+  }
+
+  container.innerHTML = `
+    <div class="bg-orange-900/30 border border-orange-700 rounded-lg p-4">
+      <div class="flex items-center justify-between mb-3">
+        <h3 class="font-bold text-orange-300">
+          <i class="fas fa-question-circle mr-2"></i>
+          Músicas fora do repertório (${pending.length})
+        </h3>
+      </div>
+      <div class="space-y-3">
+        ${pending.map(req => `
+          <div class="bg-gray-800/70 border border-orange-600/40 rounded-lg p-3">
+            <div class="flex items-start justify-between gap-3">
+              <div class="flex-1">
+                <p class="font-bold text-lg text-white">${req.custom_song_title}</p>
+                <p class="text-sm text-gray-300 mt-1">
+                  <i class="fas fa-user mr-1"></i>${req.requester_name || 'Anônimo'}
+                  <span class="mx-2">•</span>
+                  <i class="fas fa-clock mr-1"></i>${formatTime(req.created_at)}
+                </p>
+                ${req.requester_message ? `<p class="text-sm mt-2 bg-gray-900/60 rounded p-2 italic">"${req.requester_message}"</p>` : ''}
+              </div>
+              <div class="flex flex-col sm:flex-row gap-2">
+                <button onclick="answerCustomRequest(${req.id}, 'known')" class="bg-green-600 hover:bg-green-700 px-3 py-2 rounded text-sm font-semibold">
+                  <i class="fas fa-check mr-1"></i>Sei tocar
+                </button>
+                <button onclick="answerCustomRequest(${req.id}, 'unknown')" class="bg-red-600 hover:bg-red-700 px-3 py-2 rounded text-sm font-semibold">
+                  <i class="fas fa-times mr-1"></i>Não sei
+                </button>
+              </div>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `;
+}
+
+async function answerCustomRequest(requestId, status) {
+  try {
+    await axios.patch(`/api/custom-requests/${requestId}`, { status });
+    await loadCustomRequests();
+    if (status === 'known') {
+      await loadRequests();
+      showSuccess('Pedido confirmado e adicionado à fila!');
+    } else {
+      showSuccess('Resposta enviada ao cliente.');
+    }
+  } catch (error) {
+    showError(error.response?.data?.error || 'Erro ao responder solicitação');
+  }
 }
 
 // Update tips display
