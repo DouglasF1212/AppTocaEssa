@@ -10,6 +10,8 @@ type Bindings = {
   PHOTOS: R2Bucket
 }
 
+const TRIAL_PERIOD_DAYS = 30
+
 const app = new Hono<{ Bindings: Bindings }>()
 
 app.onError((err, c) => {
@@ -156,6 +158,40 @@ function generateSessionId(): string {
   return crypto.randomUUID()
 }
 
+function getLicenseAccessInfo(user: any) {
+  const isAdmin = (user?.role || 'artist') === 'admin'
+  const isApproved = (user?.license_status || 'pending') === 'approved'
+
+  if (isAdmin || isApproved) {
+    return {
+      trial_days_left: 0,
+      trial_active: false,
+      trial_expired: false,
+      requires_license_payment: false,
+      has_access: true
+    }
+  }
+
+  const createdAt = user?.created_at ? new Date(user.created_at) : null
+  const now = new Date()
+  const msPerDay = 1000 * 60 * 60 * 24
+
+  const elapsedDays = createdAt && !Number.isNaN(createdAt.getTime())
+    ? Math.floor((now.getTime() - createdAt.getTime()) / msPerDay)
+    : TRIAL_PERIOD_DAYS
+
+  const trialDaysLeft = Math.max(0, TRIAL_PERIOD_DAYS - elapsedDays)
+  const trialExpired = elapsedDays >= TRIAL_PERIOD_DAYS
+
+  return {
+    trial_days_left: trialDaysLeft,
+    trial_active: !trialExpired,
+    trial_expired: trialExpired,
+    requires_license_payment: trialExpired,
+    has_access: !trialExpired
+  }
+}
+
 // Check if user is authenticated
 async function checkAuth(c: any): Promise<any> {
   // Try cookie first
@@ -171,7 +207,7 @@ async function checkAuth(c: any): Promise<any> {
   }
   
   const session = await c.env.DB.prepare(`
-    SELECT s.*, u.id as user_id, u.email, u.full_name, u.role, u.license_status, u.license_paid, u.account_paid
+    SELECT s.*, u.id as user_id, u.email, u.full_name, u.role, u.license_status, u.license_paid, u.account_paid, u.created_at
     FROM sessions s
     JOIN users u ON s.user_id = u.id
     WHERE s.id = ? AND s.expires_at > datetime('now')
@@ -235,9 +271,10 @@ app.post('/api/auth/register', async (c) => {
   
   return c.json({ 
     success: true,
-    message: 'Conta criada com sucesso!',
+    message: 'Conta criada com sucesso! Você tem 30 dias de teste grátis.',
     slug,
-    payment_required: true,
+    payment_required: false,
+    trial_days: TRIAL_PERIOD_DAYS,
     payment_amount: 199.00
   })
 })
@@ -267,6 +304,7 @@ app.post('/api/auth/login', async (c) => {
   
   // Create session — usar datetime SQLite para compatibilidade com a query de validação
   const sessionId = generateSessionId()
+  const licenseAccess = getLicenseAccessInfo(user)
   
   await c.env.DB.prepare(`
     INSERT INTO sessions (id, user_id, expires_at)
@@ -290,6 +328,7 @@ app.post('/api/auth/login', async (c) => {
       full_name: user.full_name,
       role: user.role || 'artist',
       license_status: user.license_status || 'pending',
+      ...licenseAccess,
       artist_slug: user.artist_slug
     },
     session_id: sessionId
@@ -381,7 +420,8 @@ app.get('/api/auth/me', async (c) => {
       role: session.role,
       license_status: session.license_status || 'pending',
       license_paid: session.license_paid || 0,
-      account_paid: session.account_paid || 0
+      account_paid: session.account_paid || 0,
+      ...getLicenseAccessInfo(session)
     },
     artist: artist
   })
@@ -3404,4 +3444,3 @@ app.get('/:slug', (c) => {
     </html>
   `)
 })
-
