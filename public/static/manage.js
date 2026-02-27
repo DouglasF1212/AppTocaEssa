@@ -7,6 +7,7 @@ let bankAccount = null;
 let currentTab = 'profile';
 let showSettings = { requests_open: 1, max_requests: 0 };
 let userNotifications = [];
+const TRIAL_PERIOD_DAYS = 30;
 
 // Configure axios: send cookies + interceptor that reads session_id fresh on every request
 axios.defaults.withCredentials = true;
@@ -383,6 +384,66 @@ function renderTabContent() {
 // Profile Tab
 // ======================
 
+
+function parseCreatedAtMs(createdAtRaw) {
+  if (!createdAtRaw || typeof createdAtRaw !== 'string') return Number.NaN;
+  const createdAtISO = createdAtRaw.includes('T')
+    ? createdAtRaw
+    : `${createdAtRaw.replace(' ', 'T')}Z`;
+  return Date.parse(createdAtISO);
+}
+
+function formatDateBR(date) {
+  if (!date || Number.isNaN(date.getTime())) return '-';
+  return date.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+}
+
+function renderLicenseStatusCard() {
+  if (!user) return '';
+
+  const createdAtMs = parseCreatedAtMs(user.created_at);
+  const trialEndDate = !Number.isNaN(createdAtMs)
+    ? new Date(createdAtMs + (TRIAL_PERIOD_DAYS * 24 * 60 * 60 * 1000))
+    : null;
+
+  const baseClass = 'rounded-lg border p-4 mb-6';
+
+  if (user.role === 'admin' || user.license_status === 'approved') {
+    return `
+      <div class="${baseClass} border-green-500/40 bg-green-900/20">
+        <p class="font-semibold text-green-300"><i class="fas fa-check-circle mr-2"></i>Licença ativa</p>
+        <p class="text-sm text-gray-300 mt-1">Sua licença foi aprovada e seu acesso está liberado sem limite de período.</p>
+      </div>
+    `;
+  }
+
+  if (user.trial_active) {
+    return `
+      <div class="${baseClass} border-blue-500/40 bg-blue-900/20">
+        <p class="font-semibold text-blue-300"><i class="fas fa-flask mr-2"></i>Período de teste ativo</p>
+        <p class="text-sm text-gray-300 mt-1">Você está no teste grátis com <strong>${user.trial_days_left ?? 0} dia(s)</strong> restante(s).</p>
+        <p class="text-xs text-gray-400 mt-1">Previsão de término: ${formatDateBR(trialEndDate)}</p>
+      </div>
+    `;
+  }
+
+  const statusLabel = user.license_status === 'paid'
+    ? 'Comprovante enviado, aguardando aprovação do administrador.'
+    : user.license_status === 'rejected'
+      ? 'Licença rejeitada. Reenvie o pagamento para liberar o acesso.'
+      : 'Período de teste finalizado. Para continuar usando, pague a licença.';
+
+  return `
+    <div class="${baseClass} border-yellow-500/40 bg-yellow-900/20">
+      <p class="font-semibold text-yellow-300"><i class="fas fa-id-card mr-2"></i>Status da licença: ${user.license_status || 'pending'}</p>
+      <p class="text-sm text-gray-300 mt-1">${statusLabel}</p>
+      <a href="/license-payment" class="inline-flex mt-3 bg-yellow-600 hover:bg-yellow-700 px-3 py-2 rounded-lg text-sm font-semibold transition">
+        Ir para pagamento da licença
+      </a>
+    </div>
+  `;
+}
+
 function renderProfileTab() {
   return `
     <div class="max-w-4xl mx-auto">
@@ -390,6 +451,8 @@ function renderProfileTab() {
         <i class="fas fa-user-circle mr-2"></i>
         Meu Perfil
       </h2>
+
+      ${renderLicenseStatusCard()}
       
       <div class="bg-gray-800 rounded-xl p-8 border border-gray-700">
         <form onsubmit="handleSaveProfile(event)" class="space-y-6">

@@ -1246,6 +1246,57 @@ app.get('/api/admin/users', async (c) => {
   }))
 
   return c.json(usersWithLicenseAccess)
+  codex/add-30-day-trial-period-for-app-qvcp6g
+})
+
+
+// Simulate trial expiration for a user (admin/testing helper)
+app.post('/api/admin/users/:id/simulate-trial-expired', async (c) => {
+  const adminSession = await checkAdminAuth(c)
+  if (!adminSession) return c.json({ error: 'Acesso negado' }, 403)
+
+  const userId = c.req.param('id')
+
+  const targetUser = await c.env.DB.prepare(`
+    SELECT id, role, license_status, created_at
+    FROM users
+    WHERE id = ?
+  `).bind(userId).first()
+
+  if (!targetUser) {
+    return c.json({ error: 'Usuário não encontrado' }, 404)
+  }
+
+  if (targetUser.role === 'admin') {
+    return c.json({ error: 'Não é possível simular trial para usuário admin' }, 400)
+  }
+
+  if (targetUser.license_status === 'approved') {
+    return c.json({ error: 'Usuário com licença aprovada não pode ter trial expirado por simulação' }, 400)
+  }
+
+  await c.env.DB.prepare(`
+    UPDATE users
+    SET created_at = datetime('now', '-31 day')
+    WHERE id = ?
+  `).bind(userId).run()
+
+  const updatedUser = await c.env.DB.prepare(`
+    SELECT id, role, license_status, created_at
+    FROM users
+    WHERE id = ?
+  `).bind(userId).first()
+
+  return c.json({
+    success: true,
+    message: 'Fim do período de teste simulado com sucesso',
+    user: {
+      ...updatedUser,
+      ...getLicenseAccessInfo(updatedUser)
+    }
+  })
+
+ main
 })
 
 // Change user password (admin)
@@ -3029,11 +3080,15 @@ app.get('/admin/panel', (c) => {
           }
         </script>
         <script src="https://cdn.jsdelivr.net/npm/axios@1.6.0/dist/axios.min.js"></script>
-<<<<<<< codex/open-the-repository-oamf1k
+codex/add-30-day-trial-period-for-app-qvcp6g
         <script src="/static/admin-panel.js?v=9"></script>
-=======
+
+codex/open-the-repository-oamf1k
+        <script src="/static/admin-panel.js?v=9"></script>
+
         <script src="/static/admin-panel.js?v=8"></script>
->>>>>>> main
+main
+main
     <script>
       if ('serviceWorker' in navigator) {
         navigator.serviceWorker.register('/sw.js?v=9')
@@ -3153,7 +3208,7 @@ app.get('/admin/artists', (c) => {
       </div>
 
       <script src="https://cdn.jsdelivr.net/npm/axios@1.6.0/dist/axios.min.js"></script>
-      <script src="/static/admin-artists.js?v=1"></script>
+      <script src="/static/admin-artists.js?v=2"></script>
     </body>
     </html>
   `)
@@ -3214,7 +3269,11 @@ app.get('/manage', (c) => {
         </div>
         
         <script src="https://cdn.jsdelivr.net/npm/axios@1.6.0/dist/axios.min.js"></script>
+codex/add-30-day-trial-period-for-app-qvcp6g
+        <script src="/static/manage.js?v=11"></script>
+
         <script src="/static/manage.js?v=10"></script>
+main
         <script>init()</script>
     <script>
       if ('serviceWorker' in navigator) {

@@ -393,6 +393,12 @@ function renderUsers() {
                         <i class="fas fa-key"></i>
                       </button>
                       ${user.role !== 'admin' ? `
+                        ${user.trial_active ? `
+                          <button onclick="simulateTrialExpired(${user.id}, '${user.full_name.replace(/'/g,"\\'")}')"
+                            class="bg-orange-600 hover:bg-orange-700 px-3 py-1 rounded text-sm transition" title="Simular fim do teste">
+                            <i class="fas fa-flask"></i>
+                          </button>
+                        ` : ''}
                         <button onclick="confirmDeleteUser(${user.id}, '${user.full_name.replace(/'/g,"\\'")}')"
                           class="bg-red-600 hover:bg-red-700 px-3 py-1 rounded text-sm transition" title="Excluir">
                           <i class="fas fa-trash"></i>
@@ -1128,6 +1134,20 @@ async function handleAdminChangePassword(event, userId) {
     renderPage();
   } catch (error) {
     showError(error.response?.data?.error || 'Erro ao alterar senha');
+  }
+}
+
+
+async function simulateTrialExpired(userId, userName) {
+  if (!confirm(`Simular fim do teste grátis para "${userName}"?\n\nIsso vai mover o cadastro para mais de 30 dias e pode bloquear acesso até o pagamento.`)) return;
+  try {
+    await axios.post(`/api/admin/users/${userId}/simulate-trial-expired`);
+    showSuccess('Fim do teste simulado com sucesso.');
+    await Promise.allSettled([loadUsers(), loadPendingLicenses(), loadArtistsList(), loadStats()]);
+    renderNavigation();
+    renderPage();
+  } catch (error) {
+    showError(error.response?.data?.error || 'Erro ao simular fim do teste');
   }
 }
 
