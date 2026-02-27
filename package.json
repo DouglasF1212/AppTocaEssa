@@ -13,7 +13,8 @@
     "db:seed": "wrangler d1 execute webapp-production --local --file=./seed_simple.sql",
     "db:reset": "rm -rf .wrangler/state/v3/d1 && npm run db:migrate:local && npm run db:seed",
     "db:console:local": "wrangler d1 execute webapp-production --local",
-    "clean-port": "fuser -k 3000/tcp 2>/dev/null || true"
+    "clean-port": "fuser -k 3000/tcp 2>/dev/null || true",
+    "icons": "bash public/create-icons.sh"
   },
   "dependencies": {
     "hono": "^4.11.9"
