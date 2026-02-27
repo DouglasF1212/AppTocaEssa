@@ -1454,10 +1454,11 @@ app.put('/api/admin/settings/:key', async (c) => {
   const { value } = await c.req.json()
   
   await c.env.DB.prepare(`
-    UPDATE app_settings 
-    SET setting_value = ?, updated_at = datetime('now')
-    WHERE setting_key = ?
-  `).bind(value, key).run()
+    INSERT INTO app_settings (setting_key, setting_value, updated_at)
+    VALUES (?, ?, datetime('now'))
+    ON CONFLICT(setting_key)
+    DO UPDATE SET setting_value = excluded.setting_value, updated_at = excluded.updated_at
+  `).bind(key, value ?? '').run()
   
   return c.json({ success: true, key, value })
 })
@@ -1878,19 +1879,56 @@ app.post('/api/artists/:slug/qrcode/regenerate', async (c) => {
 // ======================
 
 // Home page - Landing page
-app.get('/', (c) => {
+app.get('/', async (c) => {
+  const defaults: Record<string, string> = {
+    app_name: 'TOCA ESSA',
+    primary_color: '#8b5cf6',
+    secondary_color: '#3b82f6',
+    logo_url: '',
+    welcome_message: 'Conecte-se com seu público durante shows ao vivo',
+    footer_text: '© 2024 TOCA ESSA - Conectando artistas e público'
+  }
+
+  let settings = { ...defaults }
+  try {
+    const { results } = await c.env.DB.prepare(`
+      SELECT setting_key, setting_value FROM app_settings
+      WHERE setting_key IN ('app_name','primary_color','secondary_color','logo_url','welcome_message','footer_text')
+    `).all()
+
+    for (const row of (results || []) as any[]) {
+      if (row?.setting_key) settings[row.setting_key] = row.setting_value || ''
+    }
+  } catch (_) {
+    // fallback para defaults quando app_settings não existir/estiver indisponível
+  }
+
+  const escapeHtml = (value: string) => String(value || '')
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#39;')
+
+  const appName = escapeHtml(settings.app_name || defaults.app_name)
+  const welcomeMessage = escapeHtml(settings.welcome_message || defaults.welcome_message)
+  const footerText = escapeHtml(settings.footer_text || defaults.footer_text)
+  const logoUrl = escapeHtml(settings.logo_url || '')
+  const primaryColor = escapeHtml(settings.primary_color || defaults.primary_color)
+  const secondaryColor = escapeHtml(settings.secondary_color || defaults.secondary_color)
+
   return c.html(`
     <!DOCTYPE html>
     <html lang="pt-BR">
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-        <title>TOCA ESSA - Sistema para Artistas de Shows ao Vivo</title>
-        <meta name="theme-color" content="#8b5cf6">
+        <title>${appName} - Sistema para Artistas de Shows ao Vivo</title>
+        <meta name="theme-color" content="${primaryColor}">
         <meta name="mobile-web-app-capable" content="yes">
         <meta name="apple-mobile-web-app-capable" content="yes">
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-        <meta name="apple-mobile-web-app-title" content="TOCA ESSA">
+        <meta name="apple-mobile-web-app-title" content="${appName}">
         <link rel="manifest" href="/manifest.json">
         <link rel="apple-touch-icon" href="/apple-touch-icon.png">
         <link rel="apple-touch-icon" sizes="57x57"   href="/apple-touch-icon-57x57.png">
@@ -1922,15 +1960,15 @@ app.get('/', (c) => {
         <script src="https://cdn.tailwindcss.com"></script>
         <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
     </head>
-    <body class="bg-gradient-to-br from-purple-900 via-indigo-900 to-blue-900 text-white min-h-screen">
+    <body class="text-white min-h-screen" style="background: linear-gradient(135deg, ${primaryColor} 0%, #1f2937 45%, ${secondaryColor} 100%);">
         <div class="container mx-auto px-4 py-8">
             <!-- Header -->
             <header class="text-center mb-12">
                 <h1 class="text-6xl font-bold mb-4">
-                    🎵 TOCA ESSA
+                    ${logoUrl ? `<img src="${logoUrl}" alt="${appName}" style="max-height:90px; margin:0 auto 12px auto;" />` : `🎵 ${appName}`}
                 </h1>
                 <p class="text-2xl text-gray-300">
-                    Conecte-se com seu público durante shows ao vivo
+                    ${welcomeMessage}
                 </p>
             </header>
             
@@ -2079,7 +2117,7 @@ app.get('/', (c) => {
             
             <!-- Footer -->
             <footer class="text-center text-gray-400 border-t border-white/10 pt-8">
-                <p>© 2024 TOCA ESSA - Conectando artistas e público</p>
+                <p>${footerText}</p>
                 <div class="mt-4 flex gap-4 justify-center flex-wrap">
                     <a href="/download" class="hover:text-white transition">
                         <i class="fas fa-download mr-1"></i>
@@ -2095,7 +2133,7 @@ app.get('/', (c) => {
         </div>
     <script>
       if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('/sw.js?v=8')
+        navigator.serviceWorker.register('/sw.js?v=9')
           .then(reg => console.log('✅ SW registrado:', reg.scope))
           .catch(err => console.log('SW erro:', err));
       }
@@ -2447,7 +2485,7 @@ app.get('/login', (c) => {
         </script>
     <script>
       if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('/sw.js?v=8')
+        navigator.serviceWorker.register('/sw.js?v=9')
           .then(reg => console.log('✅ SW registrado:', reg.scope))
           .catch(err => console.log('SW erro:', err));
       }
@@ -2547,7 +2585,7 @@ app.get('/register', (c) => {
         </script>
     <script>
       if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('/sw.js?v=8')
+        navigator.serviceWorker.register('/sw.js?v=9')
           .then(reg => console.log('✅ SW registrado:', reg.scope))
           .catch(err => console.log('SW erro:', err));
       }
@@ -2609,7 +2647,7 @@ app.get('/license-payment', (c) => {
         <script>init()</script>
     <script>
       if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('/sw.js?v=8')
+        navigator.serviceWorker.register('/sw.js?v=9')
           .then(reg => console.log('✅ SW registrado:', reg.scope))
           .catch(err => console.log('SW erro:', err));
       }
@@ -2760,7 +2798,7 @@ app.get('/admin/login', (c) => {
         </script>
     <script>
       if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('/sw.js?v=8')
+        navigator.serviceWorker.register('/sw.js?v=9')
           .then(reg => console.log('✅ SW registrado:', reg.scope))
           .catch(err => console.log('SW erro:', err));
       }
@@ -2896,10 +2934,10 @@ app.get('/admin/panel', (c) => {
           }
         </script>
         <script src="https://cdn.jsdelivr.net/npm/axios@1.6.0/dist/axios.min.js"></script>
-        <script src="/static/admin-panel.js?v=7"></script>
+        <script src="/static/admin-panel.js?v=8"></script>
     <script>
       if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('/sw.js?v=8')
+        navigator.serviceWorker.register('/sw.js?v=9')
           .then(reg => console.log('✅ SW registrado:', reg.scope))
           .catch(err => console.log('SW erro:', err));
       }
@@ -3081,7 +3119,7 @@ app.get('/manage', (c) => {
         <script>init()</script>
     <script>
       if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('/sw.js?v=8')
+        navigator.serviceWorker.register('/sw.js?v=9')
           .then(reg => console.log('✅ SW registrado:', reg.scope))
           .catch(err => console.log('SW erro:', err));
       }
@@ -3170,7 +3208,7 @@ app.get('/payment/:slug/:tipId', async (c) => {
         <script>init()</script>
     <script>
       if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('/sw.js?v=8')
+        navigator.serviceWorker.register('/sw.js?v=9')
           .then(reg => console.log('✅ SW registrado:', reg.scope))
           .catch(err => console.log('SW erro:', err));
       }
@@ -3243,7 +3281,7 @@ app.get('/dashboard/:slug', (c) => {
         <script>init()</script>
     <script>
       if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('/sw.js?v=8')
+        navigator.serviceWorker.register('/sw.js?v=9')
           .then(reg => console.log('✅ SW registrado:', reg.scope))
           .catch(err => console.log('SW erro:', err));
       }
@@ -3357,7 +3395,7 @@ app.get('/:slug', (c) => {
         <!-- PWA Service Worker -->
         <script>
           if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('/sw.js?v=8')
+            navigator.serviceWorker.register('/sw.js?v=9')
               .then(reg => console.log('✅ SW registrado:', reg.scope))
               .catch(err => console.log('SW erro:', err));
           }
