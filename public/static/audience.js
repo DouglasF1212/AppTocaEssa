@@ -496,6 +496,14 @@ function renderPage() {
         </div>
       </div>
 
+      <div class="text-center mb-8">
+        <p class="text-gray-300 mb-3">Não encontrou no repertório?</p>
+        <button onclick="showCustomRequestModal()" class="bg-gray-700 hover:bg-gray-600 px-6 py-3 rounded-xl font-semibold text-base transition shadow-lg border border-gray-500">
+          <i class="fas fa-question-circle mr-2"></i>
+          Pedir música fora do repertório
+        </button>
+      </div>
+
       <!-- Request Modal -->
       <div id="requestModal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
         <div class="bg-gray-800 rounded-2xl p-8 max-w-md w-full max-h-[90vh] overflow-y-auto">
