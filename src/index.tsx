@@ -172,12 +172,17 @@ function getLicenseAccessInfo(user: any) {
     }
   }
 
-  const createdAt = user?.created_at ? new Date(user.created_at) : null
+  const createdAtRaw = typeof user?.created_at === 'string' ? user.created_at : ''
+  const createdAtISO = createdAtRaw.includes('T')
+    ? createdAtRaw
+    : (createdAtRaw ? createdAtRaw.replace(' ', 'T') + 'Z' : '')
+  const createdAtMs = createdAtISO ? Date.parse(createdAtISO) : Number.NaN
+
   const now = new Date()
   const msPerDay = 1000 * 60 * 60 * 24
 
-  const elapsedDays = createdAt && !Number.isNaN(createdAt.getTime())
-    ? Math.floor((now.getTime() - createdAt.getTime()) / msPerDay)
+  const elapsedDays = !Number.isNaN(createdAtMs)
+    ? Math.floor((now.getTime() - createdAtMs) / msPerDay)
     : TRIAL_PERIOD_DAYS
 
   const trialDaysLeft = Math.max(0, TRIAL_PERIOD_DAYS - elapsedDays)
@@ -2483,7 +2488,7 @@ app.get('/login', (c) => {
     <body class="bg-gradient-to-br from-purple-900 via-indigo-900 to-blue-900 text-white min-h-screen">
         <div id="app"></div>
         <script src="https://cdn.jsdelivr.net/npm/axios@1.6.0/dist/axios.min.js"></script>
-        <script src="/static/auth.js?v=4"></script>
+        <script src="/static/auth.js?v=5"></script>
         <script>
           renderLoginPage()
 
@@ -2583,7 +2588,7 @@ app.get('/register', (c) => {
     <body class="bg-gradient-to-br from-purple-900 via-indigo-900 to-blue-900 text-white min-h-screen">
         <div id="app"></div>
         <script src="https://cdn.jsdelivr.net/npm/axios@1.6.0/dist/axios.min.js"></script>
-        <script src="/static/auth.js?v=4"></script>
+        <script src="/static/auth.js?v=5"></script>
         <script>
           renderRegisterPage()
 
@@ -3155,7 +3160,7 @@ app.get('/manage', (c) => {
         </div>
         
         <script src="https://cdn.jsdelivr.net/npm/axios@1.6.0/dist/axios.min.js"></script>
-        <script src="/static/manage.js?v=9"></script>
+        <script src="/static/manage.js?v=10"></script>
         <script>init()</script>
     <script>
       if ('serviceWorker' in navigator) {
