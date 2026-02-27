@@ -1239,8 +1239,13 @@ app.get('/api/admin/users', async (c) => {
     LEFT JOIN artists a ON u.id = a.user_id
     ORDER BY u.created_at DESC
   `).all()
-  
-  return c.json(results)
+
+  const usersWithLicenseAccess = (results || []).map((user: any) => ({
+    ...user,
+    ...getLicenseAccessInfo(user)
+  }))
+
+  return c.json(usersWithLicenseAccess)
 })
 
 // Change user password (admin)
@@ -1400,6 +1405,7 @@ app.get('/api/admin/licenses/pending', async (c) => {
       u.email,
       u.full_name,
       u.license_status,
+      u.created_at,
       u.license_paid_date,
       a.name as artist_name,
       a.slug as artist_slug,
@@ -1417,8 +1423,18 @@ app.get('/api/admin/licenses/pending', async (c) => {
       END,
       lp.payment_date DESC
   `).all()
-  
-  return c.json(results)
+
+  const licensesRequiringReview = (results || [])
+    .map((license: any) => {
+      const trial = getLicenseAccessInfo(license)
+      return {
+        ...license,
+        ...trial
+      }
+    })
+    .filter((license: any) => !license.trial_active)
+
+  return c.json(licensesRequiringReview)
 })
 
 // Approve license (admin)
@@ -1590,6 +1606,7 @@ app.get('/api/admin/artists', async (c) => {
       u.email,
       u.full_name as user_name,
       u.license_status,
+      u.created_at as user_created_at,
       COUNT(DISTINCT s.id) as song_count,
       COUNT(DISTINCT sr.id) as request_count,
       COALESCE(SUM(CASE WHEN t.payment_status = 'completed' THEN t.amount ELSE 0 END), 0) as total_tips
@@ -1601,8 +1618,17 @@ app.get('/api/admin/artists', async (c) => {
     GROUP BY a.id
     ORDER BY a.created_at DESC
   `).all()
-  
-  return c.json(results)
+
+  const artistsWithTrial = (results || []).map((artist: any) => ({
+    ...artist,
+    ...getLicenseAccessInfo({
+      role: 'artist',
+      license_status: artist.license_status,
+      created_at: artist.user_created_at || artist.created_at
+    })
+  }))
+
+  return c.json(artistsWithTrial)
 })
 
 // Get single artist details (admin)
