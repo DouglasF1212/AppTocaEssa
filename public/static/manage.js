@@ -1164,7 +1164,6 @@ async function exportCroppedToCanvas(canvas, outW, outH) {
     };
     reader.readAsDataURL(resized);
   });
-}
 
 // Remove photo
 async function removePhoto() {
