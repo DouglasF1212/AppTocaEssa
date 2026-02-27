@@ -10,6 +10,8 @@ type Bindings = {
   PHOTOS: R2Bucket
 }
 
+const TRIAL_PERIOD_DAYS = 30
+
 const app = new Hono<{ Bindings: Bindings }>()
 
 app.onError((err, c) => {
@@ -156,6 +158,45 @@ function generateSessionId(): string {
   return crypto.randomUUID()
 }
 
+function getLicenseAccessInfo(user: any) {
+  const isAdmin = (user?.role || 'artist') === 'admin'
+  const isApproved = (user?.license_status || 'pending') === 'approved'
+
+  if (isAdmin || isApproved) {
+    return {
+      trial_days_left: 0,
+      trial_active: false,
+      trial_expired: false,
+      requires_license_payment: false,
+      has_access: true
+    }
+  }
+
+  const createdAtRaw = typeof user?.created_at === 'string' ? user.created_at : ''
+  const createdAtISO = createdAtRaw.includes('T')
+    ? createdAtRaw
+    : (createdAtRaw ? createdAtRaw.replace(' ', 'T') + 'Z' : '')
+  const createdAtMs = createdAtISO ? Date.parse(createdAtISO) : Number.NaN
+
+  const now = new Date()
+  const msPerDay = 1000 * 60 * 60 * 24
+
+  const elapsedDays = !Number.isNaN(createdAtMs)
+    ? Math.floor((now.getTime() - createdAtMs) / msPerDay)
+    : TRIAL_PERIOD_DAYS
+
+  const trialDaysLeft = Math.max(0, TRIAL_PERIOD_DAYS - elapsedDays)
+  const trialExpired = elapsedDays >= TRIAL_PERIOD_DAYS
+
+  return {
+    trial_days_left: trialDaysLeft,
+    trial_active: !trialExpired,
+    trial_expired: trialExpired,
+    requires_license_payment: trialExpired,
+    has_access: !trialExpired
+  }
+}
+
 // Check if user is authenticated
 async function checkAuth(c: any): Promise<any> {
   // Try cookie first
@@ -171,7 +212,7 @@ async function checkAuth(c: any): Promise<any> {
   }
   
   const session = await c.env.DB.prepare(`
-    SELECT s.*, u.id as user_id, u.email, u.full_name, u.role, u.license_status, u.license_paid, u.account_paid
+    SELECT s.*, u.id as user_id, u.email, u.full_name, u.role, u.license_status, u.license_paid, u.account_paid, u.created_at
     FROM sessions s
     JOIN users u ON s.user_id = u.id
     WHERE s.id = ? AND s.expires_at > datetime('now')
@@ -235,9 +276,10 @@ app.post('/api/auth/register', async (c) => {
   
   return c.json({ 
     success: true,
-    message: 'Conta criada com sucesso!',
+    message: 'Conta criada com sucesso! Você tem 30 dias de teste grátis.',
     slug,
-    payment_required: true,
+    payment_required: false,
+    trial_days: TRIAL_PERIOD_DAYS,
     payment_amount: 199.00
   })
 })
@@ -267,6 +309,7 @@ app.post('/api/auth/login', async (c) => {
   
   // Create session — usar datetime SQLite para compatibilidade com a query de validação
   const sessionId = generateSessionId()
+  const licenseAccess = getLicenseAccessInfo(user)
   
   await c.env.DB.prepare(`
     INSERT INTO sessions (id, user_id, expires_at)
@@ -290,6 +333,7 @@ app.post('/api/auth/login', async (c) => {
       full_name: user.full_name,
       role: user.role || 'artist',
       license_status: user.license_status || 'pending',
+      ...licenseAccess,
       artist_slug: user.artist_slug
     },
     session_id: sessionId
@@ -381,7 +425,8 @@ app.get('/api/auth/me', async (c) => {
       role: session.role,
       license_status: session.license_status || 'pending',
       license_paid: session.license_paid || 0,
-      account_paid: session.account_paid || 0
+      account_paid: session.account_paid || 0,
+      ...getLicenseAccessInfo(session)
     },
     artist: artist
   })
@@ -2443,7 +2488,7 @@ app.get('/login', (c) => {
     <body class="bg-gradient-to-br from-purple-900 via-indigo-900 to-blue-900 text-white min-h-screen">
         <div id="app"></div>
         <script src="https://cdn.jsdelivr.net/npm/axios@1.6.0/dist/axios.min.js"></script>
-        <script src="/static/auth.js?v=4"></script>
+        <script src="/static/auth.js?v=5"></script>
         <script>
           renderLoginPage()
 
@@ -2543,7 +2588,7 @@ app.get('/register', (c) => {
     <body class="bg-gradient-to-br from-purple-900 via-indigo-900 to-blue-900 text-white min-h-screen">
         <div id="app"></div>
         <script src="https://cdn.jsdelivr.net/npm/axios@1.6.0/dist/axios.min.js"></script>
-        <script src="/static/auth.js?v=4"></script>
+        <script src="/static/auth.js?v=5"></script>
         <script>
           renderRegisterPage()
 
@@ -3115,7 +3160,7 @@ app.get('/manage', (c) => {
         </div>
         
         <script src="https://cdn.jsdelivr.net/npm/axios@1.6.0/dist/axios.min.js"></script>
-        <script src="/static/manage.js?v=9"></script>
+        <script src="/static/manage.js?v=10"></script>
         <script>init()</script>
     <script>
       if ('serviceWorker' in navigator) {
@@ -3404,4 +3449,3 @@ app.get('/:slug', (c) => {
     </html>
   `)
 })
-

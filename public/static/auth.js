@@ -339,7 +339,7 @@ async function handleLogin(event) {
     try { localStorage.setItem('license_status', user.license_status); } catch (e) {}
 
     if (user.role === 'admin') return window.location.replace('/admin/panel');
-    if (user.license_status === 'approved') return window.location.replace('/manage');
+    if (user.license_status === 'approved' || user.trial_active) return window.location.replace('/manage');
     return window.location.replace('/license-payment');
 
   } catch (error) {
@@ -373,7 +373,7 @@ async function handleRegister(event) {
         try { sessionStorage.setItem('pending_password', password); } catch(e) {}
         setTimeout(() => window.location.href = '/license-payment', 2000);
       } else {
-        showSuccess('Conta criada com sucesso! Faça login para continuar.');
+        showSuccess('Conta criada! Você ganhou 30 dias de teste grátis. Faça login para continuar.');
         setTimeout(() => window.location.href = '/login', 2000);
       }
       return;
