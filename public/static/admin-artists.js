@@ -139,7 +139,10 @@ function formatDate(d) {
   } catch (e) { return '-'; }
 }
 
-function statusBadge(status) {
+function statusBadge(status, trialActive, trialDaysLeft) {
+  if (trialActive) {
+    return `<span class="badge-paid" style="padding:3px 10px;border-radius:9999px;font-size:0.75rem;font-weight:600;">🧪 Teste grátis (${trialDaysLeft ?? 0}d)</span>`;
+  }
   const map = {
     approved: ['badge-approved', '✅ Aprovado'],
     paid:     ['badge-paid',     '⏳ Pago'],
@@ -153,7 +156,8 @@ function statusBadge(status) {
 function renderStats() {
   const total    = allArtists.length;
   const approved = allArtists.filter(a => a.license_status === 'approved').length;
-  const pending  = allArtists.filter(a => a.license_status === 'pending').length;
+  const pending  = allArtists.filter(a => a.license_status === 'pending' && !a.trial_active).length;
+  const trial    = allArtists.filter(a => a.trial_active).length;
   const paid     = allArtists.filter(a => a.license_status === 'paid').length;
   const totalSongs = allArtists.reduce((s, a) => s + (Number(a.song_count) || 0), 0);
   const totalReqs  = allArtists.reduce((s, a) => s + (Number(a.request_count) || 0), 0);
@@ -163,6 +167,7 @@ function renderStats() {
     { label: 'Aprovados', value: approved, color: '#16a34a', icon: 'fa-check-circle' },
     { label: 'Pagos',  value: paid,    color: '#ca8a04', icon: 'fa-clock' },
     { label: 'Pendentes', value: pending, color: '#6b7280', icon: 'fa-hourglass-half' },
+    { label: 'Em teste', value: trial, color: '#2563eb', icon: 'fa-flask' },
     { label: 'Músicas',   value: totalSongs, color: '#2563eb', icon: 'fa-music' },
     { label: 'Pedidos',   value: totalReqs,  color: '#9333ea', icon: 'fa-list' },
   ];
@@ -223,7 +228,7 @@ function renderTable() {
       <tr class="table-row" style="border-top:1px solid rgba(255,255,255,0.06);transition:background 0.15s;">
         <td style="padding:12px 16px;font-weight:600;">${name}</td>
         <td style="padding:12px 16px;font-family:monospace;font-size:0.85rem;color:#d1d5db;">${slug}</td>
-        <td style="padding:12px 16px;">${statusBadge(a.license_status)}</td>
+        <td style="padding:12px 16px;">${statusBadge(a.license_status, a.trial_active, a.trial_days_left)}</td>
         <td style="padding:12px 16px;font-size:0.85rem;color:#d1d5db;">${licDate}</td>
         <td style="padding:12px 16px;text-align:center;">
           <span style="background:rgba(37,99,235,0.2);color:#93c5fd;padding:3px 10px;border-radius:9999px;font-size:0.8rem;font-weight:600;">${songs}</span>
