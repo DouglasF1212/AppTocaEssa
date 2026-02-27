@@ -456,14 +456,10 @@ function renderPage() {
 
       <!-- Action Button -->
       <div class="grid md:grid-cols-1 gap-4 mb-6">
-        <div class="flex flex-col sm:flex-row gap-3 justify-center">
+        <div class="flex justify-center">
           <button onclick="showRequestModal()" class="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 px-8 py-4 rounded-xl font-bold text-lg transition shadow-lg">
             <i class="fas fa-guitar mr-2"></i>
             Pedir Música
-          </button>
-          <button onclick="selectedSong = null; showRequestModal();" class="bg-gray-700 hover:bg-gray-600 px-6 py-4 rounded-xl font-semibold text-lg transition shadow-lg">
-            <i class="fas fa-question-circle mr-2"></i>
-            Música fora do repertório
           </button>
         </div>
       </div>
@@ -490,6 +486,13 @@ function renderPage() {
 
         <div id="songsContainer" class="grid md:grid-cols-2 lg:grid-cols-3 gap-4 max-h-[600px] overflow-y-auto">
           ${renderSongs()}
+        </div>
+
+        <div class="mt-6 text-center">
+          <button onclick="showCustomRequestModal()" class="bg-gray-700 hover:bg-gray-600 px-6 py-3 rounded-xl font-semibold text-base transition shadow-lg">
+            <i class="fas fa-question-circle mr-2"></i>
+            Música fora do repertório
+          </button>
         </div>
       </div>
 
@@ -776,6 +779,74 @@ function showBlockedError(message) {
   const form = document.getElementById('tipOnlyForm');
   if (form) form.appendChild(el);
   setTimeout(() => el.remove(), 5000);
+}
+
+// Show custom request modal (song outside repertoire)
+async function showCustomRequestModal() {
+  await loadArtist();
+  if (isRequestsBlocked()) {
+    renderBlockedPage();
+    return;
+  }
+
+  selectedSong = null;
+
+  const modal = document.getElementById('requestModal');
+  const content = document.getElementById('requestContent');
+
+  content.innerHTML = `
+    <p class="text-gray-300 mb-4">Não achou no repertório? Pergunte ao artista se ele sabe tocar:</p>
+
+    <form id="customRequestForm" onsubmit="submitRequest(event)">
+      <div class="mb-4">
+        <label class="block text-sm font-semibold mb-2">Nome da música</label>
+        <input
+          type="text"
+          id="customSongTitle"
+          class="w-full px-4 py-2 rounded-lg bg-gray-700 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-purple-500 text-white"
+          placeholder="Ex.: Evidências"
+          required
+        >
+      </div>
+
+      <div class="mb-4">
+        <label class="block text-sm font-semibold mb-2">Seu nome (opcional)</label>
+        <input
+          type="text"
+          id="requesterName"
+          class="w-full px-4 py-2 rounded-lg bg-gray-700 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-purple-500 text-white"
+          placeholder="Anônimo"
+        >
+      </div>
+
+      <div class="mb-4">
+        <label class="block text-sm font-semibold mb-2">Mensagem (opcional)</label>
+        <textarea
+          id="requesterMessage"
+          class="w-full px-4 py-2 rounded-lg bg-gray-700 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-purple-500 text-white"
+          rows="2"
+          placeholder="Pergunte se ele sabe tocar essa música..."
+        ></textarea>
+      </div>
+
+      <div class="bg-blue-900/30 border border-blue-700 rounded-lg p-3 text-sm text-blue-200 mb-4">
+        <i class="fas fa-info-circle mr-1"></i>
+        Esse pedido só entra na fila depois que o artista confirmar que sabe tocar.
+      </div>
+
+      <div class="flex gap-3 mt-6">
+        <button type="button" onclick="closeModal('requestModal')" class="flex-1 bg-gray-600 hover:bg-gray-700 px-6 py-3 rounded-lg font-semibold transition">
+          Cancelar
+        </button>
+        <button type="submit" class="flex-1 bg-purple-600 hover:bg-purple-700 px-6 py-3 rounded-lg font-semibold transition">
+          <i class="fas fa-paper-plane mr-2"></i>
+          Perguntar ao Artista
+        </button>
+      </div>
+    </form>
+  `;
+
+  modal.classList.remove('hidden');
 }
 
 // Show request modal
