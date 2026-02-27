@@ -777,6 +777,13 @@ function renderSettings() {
             <div>
               <label class="block text-sm font-semibold mb-2 text-gray-300">URL da Logo</label>
               <input id="layout_logo_url" type="url" value="${escapeHtml(layout.logo_url || '')}" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-purple-500" placeholder="https://.../logo.png">
+              <div class="mt-2 flex items-center gap-2 flex-wrap">
+                <input id="layout_logo_file" type="file" accept="image/*" onchange="handleLogoUpload(event)" class="text-xs text-gray-300">
+                <button type="button" onclick="document.getElementById('layout_logo_file').click()" class="bg-indigo-600 hover:bg-indigo-700 px-3 py-1 rounded text-xs font-semibold">
+                  <i class="fas fa-upload mr-1"></i>Enviar do computador/galeria
+                </button>
+              </div>
+              <p class="text-xs text-gray-400 mt-1">Você pode informar URL ou enviar uma imagem do dispositivo.</p>
             </div>
             <div>
               <label class="block text-sm font-semibold mb-2 text-gray-300">Cor Primária</label>
@@ -788,6 +795,13 @@ function renderSettings() {
             </div>
           </div>
 
+          <div id="layout_logo_preview_wrap" class="${layout.logo_url ? '' : 'hidden'}">
+            <label class="block text-sm font-semibold mb-2 text-gray-300">Preview da logo</label>
+            <div class="bg-gray-900/70 border border-gray-700 rounded-lg p-4 inline-block">
+              <img id="layout_logo_preview" src="${escapeHtml(layout.logo_url || '')}" alt="Preview da logo" style="max-height:72px;" />
+            </div>
+          </div>
+
           <div>
             <label class="block text-sm font-semibold mb-2 text-gray-300">Mensagem de Boas-vindas</label>
             <input id="layout_welcome_message" type="text" value="${escapeHtml(layout.welcome_message || '')}" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-purple-500" placeholder="Texto exibido na home">
@@ -796,6 +810,24 @@ function renderSettings() {
           <div>
             <label class="block text-sm font-semibold mb-2 text-gray-300">Texto do Rodapé</label>
             <input id="layout_footer_text" type="text" value="${escapeHtml(layout.footer_text || '')}" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-purple-500" placeholder="© 2026 Sua marca">
+          </div>
+
+          <div class="border-t border-gray-700 pt-4">
+            <h4 class="text-lg font-bold text-purple-300 mb-3"><i class="fas fa-font mr-2"></i>Textos da Tela Inicial</h4>
+            <div class="grid md:grid-cols-2 gap-4">
+              <div><label class="block text-sm font-semibold mb-2 text-gray-300">Título principal (hero)</label><input id="layout_home_hero_title" type="text" value="${escapeHtml(layout.home_hero_title || 'Receba pedidos de músicas e gorjetas sem interromper o show!')}" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3"></div>
+              <div><label class="block text-sm font-semibold mb-2 text-gray-300">Subtítulo do hero</label><input id="layout_home_hero_subtitle" type="text" value="${escapeHtml(layout.home_hero_subtitle || 'Seu público escaneia o QR Code e faz pedidos direto do celular')}" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3"></div>
+              <div><label class="block text-sm font-semibold mb-2 text-gray-300">Botão cadastrar</label><input id="layout_home_cta_register" type="text" value="${escapeHtml(layout.home_cta_register || 'Criar Conta')}" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3"></div>
+              <div><label class="block text-sm font-semibold mb-2 text-gray-300">Botão entrar</label><input id="layout_home_cta_login" type="text" value="${escapeHtml(layout.home_cta_login || 'Entrar')}" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3"></div>
+              <div><label class="block text-sm font-semibold mb-2 text-gray-300">Feature 1 título</label><input id="layout_home_feature1_title" type="text" value="${escapeHtml(layout.home_feature1_title || 'QR Code Exclusivo')}" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3"></div>
+              <div><label class="block text-sm font-semibold mb-2 text-gray-300">Feature 1 descrição</label><input id="layout_home_feature1_desc" type="text" value="${escapeHtml(layout.home_feature1_desc || 'Tenha seu próprio QR Code. Clientes escaneiam e vão direto para sua página.')}" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3"></div>
+              <div><label class="block text-sm font-semibold mb-2 text-gray-300">Feature 2 título</label><input id="layout_home_feature2_title" type="text" value="${escapeHtml(layout.home_feature2_title || 'Pedidos em Tempo Real')}" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3"></div>
+              <div><label class="block text-sm font-semibold mb-2 text-gray-300">Feature 2 descrição</label><input id="layout_home_feature2_desc" type="text" value="${escapeHtml(layout.home_feature2_desc || 'Receba pedidos de músicas ao vivo. Aceite, recuse ou marque como tocada.')}" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3"></div>
+              <div><label class="block text-sm font-semibold mb-2 text-gray-300">Feature 3 título</label><input id="layout_home_feature3_title" type="text" value="${escapeHtml(layout.home_feature3_title || 'Gorjetas Ilimitadas')}" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3"></div>
+              <div><label class="block text-sm font-semibold mb-2 text-gray-300">Feature 3 descrição</label><input id="layout_home_feature3_desc" type="text" value="${escapeHtml(layout.home_feature3_desc || 'Clientes podem enviar gorjetas junto com os pedidos. Pedidos com gorjeta têm prioridade!')}" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3"></div>
+              <div><label class="block text-sm font-semibold mb-2 text-gray-300">Título seção "Como Funciona"</label><input id="layout_home_how_title" type="text" value="${escapeHtml(layout.home_how_title || 'Como Funciona')}" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3"></div>
+              <div><label class="block text-sm font-semibold mb-2 text-gray-300">Texto botão oferta</label><input id="layout_home_offer_cta" type="text" value="${escapeHtml(layout.home_offer_cta || 'Começar Agora')}" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3"></div>
+            </div>
           </div>
 
           <button type="submit" class="bg-purple-600 hover:bg-purple-700 px-6 py-3 rounded-lg transition font-semibold">
@@ -948,6 +980,18 @@ async function saveLayoutConfig(event) {
     secondary_color: document.getElementById('layout_secondary_color').value,
     welcome_message: document.getElementById('layout_welcome_message').value,
     footer_text: document.getElementById('layout_footer_text').value,
+    home_hero_title: document.getElementById('layout_home_hero_title').value,
+    home_hero_subtitle: document.getElementById('layout_home_hero_subtitle').value,
+    home_cta_register: document.getElementById('layout_home_cta_register').value,
+    home_cta_login: document.getElementById('layout_home_cta_login').value,
+    home_feature1_title: document.getElementById('layout_home_feature1_title').value,
+    home_feature1_desc: document.getElementById('layout_home_feature1_desc').value,
+    home_feature2_title: document.getElementById('layout_home_feature2_title').value,
+    home_feature2_desc: document.getElementById('layout_home_feature2_desc').value,
+    home_feature3_title: document.getElementById('layout_home_feature3_title').value,
+    home_feature3_desc: document.getElementById('layout_home_feature3_desc').value,
+    home_how_title: document.getElementById('layout_home_how_title').value,
+    home_offer_cta: document.getElementById('layout_home_offer_cta').value,
   };
 
   try {
@@ -960,6 +1004,37 @@ async function saveLayoutConfig(event) {
   } catch (error) {
     showError(error.response?.data?.error || 'Erro ao salvar layout');
   }
+}
+
+
+async function handleLogoUpload(event) {
+  const file = event?.target?.files?.[0];
+  if (!file) return;
+
+  if (!file.type.startsWith('image/')) {
+    showError('Selecione um arquivo de imagem válido.');
+    return;
+  }
+
+  const maxSizeBytes = 2 * 1024 * 1024;
+  if (file.size > maxSizeBytes) {
+    showError('A imagem deve ter no máximo 2MB.');
+    return;
+  }
+
+  const reader = new FileReader();
+  reader.onload = () => {
+    const dataUrl = String(reader.result || '');
+    const logoInput = document.getElementById('layout_logo_url');
+    const preview = document.getElementById('layout_logo_preview');
+    const wrap = document.getElementById('layout_logo_preview_wrap');
+    if (logoInput) logoInput.value = dataUrl;
+    if (preview) preview.src = dataUrl;
+    if (wrap) wrap.classList.remove('hidden');
+    showSuccess('Logo carregada. Clique em "Salvar Layout" para aplicar.');
+  };
+  reader.onerror = () => showError('Não foi possível ler a imagem selecionada.');
+  reader.readAsDataURL(file);
 }
 
 function showArtistQrCode(slug, artistName) {
