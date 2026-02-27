@@ -146,14 +146,18 @@ async function checkAuthentication() {
   user = response.data.user;
   artist = response.data.artist;
   
-  // Admin não precisa de licença aprovada
+  // Admin sempre tem acesso
   if (user.role === 'admin') return;
 
-  // Artista sem licença aprovada vai para pagamento
-  if (user.license_status !== 'approved') {
-    window.location.href = '/license-payment';
-    return;
-  }
+  // Artistas com licença aprovada têm acesso ilimitado
+  if (user.license_status === 'approved') return;
+
+  // Durante os 30 dias de teste, mantém acesso liberado
+  if (user.trial_active) return;
+
+  // Após período de teste, bloqueia e envia para pagamento da licença
+  window.location.href = '/license-payment';
+  return;
   
   if (!artist) {
     throw { response: { status: 401 } };
