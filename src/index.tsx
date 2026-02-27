@@ -890,6 +890,190 @@ app.post('/api/artists/:slug/requests', async (c) => {
   })
 })
 
+// Ask artist about a song that is not in the repertoire yet
+app.post('/api/artists/:slug/custom-requests', async (c) => {
+  const slug = c.req.param('slug')
+  const { custom_song_title, requester_name, requester_message } = await c.req.json()
+
+  const songTitle = String(custom_song_title || '').trim()
+  if (!songTitle) {
+    return c.json({ error: 'Informe o nome da música' }, 400)
+  }
+
+  // Self-healing: create custom requests table if missing
+  await c.env.DB.prepare(`
+    CREATE TABLE IF NOT EXISTS custom_song_requests (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      artist_id INTEGER NOT NULL,
+      requester_name TEXT,
+      requester_message TEXT,
+      custom_song_title TEXT NOT NULL,
+      status TEXT DEFAULT 'pending', -- pending, known, unknown
+      linked_song_id INTEGER,
+      linked_request_id INTEGER,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (artist_id) REFERENCES artists(id) ON DELETE CASCADE
+    )
+  `).run()
+
+  const artist = await c.env.DB.prepare(`
+    SELECT id, user_id FROM artists WHERE slug = ? AND active = 1
+  `).bind(slug).first() as any
+
+  if (!artist) {
+    return c.json({ error: 'Artista não encontrado' }, 404)
+  }
+
+  const result = await c.env.DB.prepare(`
+    INSERT INTO custom_song_requests (artist_id, requester_name, requester_message, custom_song_title, status)
+    VALUES (?, ?, ?, ?, 'pending')
+  `).bind(
+    artist.id,
+    requester_name || 'Anônimo',
+    requester_message || null,
+    songTitle
+  ).run()
+
+  // Notify artist in their notification center
+  await c.env.DB.prepare(`
+    CREATE TABLE IF NOT EXISTS notifications (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id INTEGER NOT NULL,
+      title TEXT NOT NULL,
+      message TEXT NOT NULL,
+      type TEXT DEFAULT 'info',
+      link TEXT,
+      read_at DATETIME,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    )
+  `).run()
+
+  await c.env.DB.prepare(`
+    INSERT INTO notifications (user_id, title, message, type, link)
+    VALUES (?, ?, ?, 'info', ?)
+  `).bind(
+    artist.user_id,
+    'Música fora do repertório',
+    `${requester_name || 'Anônimo'} perguntou se você sabe tocar "${songTitle}"`,
+    `/dashboard/${slug}`
+  ).run()
+
+  return c.json({
+    id: result.meta.last_row_id,
+    message: 'Pergunta enviada ao artista! Se ele confirmar que sabe tocar, seu pedido entrará na fila.'
+  })
+})
+
+// Get custom requests pending artist confirmation
+app.get('/api/artists/:slug/custom-requests', async (c) => {
+  const session = await checkAuth(c)
+  if (!session) return c.json({ error: 'Não autenticado' }, 401)
+
+  const slug = c.req.param('slug')
+
+  await c.env.DB.prepare(`
+    CREATE TABLE IF NOT EXISTS custom_song_requests (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      artist_id INTEGER NOT NULL,
+      requester_name TEXT,
+      requester_message TEXT,
+      custom_song_title TEXT NOT NULL,
+      status TEXT DEFAULT 'pending',
+      linked_song_id INTEGER,
+      linked_request_id INTEGER,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (artist_id) REFERENCES artists(id) ON DELETE CASCADE
+    )
+  `).run()
+
+  const artist = await c.env.DB.prepare(`
+    SELECT id FROM artists WHERE slug = ? AND user_id = ?
+  `).bind(slug, session.user_id).first() as any
+
+  if (!artist) {
+    return c.json({ error: 'Artista não encontrado ou sem permissão' }, 404)
+  }
+
+  const { results } = await c.env.DB.prepare(`
+    SELECT id, requester_name, requester_message, custom_song_title, status, created_at
+    FROM custom_song_requests
+    WHERE artist_id = ?
+    ORDER BY
+      CASE WHEN status = 'pending' THEN 0 ELSE 1 END,
+      created_at DESC
+  `).bind(artist.id).all()
+
+  return c.json(results)
+})
+
+// Artist confirms if they know an off-repertoire song
+app.patch('/api/custom-requests/:id', async (c) => {
+  const session = await checkAuth(c)
+  if (!session) return c.json({ error: 'Não autenticado' }, 401)
+
+  const id = c.req.param('id')
+  const { status } = await c.req.json()
+
+  if (!['known', 'unknown'].includes(status)) {
+    return c.json({ error: 'Status inválido' }, 400)
+  }
+
+  const customRequest = await c.env.DB.prepare(`
+    SELECT csr.*, a.slug
+    FROM custom_song_requests csr
+    JOIN artists a ON csr.artist_id = a.id
+    WHERE csr.id = ? AND a.user_id = ?
+  `).bind(id, session.user_id).first() as any
+
+  if (!customRequest) {
+    return c.json({ error: 'Solicitação não encontrada' }, 404)
+  }
+
+  let linkedSongId = customRequest.linked_song_id || null
+  let linkedRequestId = customRequest.linked_request_id || null
+
+  if (status === 'known' && !linkedRequestId) {
+    // Create song in repertoire if it doesn't exist yet, then create regular pending request
+    const existingSong = await c.env.DB.prepare(`
+      SELECT id FROM songs
+      WHERE artist_id = ? AND LOWER(title) = LOWER(?)
+      LIMIT 1
+    `).bind(customRequest.artist_id, customRequest.custom_song_title).first() as any
+
+    if (existingSong) {
+      linkedSongId = existingSong.id
+    } else {
+      const songResult = await c.env.DB.prepare(`
+        INSERT INTO songs (artist_id, title, artist_name)
+        VALUES (?, ?, '')
+      `).bind(customRequest.artist_id, customRequest.custom_song_title).run()
+      linkedSongId = songResult.meta.last_row_id
+    }
+
+    const requestResult = await c.env.DB.prepare(`
+      INSERT INTO song_requests (artist_id, song_id, requester_name, requester_message, tip_amount, tip_message, status)
+      VALUES (?, ?, ?, ?, 0, NULL, 'pending')
+    `).bind(
+      customRequest.artist_id,
+      linkedSongId,
+      customRequest.requester_name || 'Anônimo',
+      customRequest.requester_message || null
+    ).run()
+    linkedRequestId = requestResult.meta.last_row_id
+  }
+
+  await c.env.DB.prepare(`
+    UPDATE custom_song_requests
+    SET status = ?, linked_song_id = ?, linked_request_id = ?, updated_at = CURRENT_TIMESTAMP
+    WHERE id = ?
+  `).bind(status, linkedSongId, linkedRequestId, id).run()
+
+  return c.json({ success: true, status, linked_request_id: linkedRequestId })
+})
+
 // Get single request status (public — for client to check their own request)
 app.get('/api/requests/:id', async (c) => {
   const id = c.req.param('id')
@@ -3419,7 +3603,7 @@ app.get('/dashboard/:slug', (c) => {
         <script>
           const ARTIST_SLUG = '${slug}';
         </script>
-        <script src="/static/dashboard.js?v=9"></script>
+        <script src="/static/dashboard.js?v=10"></script>
         <script>init()</script>
     <script>
       if ('serviceWorker' in navigator) {
@@ -3531,7 +3715,7 @@ app.get('/:slug', (c) => {
           const ARTIST_SLUG = '${slug}';
         </script>
         <script src="/static/pix-generator.js?v=3"></script>
-        <script src="/static/audience.js?v=9"></script>
+        <script src="/static/audience.js?v=10"></script>
         <script>init()</script>
         
         <!-- PWA Service Worker -->
