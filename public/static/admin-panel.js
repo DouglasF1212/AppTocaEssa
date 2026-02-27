@@ -294,7 +294,7 @@ function renderLicenses() {
                     </p>
                   </div>
                   <div>
-                    <span class="text-gray-400">Data Cadastro:</span>
+                    <span class="text-gray-400">Data Pagamento:</span>
                     <p class="font-semibold">${license.payment_date ? new Date(license.payment_date).toLocaleDateString('pt-BR') : 'N/A'}</p>
                   </div>
                 </div>
@@ -366,10 +366,12 @@ function renderUsers() {
                   <td class="px-6 py-4">
                     <span class="px-2 py-1 rounded text-xs font-semibold
                       ${user.license_status === 'approved' ? 'bg-green-600/20 text-green-400' :
+                        user.trial_active                 ? 'bg-blue-600/20 text-blue-400' :
                         user.license_status === 'paid'     ? 'bg-yellow-600/20 text-yellow-400' :
                         user.license_status === 'rejected' ? 'bg-red-600/20 text-red-400' :
                                                              'bg-gray-600/20 text-gray-400'}">
                       ${user.license_status === 'approved' ? '✅ Aprovada' :
+                        user.trial_active                 ? `🧪 Teste grátis (${user.trial_days_left ?? 0}d)` :
                         user.license_status === 'paid'     ? '⏳ Aguard. Aprovação' :
                         user.license_status === 'rejected' ? '❌ Rejeitada' : '🕐 Pendente'}
                     </span>
@@ -444,10 +446,12 @@ function renderArtists() {
 
   const rows = list.map(a => {
     const statusLabel = a.license_status === 'approved' ? '✅ Aprovado'
-      : a.license_status === 'paid'     ? '⏳ Pago'
+      : a.trial_active              ? `🧪 Teste grátis (${a.trial_days_left ?? 0}d)`
+      : a.license_status === 'paid' ? '⏳ Pago'
       : a.license_status === 'pending'  ? '🕐 Pendente'
       : '🔴 ' + (a.license_status || 'N/A');
     const statusClass = a.license_status === 'approved' ? 'bg-green-600/20 text-green-400'
+      : a.trial_active           ? 'bg-blue-600/20 text-blue-400'
       : a.license_status === 'paid'    ? 'bg-yellow-600/20 text-yellow-400'
       : 'bg-gray-600/20 text-gray-400';
     const slug = a.slug || '-';
