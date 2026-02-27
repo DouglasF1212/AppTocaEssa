@@ -2896,7 +2896,7 @@ app.get('/admin/panel', (c) => {
           }
         </script>
         <script src="https://cdn.jsdelivr.net/npm/axios@1.6.0/dist/axios.min.js"></script>
-        <script src="/static/admin-panel.js?v=6"></script>
+        <script src="/static/admin-panel.js?v=7"></script>
     <script>
       if ('serviceWorker' in navigator) {
         navigator.serviceWorker.register('/sw.js?v=8')
