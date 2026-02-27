@@ -1,5 +1,5 @@
 // Service Worker para TOCA ESSA PWA
-const CACHE_NAME = 'toca-essa-v8';
+const CACHE_NAME = 'toca-essa-v9';
 
 // Apenas assets estáticos imutáveis
 const STATIC_ASSETS = [
@@ -51,7 +51,24 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Assets estáticos (ícones, JS, CSS, fontes): Cache First
+  // JS/CSS/fontes: network-first para evitar versão antiga em produção
+  const isDynamicAsset = /\.(js|css|woff2?|ttf|otf)$/i.test(url.pathname);
+  if (isDynamicAsset) {
+    event.respondWith(
+      fetch(event.request)
+        .then((response) => {
+          if (response.ok) {
+            const clone = response.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
+          }
+          return response;
+        })
+        .catch(() => caches.match(event.request))
+    );
+    return;
+  }
+
+  // Outros assets estáticos (ícones, imagens): cache-first
   event.respondWith(
     caches.match(event.request).then((cached) => {
       if (cached) return cached;

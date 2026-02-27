@@ -3603,7 +3603,7 @@ app.get('/dashboard/:slug', (c) => {
         <script>
           const ARTIST_SLUG = '${slug}';
         </script>
-        <script src="/static/dashboard.js?v=9"></script>
+        <script src="/static/dashboard.js?v=10"></script>
         <script>init()</script>
     <script>
       if ('serviceWorker' in navigator) {
@@ -3715,7 +3715,7 @@ app.get('/:slug', (c) => {
           const ARTIST_SLUG = '${slug}';
         </script>
         <script src="/static/pix-generator.js?v=3"></script>
-        <script src="/static/audience.js?v=9"></script>
+        <script src="/static/audience.js?v=10"></script>
         <script>init()</script>
         
         <!-- PWA Service Worker -->
