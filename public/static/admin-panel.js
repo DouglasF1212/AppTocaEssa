@@ -7,6 +7,7 @@ let pendingLicenses = [];
 let systemConfig = {};
 let artistsList = [];
 let notifications = [];
+let layoutSettings = {};
 
 // Configure axios with credentials + localStorage session fallback (interceptor reads fresh on every request)
 axios.defaults.withCredentials = true;
@@ -34,6 +35,7 @@ async function init() {
     loadUsers(),
     loadPendingLicenses(),
     loadSystemConfig(),
+    loadLayoutSettings(),
     loadArtistsList()
   ]);
 
@@ -109,6 +111,19 @@ async function loadNotifications() {
   }
 }
 
+async function loadLayoutSettings() {
+  try {
+    const response = await axios.get('/api/admin/settings');
+    const map = {};
+    (response.data || []).forEach((item) => {
+      map[item.setting_key] = item.setting_value;
+    });
+    layoutSettings = map;
+  } catch (error) {
+    layoutSettings = {};
+  }
+}
+
 // Render navigation
 function renderNavigation() {
   const nav = document.getElementById('admin-nav');
@@ -142,7 +157,7 @@ async function navigateTo(page) {
     if (page === 'users')           await loadUsers();
     else if (page === 'dashboard')  await loadStats();
     else if (page === 'licenses')   await loadPendingLicenses();
-    else if (page === 'settings')   await loadSystemConfig();
+    else if (page === 'settings') { await loadSystemConfig(); await loadLayoutSettings(); }
     else if (page === 'artists')    await loadArtistsList();
     else if (page === 'notifications') await loadNotifications();
   } catch(e) {}
@@ -405,6 +420,16 @@ function formatDate(dateStr) {
   } catch(e) { return '-'; }
 }
 
+
+function escapeHtml(value) {
+  return String(value || '')
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#39;');
+}
+
 function renderArtists() {
   const list = artistsList.length > 0 ? artistsList : users.filter(u => u.role === 'artist').map(u => ({
     name: u.full_name,
@@ -445,6 +470,7 @@ function renderArtists() {
         </td>
         <td class="px-4 py-3 text-xs text-gray-400">${formatDate(a.created_at)}</td>
         <td class="px-4 py-3">
+          ${slug !== '-' ? `<button onclick="showArtistQrCode('${escapeHtml(slug)}', '${escapeHtml(a.name || a.full_name || 'Artista')}')" class="text-green-400 hover:text-green-300 text-xs mr-2"><i class="fas fa-qrcode"></i> QR Code</button>` : ''}
           ${slug !== '-' ? `<a href="/dashboard/${slug}" target="_blank" class="text-purple-400 hover:text-purple-300 text-xs mr-2"><i class="fas fa-external-link-alt"></i> Dashboard</a>` : ''}
         </td>
       </tr>
@@ -709,9 +735,75 @@ async function deleteAllNotifications() {
 // =====================
 function renderSettings() {
   const cfg = systemConfig;
+  const layout = layoutSettings;
   return `
     <div>
       <h2 class="text-3xl font-bold mb-8"><i class="fas fa-cog mr-3"></i>Configurações do Sistema</h2>
+
+      <div class="bg-gray-800 rounded-xl p-6 border border-gray-700 mb-6">
+        <h3 class="text-xl font-bold mb-5 text-purple-400">
+          <i class="fas fa-palette mr-2"></i>Layout do App (logo, imagens e textos)
+        </h3>
+        <form onsubmit="saveLayoutConfig(event)" class="space-y-4">
+          <div class="grid md:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-semibold mb-2 text-gray-300">Nome do App</label>
+              <input id="layout_app_name" type="text" value="${escapeHtml(layout.app_name || 'TOCA ESSA')}" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-purple-500" placeholder="TOCA ESSA">
+            </div>
+            <div>
+              <label class="block text-sm font-semibold mb-2 text-gray-300">URL da Logo</label>
+              <input id="layout_logo_url" type="url" value="${escapeHtml(layout.logo_url || '')}" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-purple-500" placeholder="https://.../logo.png">
+            </div>
+            <div>
+              <label class="block text-sm font-semibold mb-2 text-gray-300">Cor Primária</label>
+              <input id="layout_primary_color" type="color" value="${escapeHtml(layout.primary_color || '#3B82F6')}" class="w-full h-12 bg-gray-700 border border-gray-600 rounded-lg px-2 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500">
+            </div>
+            <div>
+              <label class="block text-sm font-semibold mb-2 text-gray-300">Cor Secundária</label>
+              <input id="layout_secondary_color" type="color" value="${escapeHtml(layout.secondary_color || '#10B981')}" class="w-full h-12 bg-gray-700 border border-gray-600 rounded-lg px-2 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500">
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-sm font-semibold mb-2 text-gray-300">Mensagem de Boas-vindas</label>
+            <input id="layout_welcome_message" type="text" value="${escapeHtml(layout.welcome_message || '')}" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-purple-500" placeholder="Texto exibido na home">
+          </div>
+
+          <div>
+            <label class="block text-sm font-semibold mb-2 text-gray-300">Texto do Rodapé</label>
+            <input id="layout_footer_text" type="text" value="${escapeHtml(layout.footer_text || '')}" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-purple-500" placeholder="© 2026 Sua marca">
+          </div>
+
+          <button type="submit" class="bg-purple-600 hover:bg-purple-700 px-6 py-3 rounded-lg transition font-semibold">
+            <i class="fas fa-save mr-2"></i>Salvar Layout
+          </button>
+        </form>
+      </div>
+
+      <div class="bg-gray-800 rounded-xl p-6 border border-gray-700 mb-6">
+        <h3 class="text-xl font-bold mb-5 text-yellow-400">
+          <i class="fas fa-qrcode mr-2"></i>QR Codes dos Artistas
+        </h3>
+        ${artistsList.length === 0 ? '<p class="text-gray-400">Nenhum artista cadastrado.</p>' : `
+          <div class="grid md:grid-cols-2 gap-3">
+            ${artistsList.map((artist) => {
+              const slug = artist.slug || '';
+              if (!slug) return '';
+              return `
+                <div class="bg-gray-900/70 border border-gray-700 rounded-lg p-4 flex items-center justify-between gap-3">
+                  <div>
+                    <p class="font-semibold">${escapeHtml(artist.name || artist.user_name || 'Artista')}</p>
+                    <p class="text-xs text-gray-400 font-mono">/${escapeHtml(slug)}</p>
+                  </div>
+                  <button onclick="showArtistQrCode('${escapeHtml(slug)}', '${escapeHtml(artist.name || artist.user_name || 'Artista')}')" class="bg-yellow-600 hover:bg-yellow-700 px-3 py-2 rounded-lg text-sm font-semibold whitespace-nowrap">
+                    <i class="fas fa-qrcode mr-1"></i>Ver QR Code
+                  </button>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        `}
+      </div>
 
       <!-- PIX para receber licenças -->
       <div class="bg-gray-800 rounded-xl p-6 border border-gray-700 mb-6">
@@ -820,6 +912,61 @@ async function savePixConfig(event) {
   } catch (error) {
     showError(error.response?.data?.error || 'Erro ao salvar configurações PIX');
   }
+}
+
+
+async function saveLayoutConfig(event) {
+  event.preventDefault();
+  const payload = {
+    app_name: document.getElementById('layout_app_name').value,
+    logo_url: document.getElementById('layout_logo_url').value,
+    primary_color: document.getElementById('layout_primary_color').value,
+    secondary_color: document.getElementById('layout_secondary_color').value,
+    welcome_message: document.getElementById('layout_welcome_message').value,
+    footer_text: document.getElementById('layout_footer_text').value,
+  };
+
+  try {
+    for (const [key, value] of Object.entries(payload)) {
+      await axios.put(`/api/admin/settings/${key}`, { value });
+    }
+    showSuccess('✅ Layout salvo com sucesso!');
+    await loadLayoutSettings();
+    renderPage();
+  } catch (error) {
+    showError(error.response?.data?.error || 'Erro ao salvar layout');
+  }
+}
+
+function showArtistQrCode(slug, artistName) {
+  const base = window.location.origin;
+  const artistUrl = `${base}/${slug}`;
+  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=350x350&data=${encodeURIComponent(artistUrl)}`;
+
+  const modal = document.createElement('div');
+  modal.id = 'artistQrCodeModal';
+  modal.className = 'fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4';
+  modal.innerHTML = `
+    <div class="bg-gray-900 rounded-2xl p-6 max-w-md w-full border border-gray-700">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-xl font-bold"><i class="fas fa-qrcode mr-2 text-yellow-400"></i>QR Code - ${escapeHtml(artistName)}</h3>
+        <button onclick="closeModal('artistQrCodeModal')" class="text-gray-400 hover:text-white text-xl">&times;</button>
+      </div>
+      <div class="bg-white rounded-xl p-4 flex items-center justify-center mb-4">
+        <img src="${qrUrl}" alt="QR Code ${escapeHtml(artistName)}" class="w-72 h-72 object-contain" />
+      </div>
+      <p class="text-xs text-gray-400 break-all mb-4">${escapeHtml(artistUrl)}</p>
+      <div class="flex gap-3">
+        <a href="${artistUrl}" target="_blank" class="flex-1 text-center bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded-lg transition font-semibold text-sm">
+          <i class="fas fa-external-link-alt mr-1"></i>Abrir Página
+        </a>
+        <a href="${qrUrl}" target="_blank" class="flex-1 text-center bg-yellow-600 hover:bg-yellow-700 px-4 py-2 rounded-lg transition font-semibold text-sm">
+          <i class="fas fa-download mr-1"></i>Abrir QR
+        </a>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(modal);
 }
 
 async function saveContactConfig(event) {
