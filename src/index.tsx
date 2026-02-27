@@ -1957,14 +1957,26 @@ app.get('/', async (c) => {
     secondary_color: '#3b82f6',
     logo_url: '',
     welcome_message: 'Conecte-se com seu público durante shows ao vivo',
-    footer_text: '© 2024 TOCA ESSA - Conectando artistas e público'
+    footer_text: '© 2024 TOCA ESSA - Conectando artistas e público',
+    home_hero_title: 'Receba pedidos de músicas e gorjetas sem interromper o show!',
+    home_hero_subtitle: 'Seu público escaneia o QR Code e faz pedidos direto do celular',
+    home_cta_register: 'Criar Conta',
+    home_cta_login: 'Entrar',
+    home_feature1_title: 'QR Code Exclusivo',
+    home_feature1_desc: 'Tenha seu próprio QR Code. Clientes escaneiam e vão direto para sua página.',
+    home_feature2_title: 'Pedidos em Tempo Real',
+    home_feature2_desc: 'Receba pedidos de músicas ao vivo. Aceite, recuse ou marque como tocada.',
+    home_feature3_title: 'Gorjetas Ilimitadas',
+    home_feature3_desc: 'Clientes podem enviar gorjetas junto com os pedidos. Pedidos com gorjeta têm prioridade!',
+    home_how_title: 'Como Funciona',
+    home_offer_cta: 'Começar Agora'
   }
 
   let settings = { ...defaults }
   try {
     const { results } = await c.env.DB.prepare(`
       SELECT setting_key, setting_value FROM app_settings
-      WHERE setting_key IN ('app_name','primary_color','secondary_color','logo_url','welcome_message','footer_text')
+      WHERE setting_key IN ('app_name','primary_color','secondary_color','logo_url','welcome_message','footer_text','home_hero_title','home_hero_subtitle','home_cta_register','home_cta_login','home_feature1_title','home_feature1_desc','home_feature2_title','home_feature2_desc','home_feature3_title','home_feature3_desc','home_how_title','home_offer_cta')
     `).all()
 
     for (const row of (results || []) as any[]) {
@@ -1987,6 +1999,18 @@ app.get('/', async (c) => {
   const logoUrl = escapeHtml(settings.logo_url || '')
   const primaryColor = escapeHtml(settings.primary_color || defaults.primary_color)
   const secondaryColor = escapeHtml(settings.secondary_color || defaults.secondary_color)
+  const homeHeroTitle = escapeHtml(settings.home_hero_title || defaults.home_hero_title)
+  const homeHeroSubtitle = escapeHtml(settings.home_hero_subtitle || defaults.home_hero_subtitle)
+  const homeCtaRegister = escapeHtml(settings.home_cta_register || defaults.home_cta_register)
+  const homeCtaLogin = escapeHtml(settings.home_cta_login || defaults.home_cta_login)
+  const homeFeature1Title = escapeHtml(settings.home_feature1_title || defaults.home_feature1_title)
+  const homeFeature1Desc = escapeHtml(settings.home_feature1_desc || defaults.home_feature1_desc)
+  const homeFeature2Title = escapeHtml(settings.home_feature2_title || defaults.home_feature2_title)
+  const homeFeature2Desc = escapeHtml(settings.home_feature2_desc || defaults.home_feature2_desc)
+  const homeFeature3Title = escapeHtml(settings.home_feature3_title || defaults.home_feature3_title)
+  const homeFeature3Desc = escapeHtml(settings.home_feature3_desc || defaults.home_feature3_desc)
+  const homeHowTitle = escapeHtml(settings.home_how_title || defaults.home_how_title)
+  const homeOfferCta = escapeHtml(settings.home_offer_cta || defaults.home_offer_cta)
 
   return c.html(`
     <!DOCTYPE html>
@@ -2048,20 +2072,20 @@ app.get('/', async (c) => {
                 <div class="bg-white/10 backdrop-blur-lg p-12 rounded-3xl border border-white/20 text-center">
                     <div class="text-6xl mb-6">🎸✨📱</div>
                     <h2 class="text-4xl font-bold mb-6">
-                        Receba pedidos de músicas e gorjetas sem interromper o show!
+                        ${homeHeroTitle}
                     </h2>
                     <p class="text-xl text-gray-300 mb-8">
-                        Seu público escaneia o QR Code e faz pedidos direto do celular
+                        ${homeHeroSubtitle}
                     </p>
                     
                     <div class="flex gap-4 justify-center flex-wrap">
                         <a href="/register" class="bg-green-600 hover:bg-green-700 px-8 py-4 rounded-xl font-bold text-xl transition">
                             <i class="fas fa-user-plus mr-2"></i>
-                            Criar Conta
+                            ${homeCtaRegister}
                         </a>
                         <a href="/login" class="bg-blue-600 hover:bg-blue-700 px-8 py-4 rounded-xl font-bold text-xl transition">
                             <i class="fas fa-sign-in-alt mr-2"></i>
-                            Entrar
+                            ${homeCtaLogin}
                         </a>
                     </div>
 
@@ -2072,25 +2096,25 @@ app.get('/', async (c) => {
             <div class="max-w-6xl mx-auto grid md:grid-cols-3 gap-8 mb-16">
                 <div class="bg-white/10 backdrop-blur-lg p-8 rounded-2xl border border-white/20 text-center">
                     <div class="text-5xl mb-4">📱</div>
-                    <h3 class="text-2xl font-bold mb-3">QR Code Exclusivo</h3>
+                    <h3 class="text-2xl font-bold mb-3">${homeFeature1Title}</h3>
                     <p class="text-gray-300">
-                        Tenha seu próprio QR Code. Clientes escaneiam e vão direto para sua página.
+                        ${homeFeature1Desc}
                     </p>
                 </div>
                 
                 <div class="bg-white/10 backdrop-blur-lg p-8 rounded-2xl border border-white/20 text-center">
                     <div class="text-5xl mb-4">🎵</div>
-                    <h3 class="text-2xl font-bold mb-3">Pedidos em Tempo Real</h3>
+                    <h3 class="text-2xl font-bold mb-3">${homeFeature2Title}</h3>
                     <p class="text-gray-300">
-                        Receba pedidos de músicas ao vivo. Aceite, recuse ou marque como tocada.
+                        ${homeFeature2Desc}
                     </p>
                 </div>
                 
                 <div class="bg-white/10 backdrop-blur-lg p-8 rounded-2xl border border-white/20 text-center">
                     <div class="text-5xl mb-4">💰</div>
-                    <h3 class="text-2xl font-bold mb-3">Gorjetas Ilimitadas</h3>
+                    <h3 class="text-2xl font-bold mb-3">${homeFeature3Title}</h3>
                     <p class="text-gray-300">
-                        Clientes podem enviar gorjetas junto com os pedidos. Pedidos com gorjeta têm prioridade!
+                        ${homeFeature3Desc}
                     </p>
                 </div>
             </div>
@@ -2132,7 +2156,7 @@ app.get('/', async (c) => {
                     
                     <a href="/register" class="inline-block bg-green-600 hover:bg-green-700 px-12 py-5 rounded-xl font-bold text-2xl transition">
                         <i class="fas fa-rocket mr-2"></i>
-                        Começar Agora
+                        ${homeOfferCta}
                     </a>
                 </div>
             </div>
@@ -2140,7 +2164,7 @@ app.get('/', async (c) => {
             <!-- How it works -->
             <div class="max-w-4xl mx-auto mb-16">
                 <h2 class="text-4xl font-bold text-center mb-12">
-                    Como Funciona
+                    ${homeHowTitle}
                 </h2>
                 
                 <div class="space-y-8">
@@ -3005,7 +3029,11 @@ app.get('/admin/panel', (c) => {
           }
         </script>
         <script src="https://cdn.jsdelivr.net/npm/axios@1.6.0/dist/axios.min.js"></script>
+<<<<<<< codex/open-the-repository-oamf1k
+        <script src="/static/admin-panel.js?v=9"></script>
+=======
         <script src="/static/admin-panel.js?v=8"></script>
+>>>>>>> main
     <script>
       if ('serviceWorker' in navigator) {
         navigator.serviceWorker.register('/sw.js?v=9')
