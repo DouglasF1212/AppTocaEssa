@@ -344,70 +344,74 @@ function renderUsers() {
               </tr>
             </thead>
             <tbody class="divide-y divide-gray-700">
-              ${users.map(user => `
-                <tr class="hover:bg-gray-700/50 transition">
-                  <td class="px-6 py-4">
-                    <div class="flex items-center gap-3">
-                      <div class="w-9 h-9 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-sm font-bold flex-shrink-0">
-                        ${(user.full_name || '?').charAt(0).toUpperCase()}
+              ${users.map(user => {
+                const userName = user.full_name || 'Sem nome';
+                const userNameEscaped = userName.replace(/'/g, "\'");
+                return `
+                  <tr class="hover:bg-gray-700/50 transition">
+                    <td class="px-6 py-4">
+                      <div class="flex items-center gap-3">
+                        <div class="w-9 h-9 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-sm font-bold flex-shrink-0">
+                          ${(userName || '?').charAt(0).toUpperCase()}
+                        </div>
+                        <div>
+                          <p class="font-semibold">${userName}</p>
+                          ${user.artist_name ? `<p class="text-xs text-gray-400">${user.artist_name}</p>` : ''}
+                        </div>
                       </div>
-                      <div>
-                        <p class="font-semibold">${user.full_name}</p>
-                        ${user.artist_name ? `<p class="text-xs text-gray-400">${user.artist_name}</p>` : ''}
-                      </div>
-                    </div>
-                  </td>
-                  <td class="px-6 py-4 text-sm">${user.email}</td>
-                  <td class="px-6 py-4">
-                    <span class="px-3 py-1 rounded-full text-xs font-semibold ${user.role === 'admin' ? 'bg-red-600/20 text-red-400 border border-red-600' : 'bg-blue-600/20 text-blue-400 border border-blue-600'}">
-                      ${user.role === 'admin' ? '👑 Admin' : '🎤 Artista'}
-                    </span>
-                  </td>
-                  <td class="px-6 py-4">
-                    <span class="px-2 py-1 rounded text-xs font-semibold
-                      ${user.license_status === 'approved' ? 'bg-green-600/20 text-green-400' :
-                        user.trial_active                 ? 'bg-blue-600/20 text-blue-400' :
-                        user.license_status === 'paid'     ? 'bg-yellow-600/20 text-yellow-400' :
-                        user.license_status === 'rejected' ? 'bg-red-600/20 text-red-400' :
-                                                             'bg-gray-600/20 text-gray-400'}">
-                      ${user.license_status === 'approved' ? '✅ Aprovada' :
-                        user.trial_active                 ? `🧪 Teste grátis (${user.trial_days_left ?? 0}d)` :
-                        user.license_status === 'paid'     ? '⏳ Aguard. Aprovação' :
-                        user.license_status === 'rejected' ? '❌ Rejeitada' : '🕐 Pendente'}
-                    </span>
-                  </td>
-                  <td class="px-6 py-4">
-                    <div class="flex items-center justify-center gap-2 flex-wrap">
-                      ${user.artist_slug ? `
-                        <a href="/${user.artist_slug}" target="_blank"
-                          class="bg-purple-600 hover:bg-purple-700 px-3 py-1 rounded text-sm transition inline-flex items-center gap-1" title="Ver perfil como cliente">
-                          <i class="fas fa-eye"></i>
-                        </a>
-                      ` : ''}
-                      <button onclick="showSendNotificationModal(${user.id}, '${user.full_name.replace(/'/g,"\\'")}')"
-                        class="bg-blue-600 hover:bg-blue-700 px-3 py-1 rounded text-sm transition" title="Enviar notificação">
-                        <i class="fas fa-bell"></i>
-                      </button>
-                      <button onclick="showChangePasswordModal(${user.id}, '${user.full_name.replace(/'/g,"\\'")}')"
-                        class="bg-yellow-600 hover:bg-yellow-700 px-3 py-1 rounded text-sm transition" title="Alterar Senha">
-                        <i class="fas fa-key"></i>
-                      </button>
-                      ${user.role !== 'admin' ? `
-                        ${user.trial_active ? `
-                          <button onclick="simulateTrialExpired(${user.id}, '${user.full_name.replace(/'/g,"\\'")}')"
-                            class="bg-orange-600 hover:bg-orange-700 px-3 py-1 rounded text-sm transition" title="Simular fim do teste">
-                            <i class="fas fa-flask"></i>
+                    </td>
+                    <td class="px-6 py-4 text-sm">${user.email}</td>
+                    <td class="px-6 py-4">
+                      <span class="px-3 py-1 rounded-full text-xs font-semibold ${user.role === 'admin' ? 'bg-red-600/20 text-red-400 border border-red-600' : 'bg-blue-600/20 text-blue-400 border border-blue-600'}">
+                        ${user.role === 'admin' ? '👑 Admin' : '🎤 Artista'}
+                      </span>
+                    </td>
+                    <td class="px-6 py-4">
+                      <span class="px-2 py-1 rounded text-xs font-semibold
+                        ${user.license_status === 'approved' ? 'bg-green-600/20 text-green-400' :
+                          user.trial_active                 ? 'bg-blue-600/20 text-blue-400' :
+                          user.license_status === 'paid'     ? 'bg-yellow-600/20 text-yellow-400' :
+                          user.license_status === 'rejected' ? 'bg-red-600/20 text-red-400' :
+                                                               'bg-gray-600/20 text-gray-400'}">
+                        ${user.license_status === 'approved' ? '✅ Aprovada' :
+                          user.trial_active                 ? `🧪 Teste grátis (${user.trial_days_left ?? 0}d)` :
+                          user.license_status === 'paid'     ? '⏳ Aguard. Aprovação' :
+                          user.license_status === 'rejected' ? '❌ Rejeitada' : '🕐 Pendente'}
+                      </span>
+                    </td>
+                    <td class="px-6 py-4">
+                      <div class="flex items-center justify-center gap-2 flex-wrap">
+                        ${user.artist_slug ? `
+                          <a href="/${user.artist_slug}" target="_blank"
+                            class="bg-purple-600 hover:bg-purple-700 px-3 py-1 rounded text-sm transition inline-flex items-center gap-1" title="Ver perfil como cliente">
+                            <i class="fas fa-eye"></i>
+                          </a>
+                        ` : ''}
+                        <button onclick="showSendNotificationModal(${user.id}, '${userNameEscaped}')"
+                          class="bg-blue-600 hover:bg-blue-700 px-3 py-1 rounded text-sm transition" title="Enviar notificação">
+                          <i class="fas fa-bell"></i>
+                        </button>
+                        <button onclick="showChangePasswordModal(${user.id}, '${userNameEscaped}')"
+                          class="bg-yellow-600 hover:bg-yellow-700 px-3 py-1 rounded text-sm transition" title="Alterar Senha">
+                          <i class="fas fa-key"></i>
+                        </button>
+                        ${user.role !== 'admin' ? `
+                          ${user.trial_active ? `
+                            <button onclick="simulateTrialExpired(${user.id}, '${userNameEscaped}')"
+                              class="bg-orange-600 hover:bg-orange-700 px-3 py-1 rounded text-sm transition" title="Simular fim do teste">
+                              <i class="fas fa-flask"></i>
+                            </button>
+                          ` : ''}
+                          <button onclick="confirmDeleteUser(${user.id}, '${userNameEscaped}')"
+                            class="bg-red-600 hover:bg-red-700 px-3 py-1 rounded text-sm transition" title="Excluir">
+                            <i class="fas fa-trash"></i>
                           </button>
                         ` : ''}
-                        <button onclick="confirmDeleteUser(${user.id}, '${user.full_name.replace(/'/g,"\\'")}')"
-                          class="bg-red-600 hover:bg-red-700 px-3 py-1 rounded text-sm transition" title="Excluir">
-                          <i class="fas fa-trash"></i>
-                        </button>
-                      ` : ''}
-                    </div>
-                  </td>
-                </tr>
-              `).join('')}
+                      </div>
+                    </td>
+                  </tr>
+                `
+              }).join('')}
             </tbody>
           </table>
         </div>
@@ -525,7 +529,46 @@ function renderArtists() {
 // =====================
 function renderNotifications() {
   const typeLabels = { info: '💬 Info', warning: '⚠️ Aviso', success: '✅ Sucesso', error: '🔴 Urgente' };
-  const typeBadge  = { info: 'bg-blue-600/20 text-blue-300 border-blue-600', warning: 'bg-yellow-600/20 text-yellow-300 border-yellow-600', success: 'bg-green-600/20 text-green-300 border-green-600', error: 'bg-red-600/20 text-red-300 border-red-600' };
+  const typeBadge  = {
+    info: 'bg-blue-600/20 text-blue-300 border-blue-600',
+    warning: 'bg-yellow-600/20 text-yellow-300 border-yellow-600',
+    success: 'bg-green-600/20 text-green-300 border-green-600',
+    error: 'bg-red-600/20 text-red-300 border-red-600'
+  };
+
+  const rows = notifications.map(n => {
+    const msg = (n.message || '').toString();
+    const safeTitle = msg.replaceAll('"', '&quot;');
+    return `
+      <tr class="hover:bg-gray-700/50 transition">
+        <td class="px-5 py-3 text-sm">
+          ${n.user_id
+            ? `<span class="flex items-center gap-1"><i class="fas fa-user text-purple-400"></i> ${n.user_name || ('#' + n.user_id)}<br><span class="text-xs text-gray-400">${n.user_email || ''}</span></span>`
+            : `<span class="flex items-center gap-1 text-yellow-300"><i class="fas fa-broadcast-tower"></i> Todos</span>`}
+        </td>
+        <td class="px-5 py-3 font-semibold text-sm max-w-[150px] truncate">${n.title}</td>
+        <td class="px-5 py-3 text-sm text-gray-300 max-w-[200px] truncate" title="${safeTitle}">${msg}</td>
+        <td class="px-5 py-3">
+          <span class="px-2 py-1 rounded text-xs font-semibold border ${typeBadge[n.type] || typeBadge.info}">
+            ${typeLabels[n.type] || n.type}
+          </span>
+        </td>
+        <td class="px-5 py-3">
+          ${n.read_at
+            ? `<span class="text-green-400 text-xs"><i class="fas fa-check-double mr-1"></i>Lida</span>`
+            : `<span class="text-yellow-400 text-xs"><i class="fas fa-clock mr-1"></i>Não lida</span>`}
+        </td>
+        <td class="px-5 py-3 text-xs text-gray-400">${new Date(n.created_at).toLocaleString('pt-BR')}</td>
+        <td class="px-5 py-3 text-center">
+          <button onclick="deleteNotification(${n.id})"
+            class="bg-red-700 hover:bg-red-800 px-3 py-1 rounded text-sm transition" title="Excluir">
+            <i class="fas fa-trash"></i>
+          </button>
+        </td>
+      </tr>
+    `;
+  }).join('');
+
   return `
     <div>
       <div class="flex items-center justify-between mb-8 flex-wrap gap-4">
@@ -542,7 +585,6 @@ function renderNotifications() {
         </div>
       </div>
 
-      <!-- Stats row -->
       <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
         <div class="bg-gray-800 rounded-xl p-4 border border-gray-700 text-center">
           <p class="text-3xl font-black text-purple-400">${notifications.length}</p>
@@ -562,7 +604,6 @@ function renderNotifications() {
         </div>
       </div>
 
-      <!-- Notifications table -->
       <div class="bg-gray-800 rounded-xl border border-gray-700 overflow-hidden">
         ${notifications.length === 0 ? `
           <div class="text-center py-16 text-gray-400">
@@ -587,34 +628,7 @@ function renderNotifications() {
                 </tr>
               </thead>
               <tbody class="divide-y divide-gray-700">
-                ${notifications.map(n => `
-                  <tr class="hover:bg-gray-700/50 transition">
-                    <td class="px-5 py-3 text-sm">
-                      ${n.user_id
-                        ? `<span class="flex items-center gap-1"><i class="fas fa-user text-purple-400"></i> ${n.user_name || '#'+n.user_id}<br><span class="text-xs text-gray-400">${n.user_email || ''}</span></span>`
-                        : `<span class="flex items-center gap-1 text-yellow-300"><i class="fas fa-broadcast-tower"></i> Todos</span>`}
-                    </td>
-                    <td class="px-5 py-3 font-semibold text-sm max-w-[150px] truncate">${n.title}</td>
-                    <td class="px-5 py-3 text-sm text-gray-300 max-w-[200px] truncate" title="${n.message.replace(/"/g,'&quot;')}">${n.message}</td>
-                    <td class="px-5 py-3">
-                      <span class="px-2 py-1 rounded text-xs font-semibold border ${typeBadge[n.type] || typeBadge.info}">
-                        ${typeLabels[n.type] || n.type}
-                      </span>
-                    </td>
-                    <td class="px-5 py-3">
-                      ${n.read_at
-                        ? `<span class="text-green-400 text-xs"><i class="fas fa-check-double mr-1"></i>Lida</span>`
-                        : `<span class="text-yellow-400 text-xs"><i class="fas fa-clock mr-1"></i>Não lida</span>`}
-                    </td>
-                    <td class="px-5 py-3 text-xs text-gray-400">${new Date(n.created_at).toLocaleString('pt-BR')}</td>
-                    <td class="px-5 py-3 text-center">
-                      <button onclick="deleteNotification(${n.id})"
-                        class="bg-red-700 hover:bg-red-800 px-3 py-1 rounded text-sm transition" title="Excluir">
-                        <i class="fas fa-trash"></i>
-                      </button>
-                    </td>
-                  </tr>
-                `).join('')}
+                ${rows}
               </tbody>
             </table>
           </div>
@@ -763,7 +777,6 @@ function renderSettings() {
             <div>
               <label class="block text-sm font-semibold mb-2 text-gray-300">URL da Logo</label>
               <input id="layout_logo_url" type="url" value="${escapeHtml(layout.logo_url || '')}" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-purple-500" placeholder="https://.../logo.png">
-<<<<<<< codex/open-the-repository-oamf1k
               <div class="mt-2 flex items-center gap-2 flex-wrap">
                 <input id="layout_logo_file" type="file" accept="image/*" onchange="handleLogoUpload(event)" class="text-xs text-gray-300">
                 <button type="button" onclick="document.getElementById('layout_logo_file').click()" class="bg-indigo-600 hover:bg-indigo-700 px-3 py-1 rounded text-xs font-semibold">
@@ -771,8 +784,6 @@ function renderSettings() {
                 </button>
               </div>
               <p class="text-xs text-gray-400 mt-1">Você pode informar URL ou enviar uma imagem do dispositivo.</p>
-=======
->>>>>>> main
             </div>
             <div>
               <label class="block text-sm font-semibold mb-2 text-gray-300">Cor Primária</label>
@@ -784,7 +795,6 @@ function renderSettings() {
             </div>
           </div>
 
-<<<<<<< codex/open-the-repository-oamf1k
           <div id="layout_logo_preview_wrap" class="${layout.logo_url ? '' : 'hidden'}">
             <label class="block text-sm font-semibold mb-2 text-gray-300">Preview da logo</label>
             <div class="bg-gray-900/70 border border-gray-700 rounded-lg p-4 inline-block">
@@ -792,8 +802,6 @@ function renderSettings() {
             </div>
           </div>
 
-=======
->>>>>>> main
           <div>
             <label class="block text-sm font-semibold mb-2 text-gray-300">Mensagem de Boas-vindas</label>
             <input id="layout_welcome_message" type="text" value="${escapeHtml(layout.welcome_message || '')}" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-purple-500" placeholder="Texto exibido na home">
@@ -804,7 +812,6 @@ function renderSettings() {
             <input id="layout_footer_text" type="text" value="${escapeHtml(layout.footer_text || '')}" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-purple-500" placeholder="© 2026 Sua marca">
           </div>
 
-<<<<<<< codex/open-the-repository-oamf1k
           <div class="border-t border-gray-700 pt-4">
             <h4 class="text-lg font-bold text-purple-300 mb-3"><i class="fas fa-font mr-2"></i>Textos da Tela Inicial</h4>
             <div class="grid md:grid-cols-2 gap-4">
@@ -823,8 +830,6 @@ function renderSettings() {
             </div>
           </div>
 
-=======
->>>>>>> main
           <button type="submit" class="bg-purple-600 hover:bg-purple-700 px-6 py-3 rounded-lg transition font-semibold">
             <i class="fas fa-save mr-2"></i>Salvar Layout
           </button>
@@ -975,7 +980,6 @@ async function saveLayoutConfig(event) {
     secondary_color: document.getElementById('layout_secondary_color').value,
     welcome_message: document.getElementById('layout_welcome_message').value,
     footer_text: document.getElementById('layout_footer_text').value,
-<<<<<<< codex/open-the-repository-oamf1k
     home_hero_title: document.getElementById('layout_home_hero_title').value,
     home_hero_subtitle: document.getElementById('layout_home_hero_subtitle').value,
     home_cta_register: document.getElementById('layout_home_cta_register').value,
@@ -988,8 +992,6 @@ async function saveLayoutConfig(event) {
     home_feature3_desc: document.getElementById('layout_home_feature3_desc').value,
     home_how_title: document.getElementById('layout_home_how_title').value,
     home_offer_cta: document.getElementById('layout_home_offer_cta').value,
-=======
->>>>>>> main
   };
 
   try {
@@ -1004,7 +1006,6 @@ async function saveLayoutConfig(event) {
   }
 }
 
-<<<<<<< codex/open-the-repository-oamf1k
 
 async function handleLogoUpload(event) {
   const file = event?.target?.files?.[0];
@@ -1036,8 +1037,6 @@ async function handleLogoUpload(event) {
   reader.readAsDataURL(file);
 }
 
-=======
->>>>>>> main
 function showArtistQrCode(slug, artistName) {
   const base = window.location.origin;
   const artistUrl = `${base}/${slug}`;
