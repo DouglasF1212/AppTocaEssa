@@ -596,12 +596,11 @@ function resizeImage(file, maxWidth, maxHeight, quality) {
   });
 }
 
-// Handle photo file selection
+// Handle photo file selection (com recorte ajustável)
 function handlePhotoSelect(event) {
   const file = event.target.files[0];
-  
   if (!file) return;
-  
+
   // Validate file size (10MB raw)
   const maxSize = 10 * 1024 * 1024;
   if (file.size > maxSize) {
@@ -609,7 +608,7 @@ function handlePhotoSelect(event) {
     event.target.value = '';
     return;
   }
-  
+
   // Validate file type
   const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
   if (!allowedTypes.includes(file.type)) {
@@ -617,6 +616,542 @@ function handlePhotoSelect(event) {
     event.target.value = '';
     return;
   }
+
+  // Abre o recorte (crop) antes de otimizar
+  openPhotoCropper(file);
+}
+
+// ======================
+// Cropper (recorte ajustável) - Avatar quadrado
+// ======================
+let cropperState = null;
+
+function openPhotoCropper(file) {
+  const existing = document.getElementById('photoCropperModal');
+  if (existing) existing.remove();
+
+  let cropperState = null;
+
+function openPhotoCropper(file, inputIdToReset) {
+  const existing = document.getElementById('photoCropperModal');
+  if (existing) existing.remove();
+
+  const modal = document.createElement('div');
+  modal.id = 'photoCropperModal';
+  modal.className = 'fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4';
+  modal.innerHTML = `
+    <div class="bg-gray-900 rounded-2xl p-6 w-full max-w-xl border border-gray-700 relative">
+      <button id="closeCropperBtn" class="absolute top-3 right-3 text-gray-400 hover:text-white text-2xl">
+        <i class="fas fa-times"></i>
+      </button>
+
+      <h3 class="text-xl font-bold mb-4">
+        <i class="fas fa-crop-alt mr-2 text-yellow-400"></i>
+        Ajustar foto (arraste e dê zoom)
+      </h3>
+
+      <div class="flex flex-col md:flex-row gap-6">
+        <div class="flex-1">
+          <div id="cropViewport"
+            class="relative w-full aspect-square bg-black rounded-xl overflow-hidden border border-gray-700 select-none touch-none">
+            <img id="cropImage" class="absolute top-1/2 left-1/2 will-change-transform" alt="Prévia" />
+            <div class="absolute inset-0 pointer-events-none border-2 border-white/70 rounded-xl"></div>
+          </div>
+
+          <div class="mt-4">
+            <label class="text-sm text-gray-300">Zoom</label>
+            <input id="cropZoom" type="range" min="1" max="3" step="0.01" class="w-full mt-2" value="1.2">
+          </div>
+
+          <p class="text-xs text-gray-400 mt-3">Dica: arraste para centralizar o rosto.</p>
+        </div>
+
+        <div class="w-full md:w-48">
+          <p class="text-sm font-semibold mb-2 text-gray-200">Prévia</p>
+          <div class="w-40 h-40 mx-auto rounded-full overflow-hidden border border-gray-700 bg-black relative">
+            <canvas id="cropPreview" width="160" height="160" class="w-full h-full"></canvas>
+          </div>
+
+          <button id="applyCropBtn"
+            class="w-full mt-6 bg-purple-600 hover:bg-purple-700 px-4 py-3 rounded-lg font-semibold transition">
+            <i class="fas fa-check mr-2"></i>Usar esta foto
+          </button>
+
+          <button id="cancelCropBtn"
+            class="w-full mt-3 bg-gray-700 hover:bg-gray-600 px-4 py-3 rounded-lg font-semibold transition">
+            Cancelar
+          </button>
+        </div>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(modal);
+
+  const imgEl = modal.querySelector('#cropImage');
+  const viewport = modal.querySelector('#cropViewport');
+  const zoomEl = modal.querySelector('#cropZoom');
+  const previewCanvas = modal.querySelector('#cropPreview');
+  const previewCtx = previewCanvas.getContext('2d');
+
+  const url = URL.createObjectURL(file);
+  imgEl.onload = () => {
+    cropperState = {
+      file, url, imgEl, viewport,
+      zoom: parseFloat(zoomEl.value) || 1.2,
+      dx: 0, dy: 0,
+      dragging: false,
+      lastX: 0, lastY: 0,
+      previewCtx,
+      inputIdToReset
+    };
+
+    cropperState.zoom = Math.max(1.2, cropperState.zoom);
+    zoomEl.value = String(cropperState.zoom);
+    applyCropTransform();
+    exportCroppedToCanvas(previewCanvas, 160, 160);
+  };
+  imgEl.src = url;
+
+  const close = (resetInput) => closePhotoCropper(resetInput);
+
+  modal.querySelector('#closeCropperBtn').addEventListener('click', () => close(true));
+  modal.querySelector('#cancelCropBtn').addEventListener('click', () => close(true));
+  modal.addEventListener('click', (e) => { if (e.target === modal) close(true); });
+
+  zoomEl.addEventListener('input', () => {
+    if (!cropperState) return;
+    cropperState.zoom = parseFloat(zoomEl.value);
+    applyCropTransform();
+    exportCroppedToCanvas(previewCanvas, 160, 160);
+  });
+
+  // Drag mouse/touch
+  const startDrag = (x, y) => {
+    if (!cropperState) return;
+    cropperState.dragging = true;
+    cropperState.lastX = x;
+    cropperState.lastY = y;
+  };
+
+  const moveDrag = (x, y) => {
+    if (!cropperState || !cropperState.dragging) return;
+    const ddx = x - cropperState.lastX;
+    const ddy = y - cropperState.lastY;
+    cropperState.lastX = x;
+    cropperState.lastY = y;
+    cropperState.dx += ddx;
+    cropperState.dy += ddy;
+    applyCropTransform();
+    exportCroppedToCanvas(previewCanvas, 160, 160);
+  };
+
+  const endDrag = () => { if (cropperState) cropperState.dragging = false; };
+
+  viewport.addEventListener('mousedown', (e) => startDrag(e.clientX, e.clientY));
+  window.addEventListener('mousemove', (e) => moveDrag(e.clientX, e.clientY));
+  window.addEventListener('mouseup', endDrag);
+
+  viewport.addEventListener('touchstart', (e) => {
+    if (e.touches?.[0]) startDrag(e.touches[0].clientX, e.touches[0].clientY);
+  }, { passive: true });
+
+  viewport.addEventListener('touchmove', (e) => {
+    if (e.touches?.[0]) moveDrag(e.touches[0].clientX, e.touches[0].clientY);
+  }, { passive: true });
+
+  viewport.addEventListener('touchend', endDrag);
+
+  modal.querySelector('#applyCropBtn').addEventListener('click', async () => {
+    try {
+      const croppedFile = await exportCroppedPhoto(800, 800, 0.86);
+      selectedPhotoFile = croppedFile; // mantém seu fluxo atual
+
+      // Atualiza preview existente
+      const prev = document.getElementById('profilePhotoPreview');
+      if (prev) prev.src = URL.createObjectURL(croppedFile);
+
+      const nameEl = document.getElementById('photoFileName');
+      if (nameEl) nameEl.textContent = file.name + ' (ajustada)';
+
+      close(false);
+      showSuccess('Foto ajustada! Agora clique em "Salvar Alterações".');
+    } catch (err) {
+      console.error(err);
+      showError('Não foi possível recortar a foto.');
+    }
+  });
+}
+
+function closePhotoCropper(resetInput) {
+  const modal = document.getElementById('photoCropperModal');
+  if (modal) modal.remove();
+  if (cropperState?.url) URL.revokeObjectURL(cropperState.url);
+
+  if (resetInput && cropperState?.inputIdToReset) {
+    const inp = document.getElementById(cropperState.inputIdToReset);
+    if (inp) inp.value = '';
+  }
+
+  cropperState = null;
+}
+
+function applyCropTransform() {
+  if (!cropperState) return;
+  const { imgEl, viewport, zoom, dx, dy } = cropperState;
+  const rect = viewport.getBoundingClientRect();
+
+  imgEl.style.transform = `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px)) scale(${zoom})`;
+  imgEl.style.maxWidth = 'none';
+  imgEl.style.maxHeight = 'none';
+  imgEl.style.width = `${rect.width}px`;
+  imgEl.style.height = 'auto';
+}
+
+async function exportCroppedPhoto(outW, outH, quality) {
+  const canvas = document.createElement('canvas');
+  canvas.width = outW;
+  canvas.height = outH;
+  await exportCroppedToCanvas(canvas, outW, outH);
+
+  return new Promise((resolve, reject) => {
+    canvas.toBlob((blob) => {
+      if (!blob) return reject(new Error('toBlob failed'));
+      resolve(new File([blob], `profile_${Date.now()}.jpg`, { type: 'image/jpeg' }));
+    }, 'image/jpeg', quality ?? 0.86);
+  });
+}
+
+async function exportCroppedToCanvas(canvas, outW, outH) {
+  if (!cropperState) throw new Error('no cropper');
+
+  const { imgEl, viewport, zoom, dx, dy } = cropperState;
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, outW, outH);
+
+  const natW = imgEl.naturalWidth;
+  const natH = imgEl.naturalHeight;
+
+  const vpRect = viewport.getBoundingClientRect();
+  const vpW = vpRect.width;
+  const vpH = vpRect.height;
+
+  // base: imagem com width = vpW (antes do zoom)
+  const drawnBaseH = vpW * (natH / natW);
+
+  const pxPerVpX = natW / vpW;
+  const pxPerVpY = natH / drawnBaseH;
+
+  const pxPerVpXZoom = pxPerVpX / zoom;
+  const pxPerVpYZoom = pxPerVpY / zoom;
+
+  const srcW = vpW * pxPerVpXZoom;
+  const srcH = vpH * pxPerVpYZoom;
+
+  const srcX = (natW / 2) - (srcW / 2) - (dx * pxPerVpXZoom);
+  const srcY = (natH / 2) - (srcH / 2) - (dy * pxPerVpYZoom);
+
+  const clamp = (v, min, max) => Math.max(min, Math.min(max, v));
+  const sx = clamp(srcX, 0, natW - srcW);
+  const sy = clamp(srcY, 0, natH - srcH);
+
+  ctx.drawImage(imgEl, sx, sy, srcW, srcH, 0, 0, outW, outH);
+}
+
+  const modal = document.createElement('div');
+  modal.id = 'photoCropperModal';
+  modal.className = 'fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4';
+  modal.innerHTML = `
+    <div class="bg-gray-900 rounded-2xl p-6 w-full max-w-xl border border-gray-700 relative">
+      <button id="closeCropperBtn" class="absolute top-3 right-3 text-gray-400 hover:text-white text-2xl">
+        <i class="fas fa-times"></i>
+      </button>
+
+      <h3 class="text-xl font-bold mb-4">
+        <i class="fas fa-crop-alt mr-2 text-yellow-400"></i>
+        Ajustar foto (arraste e dê zoom)
+      </h3>
+
+      <div class="flex flex-col md:flex-row gap-6">
+        <div class="flex-1">
+          <div
+            id="cropViewport"
+            class="relative w-full aspect-square bg-black rounded-xl overflow-hidden border border-gray-700 select-none touch-none"
+          >
+            <img id="cropImage" class="absolute top-1/2 left-1/2 will-change-transform" alt="Prévia" />
+            <!-- Moldura do recorte -->
+            <div class="absolute inset-0 pointer-events-none border-2 border-white/70 rounded-xl"></div>
+          </div>
+
+          <div class="mt-4">
+            <label class="text-sm text-gray-300">Zoom</label>
+            <input id="cropZoom" type="range" min="1" max="3" step="0.01"
+              class="w-full mt-2" value="1.2">
+          </div>
+
+          <p class="text-xs text-gray-400 mt-3">
+            Dica: arraste a imagem para centralizar o rosto.
+          </p>
+        </div>
+
+        <div class="w-full md:w-48">
+          <p class="text-sm font-semibold mb-2 text-gray-200">Prévia</p>
+          <div class="w-40 h-40 mx-auto rounded-full overflow-hidden border border-gray-700 bg-black relative">
+            <canvas id="cropPreview" width="160" height="160" class="w-full h-full"></canvas>
+          </div>
+
+          <button id="applyCropBtn"
+            class="w-full mt-6 bg-purple-600 hover:bg-purple-700 px-4 py-3 rounded-lg font-semibold transition">
+            <i class="fas fa-check mr-2"></i>Usar esta foto
+          </button>
+
+          <button id="cancelCropBtn"
+            class="w-full mt-3 bg-gray-700 hover:bg-gray-600 px-4 py-3 rounded-lg font-semibold transition">
+            Cancelar
+          </button>
+        </div>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(modal);
+
+  const imgEl = modal.querySelector('#cropImage');
+  const viewport = modal.querySelector('#cropViewport');
+  const zoomEl = modal.querySelector('#cropZoom');
+  const previewCanvas = modal.querySelector('#cropPreview');
+  const previewCtx = previewCanvas.getContext('2d');
+
+  const url = URL.createObjectURL(file);
+  imgEl.onload = () => {
+    // estado inicial
+    cropperState = {
+      file,
+      url,
+      imgEl,
+      viewport,
+      zoom: parseFloat(zoomEl.value),
+      // deslocamento em px relativo ao centro do viewport
+      dx: 0,
+      dy: 0,
+      dragging: false,
+      lastX: 0,
+      lastY: 0,
+      previewCtx
+    };
+
+    // Centraliza e dá um zoom inicial legal
+    cropperState.zoom = Math.max(1.2, cropperState.zoom);
+    zoomEl.value = String(cropperState.zoom);
+    applyCropTransform();
+    drawCropPreview();
+  };
+  imgEl.src = url;
+
+  // Eventos
+  const close = () => closePhotoCropper(true);
+
+  modal.querySelector('#closeCropperBtn').addEventListener('click', close);
+  modal.querySelector('#cancelCropBtn').addEventListener('click', close);
+  modal.addEventListener('click', (e) => { if (e.target === modal) close(); });
+
+  zoomEl.addEventListener('input', () => {
+    if (!cropperState) return;
+    cropperState.zoom = parseFloat(zoomEl.value);
+    applyCropTransform();
+    drawCropPreview();
+  });
+
+  // Drag mouse/touch
+  const startDrag = (clientX, clientY) => {
+    if (!cropperState) return;
+    cropperState.dragging = true;
+    cropperState.lastX = clientX;
+    cropperState.lastY = clientY;
+  };
+
+  const moveDrag = (clientX, clientY) => {
+    if (!cropperState || !cropperState.dragging) return;
+    const dx = clientX - cropperState.lastX;
+    const dy = clientY - cropperState.lastY;
+    cropperState.lastX = clientX;
+    cropperState.lastY = clientY;
+    cropperState.dx += dx;
+    cropperState.dy += dy;
+    applyCropTransform();
+    drawCropPreview();
+  };
+
+  const endDrag = () => {
+    if (!cropperState) return;
+    cropperState.dragging = false;
+  };
+
+  viewport.addEventListener('mousedown', (e) => startDrag(e.clientX, e.clientY));
+  window.addEventListener('mousemove', (e) => moveDrag(e.clientX, e.clientY));
+  window.addEventListener('mouseup', endDrag);
+
+  viewport.addEventListener('touchstart', (e) => {
+    if (e.touches?.[0]) startDrag(e.touches[0].clientX, e.touches[0].clientY);
+  }, { passive: true });
+
+  viewport.addEventListener('touchmove', (e) => {
+    if (e.touches?.[0]) moveDrag(e.touches[0].clientX, e.touches[0].clientY);
+  }, { passive: true });
+
+  viewport.addEventListener('touchend', endDrag);
+
+  modal.querySelector('#applyCropBtn').addEventListener('click', async () => {
+    try {
+      const croppedFile = await exportCroppedPhoto(800, 800, 0.86); // avatar 800x800
+      selectedPhotoFile = croppedFile;
+
+      // Atualiza preview do perfil
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const prev = document.getElementById('profilePhotoPreview');
+        if (prev) prev.src = e.target.result;
+      };
+      reader.readAsDataURL(croppedFile);
+
+      const nameEl = document.getElementById('photoFileName');
+      if (nameEl) nameEl.textContent = file.name + ' (recortada)';
+
+      closePhotoCropper(false);
+      showSuccess('Foto ajustada! Agora clique em "Salvar Alterações".');
+    } catch (err) {
+      console.error(err);
+      showError('Não foi possível recortar a foto.');
+    }
+  });
+}
+
+function closePhotoCropper(resetInput) {
+  const modal = document.getElementById('photoCropperModal');
+  if (modal) modal.remove();
+  if (cropperState?.url) URL.revokeObjectURL(cropperState.url);
+  cropperState = null;
+
+  // Se cancelou, limpa o input file pra poder selecionar a mesma foto de novo
+  if (resetInput) {
+    const fileInput = document.getElementById('profilePhotoInput');
+    if (fileInput) fileInput.value = '';
+  }
+}
+
+function applyCropTransform() {
+  if (!cropperState) return;
+
+  const { imgEl, viewport, zoom, dx, dy } = cropperState;
+  const rect = viewport.getBoundingClientRect();
+
+  // Coloca a imagem no centro (50/50) e aplica translate/scale
+  // translate(-50%, -50%) é base; depois adicionamos dx/dy em px
+  imgEl.style.transform =
+    `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px)) scale(${zoom})`;
+
+  // Mantém a imagem com "contain" visualmente grande
+  imgEl.style.maxWidth = 'none';
+  imgEl.style.maxHeight = 'none';
+
+  // Base: dimensiona para cobrir o viewport (com zoom)
+  // (fazemos via width/height auto; o scale faz o resto)
+  imgEl.style.width = `${rect.width}px`;
+  imgEl.style.height = 'auto';
+}
+
+function drawCropPreview() {
+  if (!cropperState) return;
+  const canvas = document.getElementById('cropPreview');
+  if (!canvas) return;
+  const ctx = cropperState.previewCtx;
+  if (!ctx) return;
+
+  // Preview em 160x160
+  exportCroppedToCanvas(canvas, 160, 160).catch(() => {});
+}
+
+async function exportCroppedPhoto(outW, outH, quality) {
+  const canvas = document.createElement('canvas');
+  canvas.width = outW;
+  canvas.height = outH;
+  await exportCroppedToCanvas(canvas, outW, outH);
+
+  return new Promise((resolve, reject) => {
+    canvas.toBlob((blob) => {
+      if (!blob) return reject(new Error('toBlob failed'));
+      const file = new File([blob], `profile_${Date.now()}.jpg`, {
+        type: 'image/jpeg',
+        lastModified: Date.now()
+      });
+      resolve(file);
+    }, 'image/jpeg', quality ?? 0.86);
+  });
+}
+
+async function exportCroppedToCanvas(canvas, outW, outH) {
+  if (!cropperState) throw new Error('no cropper state');
+
+  const { imgEl, viewport, zoom, dx, dy } = cropperState;
+
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, outW, outH);
+
+  // viewport quadrado
+  const vpRect = viewport.getBoundingClientRect();
+
+  // Precisamos mapear o recorte (viewport) para coordenadas reais da imagem
+  // A imagem é desenhada como: centro do viewport + (dx,dy) e scale(zoom) com base no viewport width.
+  const img = imgEl;
+
+  // Dimensões naturais da imagem
+  const natW = img.naturalWidth;
+  const natH = img.naturalHeight;
+
+  // A base visual: definimos imgEl.style.width = viewportWidth.
+  // Então, 1 "unidade" no viewport equivale a (natW / viewportWidth) na imagem (antes do zoom).
+  const viewportW = vpRect.width;
+  const viewportH = vpRect.height;
+
+  const baseScaleX = natW / viewportW;
+  const baseScaleY = natH / (viewportW * (natH / natW)); // proporcional, mas vamos calcular pela altura real desenhada
+
+  // Melhor: calcule a altura desenhada no DOM (sem o scale do CSS)
+  // Como colocamos width = viewportW e height = auto, a altura base desenhada:
+  const drawnBaseH = viewportW * (natH / natW);
+
+  // Fator pixels imagem por pixel viewport na base
+  const pxPerVpX = natW / viewportW;
+  const pxPerVpY = natH / drawnBaseH;
+
+  // Com zoom: cada pixel no viewport corresponde a menos pixels da imagem
+  const pxPerVpXZoom = pxPerVpX / zoom;
+  const pxPerVpYZoom = pxPerVpY / zoom;
+
+  // O viewport recorta um quadrado. A origem do recorte na imagem depende do deslocamento dx/dy.
+  // dx/dy deslocam a imagem no viewport; se dx é positivo, a imagem foi movida p/ direita,
+  // então o recorte pega uma área mais à esquerda na imagem.
+  const cropVpX = (viewportW / 2) - (viewportW / 2) - dx; // simplifica: -dx
+  const cropVpY = (viewportH / 2) - (viewportH / 2) - dy; // -dy
+
+  // O centro do recorte no viewport é o centro do viewport.
+  // A posição do recorte na imagem (top-left) em pixels imagem:
+  const srcW = viewportW * pxPerVpXZoom;
+  const srcH = viewportH * pxPerVpYZoom;
+
+  // A imagem está centrada no viewport; então o recorte está centrado no centro da imagem (em viewport coords),
+  // ajustado por dx/dy.
+  // Top-left do recorte em coords da imagem:
+  const srcX = (natW / 2) - (srcW / 2) - (dx * pxPerVpXZoom);
+  const srcY = (natH / 2) - (srcH / 2) - (dy * pxPerVpYZoom);
+
+  // Clamp pra não estourar
+  const clamp = (v, min, max) => Math.max(min, Math.min(max, v));
+  const sx = clamp(srcX, 0, natW - srcW);
+  const sy = clamp(srcY, 0, natH - srcH);
+
+  ctx.drawImage(img, sx, sy, srcW, srcH, 0, 0, outW, outH);
+}
   
   // Resize image before storing (max 800x800, JPEG 82% quality ≈ keeps it under 400KB)
   resizeImage(file, 800, 800, 0.82).then((resized) => {
