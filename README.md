@@ -346,3 +346,24 @@ Sistema desenvolvido para conectar artistas e público durante apresentações a
 ## 📄 **Licença**
 
 Este projeto é privado e confidencial.
+
+## 🎨 Alterar ícone do app (PWA/iOS)
+
+1. Substitua a imagem base em `public/app-icon-source.png` (ideal: PNG quadrado em alta resolução, ex.: 1024x1024).
+2. Rode o comando abaixo para regenerar todos os ícones usados pelo app:
+
+```bash
+npm run icons
+```
+
+Também é possível informar outro arquivo de origem:
+
+```bash
+bash public/create-icons.sh caminho/para/novo-icone.png
+```
+
+Esse script atualiza automaticamente:
+- `icon-192.png` e `icon-512.png` (PWA)
+- `apple-touch-icon-*.png` (atalhos iOS)
+- `apple-touch-icon.png`
+- `favicon.ico`
