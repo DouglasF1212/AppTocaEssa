@@ -3053,7 +3053,7 @@ app.get('/admin/panel', (c) => {
           }
         </script>
         <script src="https://cdn.jsdelivr.net/npm/axios@1.6.0/dist/axios.min.js"></script>
-        <script src="/static/admin-panel.js?v=8"></script>
+        <script src="/static/admin-panel.js?v=9"></script>
     <script>
       if ('serviceWorker' in navigator) {
         navigator.serviceWorker.register('/sw.js?v=9')
@@ -3173,7 +3173,7 @@ app.get('/admin/artists', (c) => {
       </div>
 
       <script src="https://cdn.jsdelivr.net/npm/axios@1.6.0/dist/axios.min.js"></script>
-      <script src="/static/admin-artists.js?v=1"></script>
+      <script src="/static/admin-artists.js?v=2"></script>
     </body>
     </html>
   `)
@@ -3234,7 +3234,7 @@ app.get('/manage', (c) => {
         </div>
         
         <script src="https://cdn.jsdelivr.net/npm/axios@1.6.0/dist/axios.min.js"></script>
-        <script src="/static/manage.js?v=10"></script>
+        <script src="/static/manage.js?v=11"></script>
         <script>init()</script>
     <script>
       if ('serviceWorker' in navigator) {
