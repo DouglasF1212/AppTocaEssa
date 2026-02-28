@@ -1932,7 +1932,7 @@ function renderQRCodeTab() {
             </button>
             <button onclick="regenerateQRCode()" class="bg-gray-600 hover:bg-gray-700 px-6 py-3 rounded-lg font-semibold text-white transition text-sm">
               <i class="fas fa-sync mr-2"></i>
-              Gerar Novo
+              Recarregar QR
             </button>
           </div>
           
@@ -2010,7 +2010,7 @@ async function loadQRCode() {
 }
 
 async function regenerateQRCode() {
-  if (!confirm('Deseja gerar um novo QR Code? O antigo deixará de funcionar.')) {
+  if (!confirm('Seu QR Code é fixo. Deseja apenas recarregar os dados do QR atual?')) {
     return;
   }
   
@@ -2018,7 +2018,7 @@ async function regenerateQRCode() {
     const response = await axios.post(`/api/artists/${artist.slug}/qrcode/regenerate`);
     const data = response.data;
     
-    showSuccess('QR Code regenerado com sucesso!');
+    showSuccess('QR Code fixo carregado com sucesso!');
     loadQRCode();
   } catch (error) {
     showError('Erro ao regenerar QR Code: ' + (error.response?.data?.error || error.message));

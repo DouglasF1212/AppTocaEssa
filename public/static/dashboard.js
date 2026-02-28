@@ -10,7 +10,9 @@ let customRequests = [];
 // Send session_id cookie + header on every request (same setup as manage.js)
 axios.defaults.withCredentials = true;
 axios.interceptors.request.use(function(config) {
-  const sid = localStorage.getItem('session_id');
+  const sid = localStorage.getItem('session_id')
+    || localStorage.getItem('admin_session_id')
+    || sessionStorage.getItem('session_id');
   if (sid) config.headers['X-Session-ID'] = sid;
   return config;
 });
