@@ -126,15 +126,19 @@ app.get('/splash-2048x2732.png', serveStatic({ path: 'splash-2048x2732.png', roo
 
 // APK download — redirect to static asset served directly by Cloudflare Pages
 app.get('/download/TocaEssa.apk', (c) => {
-  return c.redirect('/TocaEssa.apk', 302)
+  const search = new URL(c.req.url).search || ''
+  c.header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0')
+  return c.redirect(`/TocaEssa.apk${search}`, 302)
 })
 
 // Also serve directly at /TocaEssa.apk with correct headers (fallback if CF Pages doesn't add them)
 app.get('/TocaEssa.apk', (c) => {
   c.header('Content-Type', 'application/vnd.android.package-archive')
   c.header('Content-Disposition', 'attachment; filename="TocaEssa.apk"')
-  return serveStatic({ path: 'TocaEssa.apk', root: './' })(c, async () => {})
+  c.header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0')
+  return serveStatic({ path: 'TocaEssa.apk', root: './public' })(c, async () => {})
 })
+
 
 // Serve promotional video
 app.get('/video-promo', (c) => {
@@ -2651,7 +2655,7 @@ app.get('/download', (c) => {
     </head>
     <body>
         <div class="card">
-            <img src="/icon-192.png" alt="TOCA ESSA" class="app-icon">
+            <img src="/icon-192.png?v=11" alt="TOCA ESSA" class="app-icon">
             <div class="app-name">TOCA ESSA</div>
             <div class="app-sub">Conectando artistas e público ao vivo</div>
             <span class="version-tag">v1.0 · Gratuito</span>
@@ -2670,7 +2674,7 @@ app.get('/download', (c) => {
                 <div class="feature"><i class="fas fa-infinity"></i> Uso ilimitado</div>
             </div>
 
-            <a href="/download/TocaEssa.apk" download="TocaEssa.apk" class="btn-android">
+            <a href="/download/TocaEssa.apk?v=16" download="TocaEssa.apk" class="btn-android">
                 <i class="fab fa-android" style="font-size:28px;"></i>
                 <div class="btn-label">
                     <small>Baixar para</small>
@@ -2691,7 +2695,7 @@ app.get('/download', (c) => {
             </a>
 
             <div class="note">
-                <strong style="color:#94a3b8;">Android:</strong> Após baixar, abra o arquivo .apk. Se aparecer aviso de segurança, toque em <em>Instalar mesmo assim</em>.<br><br>
+                <strong style="color:#94a3b8;">Android:</strong> Após baixar, abra o arquivo .apk. Se aparecer aviso de segurança, toque em <em>Instalar mesmo assim</em>. Se der erro de atualização, desinstale a versão antiga e instale novamente.<br><br>
                 <strong style="color:#94a3b8;">iPhone / Safari:</strong> Acesse <a href="https://www.apptocaessa.com.br">apptocaessa.com.br</a>, toque em <i class="fas fa-share-from-square"></i> e escolha <em>Adicionar à Tela de Início</em>.
             </div>
         </div>
