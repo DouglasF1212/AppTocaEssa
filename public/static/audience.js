@@ -464,7 +464,11 @@ function renderPage() {
             id="requestSongBtn"
             onclick="showRequestModal()"
             class="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 px-8 py-4 rounded-xl font-bold text-lg transition shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:from-purple-600 disabled:hover:to-pink-600"
+ codex/fix-music-request-button-functionality-5ld26a
             ${selectedSong && songs.length > 0 ? '' : 'disabled'}
+
+            ${selectedSong ? '' : 'disabled'}
+ main
           >
             <i class="fas fa-guitar mr-2"></i>
             Pedir Música
@@ -548,7 +552,11 @@ function enforceAudienceLayout() {
 function updateRequestButtonState() {
   const requestBtn = document.getElementById('requestSongBtn');
   if (!requestBtn) return;
+codex/fix-music-request-button-functionality-5ld26a
   requestBtn.disabled = !selectedSong || songs.length === 0;
+
+  requestBtn.disabled = !selectedSong;
+main
 }
 
 // Render songs list
