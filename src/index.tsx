@@ -2485,7 +2485,11 @@ app.get('/download', (c) => {
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Baixar App - TOCA ESSA</title>
         <meta name="description" content="Baixe o app TOCA ESSA para Android e conecte artistas ao público durante shows ao vivo.">
-        <link rel="icon" href="/icon-192.png?v=11">
+        <meta name="theme-color" content="#8b5cf6">
+        <link rel="manifest" href="/manifest.json?v=11">
+        <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=11">
+        <link rel="icon" type="image/png" sizes="512x512" href="/icon-512.png?v=11">
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=11">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
         <style>
           * { margin: 0; padding: 0; box-sizing: border-box; }
