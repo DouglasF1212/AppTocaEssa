@@ -1,11 +1,11 @@
 // Service Worker para TOCA ESSA PWA
-const CACHE_NAME = 'toca-essa-v9';
+const CACHE_NAME = 'toca-essa-v11';
 
 // Apenas assets estáticos imutáveis
 const STATIC_ASSETS = [
-  '/icon-192.png',
-  '/icon-512.png',
-  '/manifest.json'
+  '/icon-192.png?v=11',
+  '/icon-512.png?v=11',
+  '/manifest.json?v=11'
 ];
 
 self.addEventListener('install', (event) => {

@@ -1,0 +1,40 @@
+name: Update app icons
+
+on:
+  push:
+    paths:
+      - "public/app-icon-source.png"
+      - "public/create-icons.sh"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  regenerate-icons:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install ImageMagick
+        run: sudo apt-get update && sudo apt-get install -y imagemagick
+
+      - name: Generate icons from source
+        run: bash public/create-icons.sh public/app-icon-source.png
+
+      - name: Commit updated icons
+        run: |
+          if git diff --quiet; then
+            echo "No icon changes to commit."
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add public/icon-192.png public/icon-512.png public/favicon.ico public/apple-touch-icon.png public/apple-touch-icon-*.png
+          git commit -m "chore: regenerate app icons"
+          git push
