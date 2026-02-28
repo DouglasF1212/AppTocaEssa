@@ -456,9 +456,11 @@ app.get('/api/artists', async (c) => {
 // Get artist by slug
 app.get('/api/artists/:slug', async (c) => {
   const slug = c.req.param('slug')
+  const session = await checkAuth(c)
+  const isAdmin = session?.role === 'admin'
   
   const artist = await c.env.DB.prepare(`
-    SELECT * FROM artists WHERE slug = ? AND active = 1
+    SELECT * FROM artists WHERE slug = ? ${isAdmin ? '' : 'AND active = 1'}
   `).bind(slug).first()
   
   if (!artist) {
@@ -655,9 +657,11 @@ app.get('/api/photos/*', async (c) => {
 // Get all songs for an artist
 app.get('/api/artists/:slug/songs', async (c) => {
   const slug = c.req.param('slug')
-  
+  const session = await checkAuth(c)
+  const isAdmin = session?.role === 'admin'
+
   const artist = await c.env.DB.prepare(`
-    SELECT id FROM artists WHERE slug = ? AND active = 1
+    SELECT id FROM artists WHERE slug = ? ${isAdmin ? '' : 'AND active = 1'}
   `).bind(slug).first()
   
   if (!artist) {
