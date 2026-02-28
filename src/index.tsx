@@ -2177,32 +2177,36 @@ app.get('/api/artists/:slug/qrcode', async (c) => {
   })
 })
 
-// Regenerate QR Code for artist
+// Keep artist QR Code fixed (legacy route kept for compatibility)
 app.post('/api/artists/:slug/qrcode/regenerate', async (c) => {
   const session = await checkAuth(c)
   if (!session) return c.json({ error: 'Não autenticado' }, 401)
-  
+
   const slug = c.req.param('slug')
-  
+
   const artist = await c.env.DB.prepare(`
-    SELECT id FROM artists WHERE slug = ? AND user_id = ?
-  `).bind(slug, session.user_id).first()
-  
+    SELECT id, qr_code_data FROM artists WHERE slug = ? AND user_id = ?
+  `).bind(slug, session.user_id).first() as any
+
   if (!artist) {
     return c.json({ error: 'Acesso negado' }, 403)
   }
-  
-  // Generate new QR code data (URL to artist page)
-  const qrCodeData = buildArtistPublicUrl(c, slug)
-  
-  await c.env.DB.prepare(`
-    UPDATE artists 
-    SET qr_code_data = ?, qr_code_generated_at = datetime('now')
-    WHERE id = ?
-  `).bind(qrCodeData, artist.id).run()
-  
+
+  // QR must be stable/fixed: only initialize when missing
+  let qrCodeData = artist.qr_code_data as string | null
+  if (!qrCodeData || !qrCodeData.trim()) {
+    qrCodeData = buildArtistPublicUrl(c, slug)
+    await c.env.DB.prepare(`
+      UPDATE artists
+      SET qr_code_data = ?, qr_code_generated_at = COALESCE(qr_code_generated_at, datetime('now'))
+      WHERE id = ?
+    `).bind(qrCodeData, artist.id).run()
+  }
+
   return c.json({
     success: true,
+    fixed: true,
+    message: 'QR Code fixo mantido com sucesso',
     qr_code_data: qrCodeData,
     qr_code_url: `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(qrCodeData)}`
   })
