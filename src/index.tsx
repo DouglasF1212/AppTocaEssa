@@ -163,6 +163,18 @@ function generateSessionId(): string {
   return crypto.randomUUID()
 }
 
+
+// Build stable public URL for artist pages
+function buildArtistPublicUrl(c: any, slug: string): string {
+  const configuredBaseUrl = ((c.env as any)?.PUBLIC_BASE_URL || '').toString().trim().replace(/\/+$/, '')
+  if (configuredBaseUrl) {
+    return `${configuredBaseUrl}/${slug}`
+  }
+
+  const requestUrl = new URL(c.req.url)
+  return `${requestUrl.origin}/${slug}`
+}
+
 function getLicenseAccessInfo(user: any) {
   const isAdmin = (user?.role || 'artist') === 'admin'
   const isApproved = (user?.license_status || 'pending') === 'approved'
@@ -272,7 +284,7 @@ app.post('/api/auth/register', async (c) => {
     .replace(/^-+|-+$/g, '')
   
   // Create artist profile with QR code data
-  const qrCodeData = `${c.req.url.split('/api')[0]}/${slug}` // Full URL to artist page
+  const qrCodeData = buildArtistPublicUrl(c, slug)
   
   await c.env.DB.prepare(`
     INSERT INTO artists (name, slug, bio, user_id, active, qr_code_data, qr_code_generated_at)
@@ -456,9 +468,11 @@ app.get('/api/artists', async (c) => {
 // Get artist by slug
 app.get('/api/artists/:slug', async (c) => {
   const slug = c.req.param('slug')
+  const session = await checkAuth(c)
+  const isAdmin = session?.role === 'admin'
   
   const artist = await c.env.DB.prepare(`
-    SELECT * FROM artists WHERE slug = ? AND active = 1
+    SELECT * FROM artists WHERE slug = ? ${isAdmin ? '' : 'AND active = 1'}
   `).bind(slug).first()
   
   if (!artist) {
@@ -655,9 +669,11 @@ app.get('/api/photos/*', async (c) => {
 // Get all songs for an artist
 app.get('/api/artists/:slug/songs', async (c) => {
   const slug = c.req.param('slug')
-  
+  const session = await checkAuth(c)
+  const isAdmin = session?.role === 'admin'
+
   const artist = await c.env.DB.prepare(`
-    SELECT id FROM artists WHERE slug = ? AND active = 1
+    SELECT id FROM artists WHERE slug = ? ${isAdmin ? '' : 'AND active = 1'}
   `).bind(slug).first()
   
   if (!artist) {
@@ -2130,52 +2146,68 @@ app.put('/api/notifications/read-all', async (c) => {
 app.get('/api/artists/:slug/qrcode', async (c) => {
   const session = await checkAuth(c)
   if (!session) return c.json({ error: 'Não autenticado' }, 401)
-  
+
   const slug = c.req.param('slug')
-  
+
   const artist = await c.env.DB.prepare(`
-    SELECT id, qr_code_data, qr_code_generated_at FROM artists 
+    SELECT id, qr_code_data, qr_code_generated_at FROM artists
     WHERE slug = ? AND user_id = ?
-  `).bind(slug, session.user_id).first()
-  
+  `).bind(slug, session.user_id).first() as any
+
   if (!artist) {
     return c.json({ error: 'Acesso negado' }, 403)
   }
-  
+
+  // Keep QR fixed forever once persisted (do not rotate by request host)
+  let qrCodeData = (artist.qr_code_data || '').toString().trim()
+
+  // Legacy backfill only when empty
+  if (!qrCodeData) {
+    qrCodeData = buildArtistPublicUrl(c, slug)
+    await c.env.DB.prepare(`
+      UPDATE artists
+      SET qr_code_data = ?, qr_code_generated_at = COALESCE(qr_code_generated_at, datetime('now'))
+      WHERE id = ?
+    `).bind(qrCodeData, artist.id).run()
+  }
+
   return c.json({
-    qr_code_data: artist.qr_code_data,
-    qr_code_url: `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(artist.qr_code_data)}`,
+    qr_code_data: qrCodeData,
+    qr_code_url: `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(qrCodeData)}`,
     generated_at: artist.qr_code_generated_at
   })
 })
 
-// Regenerate QR Code for artist
+// Keep artist QR Code fixed (legacy route kept for compatibility)
 app.post('/api/artists/:slug/qrcode/regenerate', async (c) => {
   const session = await checkAuth(c)
   if (!session) return c.json({ error: 'Não autenticado' }, 401)
-  
+
   const slug = c.req.param('slug')
-  
+
   const artist = await c.env.DB.prepare(`
-    SELECT id FROM artists WHERE slug = ? AND user_id = ?
-  `).bind(slug, session.user_id).first()
-  
+    SELECT id, qr_code_data FROM artists WHERE slug = ? AND user_id = ?
+  `).bind(slug, session.user_id).first() as any
+
   if (!artist) {
     return c.json({ error: 'Acesso negado' }, 403)
   }
-  
-  // Generate new QR code data (URL to artist page)
-  const baseUrl = c.req.url.split('/api')[0]
-  const qrCodeData = `${baseUrl}/${slug}`
-  
-  await c.env.DB.prepare(`
-    UPDATE artists 
-    SET qr_code_data = ?, qr_code_generated_at = datetime('now')
-    WHERE id = ?
-  `).bind(qrCodeData, artist.id).run()
-  
+
+  // QR remains fixed: only initialize if missing
+  let qrCodeData = (artist.qr_code_data || '').toString().trim()
+  if (!qrCodeData) {
+    qrCodeData = buildArtistPublicUrl(c, slug)
+    await c.env.DB.prepare(`
+      UPDATE artists
+      SET qr_code_data = ?, qr_code_generated_at = COALESCE(qr_code_generated_at, datetime('now'))
+      WHERE id = ?
+    `).bind(qrCodeData, artist.id).run()
+  }
+
   return c.json({
     success: true,
+    fixed: true,
+    message: 'QR Code fixo mantido com sucesso',
     qr_code_data: qrCodeData,
     qr_code_url: `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(qrCodeData)}`
   })
