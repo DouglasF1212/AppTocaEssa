@@ -487,6 +487,29 @@ function renderPage() {
         <div id="songsContainer" class="grid md:grid-cols-2 lg:grid-cols-3 gap-4 max-h-[600px] overflow-y-auto">
           ${renderSongs()}
         </div>
+
+        <div class="mt-6 text-center">
+          <button onclick="showCustomRequestModal()" class="bg-gray-700 hover:bg-gray-600 px-6 py-3 rounded-xl font-semibold text-base transition shadow-lg">
+            <i class="fas fa-question-circle mr-2"></i>
+            Música fora do repertório
+          </button>
+        </div>
+      </div>
+
+      <div class="text-center mb-8">
+        <p class="text-gray-300 mb-3">Não encontrou no repertório?</p>
+        <button onclick="showCustomRequestModal()" class="bg-gray-700 hover:bg-gray-600 px-6 py-3 rounded-xl font-semibold text-base transition shadow-lg border border-gray-500">
+          <i class="fas fa-question-circle mr-2"></i>
+          Pedir música fora do repertório
+        </button>
+      </div>
+
+      <div class="text-center mb-8">
+        <p class="text-gray-300 mb-3">Não encontrou no repertório?</p>
+        <button onclick="showCustomRequestModal()" class="bg-gray-700 hover:bg-gray-600 px-6 py-3 rounded-xl font-semibold text-base transition shadow-lg border border-gray-500">
+          <i class="fas fa-question-circle mr-2"></i>
+          Pedir música fora do repertório
+        </button>
       </div>
 
       <div id="customRequestSection" class="text-center mb-8">
