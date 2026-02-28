@@ -63,16 +63,16 @@ app.get("/manifest.json", (c) => {
     orientation: "portrait",
     icons: [
       {
-        src: "/icon-192.png?v=11",
+        src: "/icon-192.png?v=12",
         sizes: "192x192",
         type: "image/png",
-        purpose: "any maskable"
+        purpose: "any"
       },
       {
-        src: "/icon-512.png?v=11",
+        src: "/icon-512.png?v=12",
         sizes: "512x512",
         type: "image/png",
-        purpose: "any maskable"
+        purpose: "any"
       }
     ],
     categories: ["music", "entertainment"],
@@ -2260,18 +2260,18 @@ app.get('/', async (c) => {
         <meta name="apple-mobile-web-app-capable" content="yes">
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
         <meta name="apple-mobile-web-app-title" content="${appName}">
-        <link rel="manifest" href="/manifest.json?v=11">
-        <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=11">
-        <link rel="apple-touch-icon" sizes="57x57"   href="/apple-touch-icon-57x57.png?v=11">
-        <link rel="apple-touch-icon" sizes="60x60"   href="/apple-touch-icon-60x60.png?v=11">
-        <link rel="apple-touch-icon" sizes="72x72"   href="/apple-touch-icon-72x72.png?v=11">
-        <link rel="apple-touch-icon" sizes="76x76"   href="/apple-touch-icon-76x76.png?v=11">
-        <link rel="apple-touch-icon" sizes="114x114" href="/apple-touch-icon-114x114.png?v=11">
-        <link rel="apple-touch-icon" sizes="120x120" href="/apple-touch-icon-120x120.png?v=11">
-        <link rel="apple-touch-icon" sizes="144x144" href="/apple-touch-icon-144x144.png?v=11">
-        <link rel="apple-touch-icon" sizes="152x152" href="/apple-touch-icon-152x152.png?v=11">
-        <link rel="apple-touch-icon" sizes="167x167" href="/apple-touch-icon-167x167.png?v=11">
-        <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon-180x180.png?v=11">
+        <link rel="manifest" href="/manifest.json?v=12">
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=12">
+        <link rel="apple-touch-icon" sizes="57x57"   href="/apple-touch-icon-57x57.png?v=12">
+        <link rel="apple-touch-icon" sizes="60x60"   href="/apple-touch-icon-60x60.png?v=12">
+        <link rel="apple-touch-icon" sizes="72x72"   href="/apple-touch-icon-72x72.png?v=12">
+        <link rel="apple-touch-icon" sizes="76x76"   href="/apple-touch-icon-76x76.png?v=12">
+        <link rel="apple-touch-icon" sizes="114x114" href="/apple-touch-icon-114x114.png?v=12">
+        <link rel="apple-touch-icon" sizes="120x120" href="/apple-touch-icon-120x120.png?v=12">
+        <link rel="apple-touch-icon" sizes="144x144" href="/apple-touch-icon-144x144.png?v=12">
+        <link rel="apple-touch-icon" sizes="152x152" href="/apple-touch-icon-152x152.png?v=12">
+        <link rel="apple-touch-icon" sizes="167x167" href="/apple-touch-icon-167x167.png?v=12">
+        <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon-180x180.png?v=12">
         <!-- Splash screens iOS -->
         <link rel="apple-touch-startup-image" media="(device-width:320px) and (device-height:568px) and (-webkit-device-pixel-ratio:2)"  href="/splash-640x1136.png">
         <link rel="apple-touch-startup-image" media="(device-width:375px) and (device-height:667px) and (-webkit-device-pixel-ratio:2)"  href="/splash-750x1334.png">
@@ -2464,7 +2464,7 @@ app.get('/', async (c) => {
         </div>
     <script>
       if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('/sw.js?v=11')
+        navigator.serviceWorker.register('/sw.js?v=12')
           .then(reg => console.log('✅ SW registrado:', reg.scope))
           .catch(err => console.log('SW erro:', err));
       }
@@ -2486,10 +2486,10 @@ app.get('/download', (c) => {
         <title>Baixar App - TOCA ESSA</title>
         <meta name="description" content="Baixe o app TOCA ESSA para Android e conecte artistas ao público durante shows ao vivo.">
         <meta name="theme-color" content="#8b5cf6">
-        <link rel="manifest" href="/manifest.json?v=11">
-        <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=11">
-        <link rel="icon" type="image/png" sizes="512x512" href="/icon-512.png?v=11">
-        <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=11">
+        <link rel="manifest" href="/manifest.json?v=12">
+        <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=12">
+        <link rel="icon" type="image/png" sizes="512x512" href="/icon-512.png?v=12">
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=12">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
         <style>
           * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -2659,7 +2659,7 @@ app.get('/download', (c) => {
     </head>
     <body>
         <div class="card">
-            <img src="/icon-192.png?v=11" alt="TOCA ESSA" class="app-icon">
+            <img src="/icon-192.png?v=12" alt="TOCA ESSA" class="app-icon">
             <div class="app-name">TOCA ESSA</div>
             <div class="app-sub">Conectando artistas e público ao vivo</div>
             <span class="version-tag">v1.0 · Gratuito</span>
@@ -2743,18 +2743,18 @@ app.get('/login', (c) => {
         <meta name="apple-mobile-web-app-capable" content="yes">
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
         <meta name="apple-mobile-web-app-title" content="TOCA ESSA">
-        <link rel="manifest" href="/manifest.json?v=11">
-        <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=11">
-        <link rel="apple-touch-icon" sizes="57x57"   href="/apple-touch-icon-57x57.png?v=11">
-        <link rel="apple-touch-icon" sizes="60x60"   href="/apple-touch-icon-60x60.png?v=11">
-        <link rel="apple-touch-icon" sizes="72x72"   href="/apple-touch-icon-72x72.png?v=11">
-        <link rel="apple-touch-icon" sizes="76x76"   href="/apple-touch-icon-76x76.png?v=11">
-        <link rel="apple-touch-icon" sizes="114x114" href="/apple-touch-icon-114x114.png?v=11">
-        <link rel="apple-touch-icon" sizes="120x120" href="/apple-touch-icon-120x120.png?v=11">
-        <link rel="apple-touch-icon" sizes="144x144" href="/apple-touch-icon-144x144.png?v=11">
-        <link rel="apple-touch-icon" sizes="152x152" href="/apple-touch-icon-152x152.png?v=11">
-        <link rel="apple-touch-icon" sizes="167x167" href="/apple-touch-icon-167x167.png?v=11">
-        <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon-180x180.png?v=11">
+        <link rel="manifest" href="/manifest.json?v=12">
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=12">
+        <link rel="apple-touch-icon" sizes="57x57"   href="/apple-touch-icon-57x57.png?v=12">
+        <link rel="apple-touch-icon" sizes="60x60"   href="/apple-touch-icon-60x60.png?v=12">
+        <link rel="apple-touch-icon" sizes="72x72"   href="/apple-touch-icon-72x72.png?v=12">
+        <link rel="apple-touch-icon" sizes="76x76"   href="/apple-touch-icon-76x76.png?v=12">
+        <link rel="apple-touch-icon" sizes="114x114" href="/apple-touch-icon-114x114.png?v=12">
+        <link rel="apple-touch-icon" sizes="120x120" href="/apple-touch-icon-120x120.png?v=12">
+        <link rel="apple-touch-icon" sizes="144x144" href="/apple-touch-icon-144x144.png?v=12">
+        <link rel="apple-touch-icon" sizes="152x152" href="/apple-touch-icon-152x152.png?v=12">
+        <link rel="apple-touch-icon" sizes="167x167" href="/apple-touch-icon-167x167.png?v=12">
+        <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon-180x180.png?v=12">
         <!-- Splash screens iOS -->
         <link rel="apple-touch-startup-image" media="(device-width:320px) and (device-height:568px) and (-webkit-device-pixel-ratio:2)"  href="/splash-640x1136.png">
         <link rel="apple-touch-startup-image" media="(device-width:375px) and (device-height:667px) and (-webkit-device-pixel-ratio:2)"  href="/splash-750x1334.png">
@@ -2820,7 +2820,7 @@ app.get('/login', (c) => {
         </script>
     <script>
       if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('/sw.js?v=11')
+        navigator.serviceWorker.register('/sw.js?v=12')
           .then(reg => console.log('✅ SW registrado:', reg.scope))
           .catch(err => console.log('SW erro:', err));
       }
@@ -2843,18 +2843,18 @@ app.get('/register', (c) => {
         <meta name="apple-mobile-web-app-capable" content="yes">
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
         <meta name="apple-mobile-web-app-title" content="TOCA ESSA">
-        <link rel="manifest" href="/manifest.json?v=11">
-        <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=11">
-        <link rel="apple-touch-icon" sizes="57x57"   href="/apple-touch-icon-57x57.png?v=11">
-        <link rel="apple-touch-icon" sizes="60x60"   href="/apple-touch-icon-60x60.png?v=11">
-        <link rel="apple-touch-icon" sizes="72x72"   href="/apple-touch-icon-72x72.png?v=11">
-        <link rel="apple-touch-icon" sizes="76x76"   href="/apple-touch-icon-76x76.png?v=11">
-        <link rel="apple-touch-icon" sizes="114x114" href="/apple-touch-icon-114x114.png?v=11">
-        <link rel="apple-touch-icon" sizes="120x120" href="/apple-touch-icon-120x120.png?v=11">
-        <link rel="apple-touch-icon" sizes="144x144" href="/apple-touch-icon-144x144.png?v=11">
-        <link rel="apple-touch-icon" sizes="152x152" href="/apple-touch-icon-152x152.png?v=11">
-        <link rel="apple-touch-icon" sizes="167x167" href="/apple-touch-icon-167x167.png?v=11">
-        <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon-180x180.png?v=11">
+        <link rel="manifest" href="/manifest.json?v=12">
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=12">
+        <link rel="apple-touch-icon" sizes="57x57"   href="/apple-touch-icon-57x57.png?v=12">
+        <link rel="apple-touch-icon" sizes="60x60"   href="/apple-touch-icon-60x60.png?v=12">
+        <link rel="apple-touch-icon" sizes="72x72"   href="/apple-touch-icon-72x72.png?v=12">
+        <link rel="apple-touch-icon" sizes="76x76"   href="/apple-touch-icon-76x76.png?v=12">
+        <link rel="apple-touch-icon" sizes="114x114" href="/apple-touch-icon-114x114.png?v=12">
+        <link rel="apple-touch-icon" sizes="120x120" href="/apple-touch-icon-120x120.png?v=12">
+        <link rel="apple-touch-icon" sizes="144x144" href="/apple-touch-icon-144x144.png?v=12">
+        <link rel="apple-touch-icon" sizes="152x152" href="/apple-touch-icon-152x152.png?v=12">
+        <link rel="apple-touch-icon" sizes="167x167" href="/apple-touch-icon-167x167.png?v=12">
+        <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon-180x180.png?v=12">
         <!-- Splash screens iOS -->
         <link rel="apple-touch-startup-image" media="(device-width:320px) and (device-height:568px) and (-webkit-device-pixel-ratio:2)"  href="/splash-640x1136.png">
         <link rel="apple-touch-startup-image" media="(device-width:375px) and (device-height:667px) and (-webkit-device-pixel-ratio:2)"  href="/splash-750x1334.png">
@@ -2920,7 +2920,7 @@ app.get('/register', (c) => {
         </script>
     <script>
       if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('/sw.js?v=11')
+        navigator.serviceWorker.register('/sw.js?v=12')
           .then(reg => console.log('✅ SW registrado:', reg.scope))
           .catch(err => console.log('SW erro:', err));
       }
@@ -2943,18 +2943,18 @@ app.get('/license-payment', (c) => {
         <meta name="apple-mobile-web-app-capable" content="yes">
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
         <meta name="apple-mobile-web-app-title" content="TOCA ESSA">
-        <link rel="manifest" href="/manifest.json?v=11">
-        <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=11">
-        <link rel="apple-touch-icon" sizes="57x57"   href="/apple-touch-icon-57x57.png?v=11">
-        <link rel="apple-touch-icon" sizes="60x60"   href="/apple-touch-icon-60x60.png?v=11">
-        <link rel="apple-touch-icon" sizes="72x72"   href="/apple-touch-icon-72x72.png?v=11">
-        <link rel="apple-touch-icon" sizes="76x76"   href="/apple-touch-icon-76x76.png?v=11">
-        <link rel="apple-touch-icon" sizes="114x114" href="/apple-touch-icon-114x114.png?v=11">
-        <link rel="apple-touch-icon" sizes="120x120" href="/apple-touch-icon-120x120.png?v=11">
-        <link rel="apple-touch-icon" sizes="144x144" href="/apple-touch-icon-144x144.png?v=11">
-        <link rel="apple-touch-icon" sizes="152x152" href="/apple-touch-icon-152x152.png?v=11">
-        <link rel="apple-touch-icon" sizes="167x167" href="/apple-touch-icon-167x167.png?v=11">
-        <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon-180x180.png?v=11">
+        <link rel="manifest" href="/manifest.json?v=12">
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=12">
+        <link rel="apple-touch-icon" sizes="57x57"   href="/apple-touch-icon-57x57.png?v=12">
+        <link rel="apple-touch-icon" sizes="60x60"   href="/apple-touch-icon-60x60.png?v=12">
+        <link rel="apple-touch-icon" sizes="72x72"   href="/apple-touch-icon-72x72.png?v=12">
+        <link rel="apple-touch-icon" sizes="76x76"   href="/apple-touch-icon-76x76.png?v=12">
+        <link rel="apple-touch-icon" sizes="114x114" href="/apple-touch-icon-114x114.png?v=12">
+        <link rel="apple-touch-icon" sizes="120x120" href="/apple-touch-icon-120x120.png?v=12">
+        <link rel="apple-touch-icon" sizes="144x144" href="/apple-touch-icon-144x144.png?v=12">
+        <link rel="apple-touch-icon" sizes="152x152" href="/apple-touch-icon-152x152.png?v=12">
+        <link rel="apple-touch-icon" sizes="167x167" href="/apple-touch-icon-167x167.png?v=12">
+        <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon-180x180.png?v=12">
         <!-- Splash screens iOS -->
         <link rel="apple-touch-startup-image" media="(device-width:320px) and (device-height:568px) and (-webkit-device-pixel-ratio:2)"  href="/splash-640x1136.png">
         <link rel="apple-touch-startup-image" media="(device-width:375px) and (device-height:667px) and (-webkit-device-pixel-ratio:2)"  href="/splash-750x1334.png">
@@ -2982,7 +2982,7 @@ app.get('/license-payment', (c) => {
         <script>init()</script>
     <script>
       if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('/sw.js?v=11')
+        navigator.serviceWorker.register('/sw.js?v=12')
           .then(reg => console.log('✅ SW registrado:', reg.scope))
           .catch(err => console.log('SW erro:', err));
       }
@@ -3005,18 +3005,18 @@ app.get('/admin/login', (c) => {
         <meta name="apple-mobile-web-app-capable" content="yes">
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
         <meta name="apple-mobile-web-app-title" content="TOCA ESSA">
-        <link rel="manifest" href="/manifest.json?v=11">
-        <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=11">
-        <link rel="apple-touch-icon" sizes="57x57"   href="/apple-touch-icon-57x57.png?v=11">
-        <link rel="apple-touch-icon" sizes="60x60"   href="/apple-touch-icon-60x60.png?v=11">
-        <link rel="apple-touch-icon" sizes="72x72"   href="/apple-touch-icon-72x72.png?v=11">
-        <link rel="apple-touch-icon" sizes="76x76"   href="/apple-touch-icon-76x76.png?v=11">
-        <link rel="apple-touch-icon" sizes="114x114" href="/apple-touch-icon-114x114.png?v=11">
-        <link rel="apple-touch-icon" sizes="120x120" href="/apple-touch-icon-120x120.png?v=11">
-        <link rel="apple-touch-icon" sizes="144x144" href="/apple-touch-icon-144x144.png?v=11">
-        <link rel="apple-touch-icon" sizes="152x152" href="/apple-touch-icon-152x152.png?v=11">
-        <link rel="apple-touch-icon" sizes="167x167" href="/apple-touch-icon-167x167.png?v=11">
-        <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon-180x180.png?v=11">
+        <link rel="manifest" href="/manifest.json?v=12">
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=12">
+        <link rel="apple-touch-icon" sizes="57x57"   href="/apple-touch-icon-57x57.png?v=12">
+        <link rel="apple-touch-icon" sizes="60x60"   href="/apple-touch-icon-60x60.png?v=12">
+        <link rel="apple-touch-icon" sizes="72x72"   href="/apple-touch-icon-72x72.png?v=12">
+        <link rel="apple-touch-icon" sizes="76x76"   href="/apple-touch-icon-76x76.png?v=12">
+        <link rel="apple-touch-icon" sizes="114x114" href="/apple-touch-icon-114x114.png?v=12">
+        <link rel="apple-touch-icon" sizes="120x120" href="/apple-touch-icon-120x120.png?v=12">
+        <link rel="apple-touch-icon" sizes="144x144" href="/apple-touch-icon-144x144.png?v=12">
+        <link rel="apple-touch-icon" sizes="152x152" href="/apple-touch-icon-152x152.png?v=12">
+        <link rel="apple-touch-icon" sizes="167x167" href="/apple-touch-icon-167x167.png?v=12">
+        <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon-180x180.png?v=12">
         <!-- Splash screens iOS -->
         <link rel="apple-touch-startup-image" media="(device-width:320px) and (device-height:568px) and (-webkit-device-pixel-ratio:2)"  href="/splash-640x1136.png">
         <link rel="apple-touch-startup-image" media="(device-width:375px) and (device-height:667px) and (-webkit-device-pixel-ratio:2)"  href="/splash-750x1334.png">
@@ -3133,7 +3133,7 @@ app.get('/admin/login', (c) => {
         </script>
     <script>
       if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('/sw.js?v=11')
+        navigator.serviceWorker.register('/sw.js?v=12')
           .then(reg => console.log('✅ SW registrado:', reg.scope))
           .catch(err => console.log('SW erro:', err));
       }
@@ -3161,18 +3161,18 @@ app.get('/admin/panel', (c) => {
         <meta name="apple-mobile-web-app-capable" content="yes">
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
         <meta name="apple-mobile-web-app-title" content="TOCA ESSA">
-        <link rel="manifest" href="/manifest.json?v=11">
-        <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=11">
-        <link rel="apple-touch-icon" sizes="57x57"   href="/apple-touch-icon-57x57.png?v=11">
-        <link rel="apple-touch-icon" sizes="60x60"   href="/apple-touch-icon-60x60.png?v=11">
-        <link rel="apple-touch-icon" sizes="72x72"   href="/apple-touch-icon-72x72.png?v=11">
-        <link rel="apple-touch-icon" sizes="76x76"   href="/apple-touch-icon-76x76.png?v=11">
-        <link rel="apple-touch-icon" sizes="114x114" href="/apple-touch-icon-114x114.png?v=11">
-        <link rel="apple-touch-icon" sizes="120x120" href="/apple-touch-icon-120x120.png?v=11">
-        <link rel="apple-touch-icon" sizes="144x144" href="/apple-touch-icon-144x144.png?v=11">
-        <link rel="apple-touch-icon" sizes="152x152" href="/apple-touch-icon-152x152.png?v=11">
-        <link rel="apple-touch-icon" sizes="167x167" href="/apple-touch-icon-167x167.png?v=11">
-        <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon-180x180.png?v=11">
+        <link rel="manifest" href="/manifest.json?v=12">
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=12">
+        <link rel="apple-touch-icon" sizes="57x57"   href="/apple-touch-icon-57x57.png?v=12">
+        <link rel="apple-touch-icon" sizes="60x60"   href="/apple-touch-icon-60x60.png?v=12">
+        <link rel="apple-touch-icon" sizes="72x72"   href="/apple-touch-icon-72x72.png?v=12">
+        <link rel="apple-touch-icon" sizes="76x76"   href="/apple-touch-icon-76x76.png?v=12">
+        <link rel="apple-touch-icon" sizes="114x114" href="/apple-touch-icon-114x114.png?v=12">
+        <link rel="apple-touch-icon" sizes="120x120" href="/apple-touch-icon-120x120.png?v=12">
+        <link rel="apple-touch-icon" sizes="144x144" href="/apple-touch-icon-144x144.png?v=12">
+        <link rel="apple-touch-icon" sizes="152x152" href="/apple-touch-icon-152x152.png?v=12">
+        <link rel="apple-touch-icon" sizes="167x167" href="/apple-touch-icon-167x167.png?v=12">
+        <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon-180x180.png?v=12">
         <!-- Splash screens iOS -->
         <link rel="apple-touch-startup-image" media="(device-width:320px) and (device-height:568px) and (-webkit-device-pixel-ratio:2)"  href="/splash-640x1136.png">
         <link rel="apple-touch-startup-image" media="(device-width:375px) and (device-height:667px) and (-webkit-device-pixel-ratio:2)"  href="/splash-750x1334.png">
@@ -3272,7 +3272,7 @@ app.get('/admin/panel', (c) => {
         <script src="/static/admin-panel.js?v=9"></script>
     <script>
       if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('/sw.js?v=11')
+        navigator.serviceWorker.register('/sw.js?v=12')
           .then(reg => console.log('✅ SW registrado:', reg.scope))
           .catch(err => console.log('SW erro:', err));
       }
@@ -3408,18 +3408,18 @@ app.get('/manage', (c) => {
         <meta name="apple-mobile-web-app-capable" content="yes">
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
         <meta name="apple-mobile-web-app-title" content="TOCA ESSA">
-        <link rel="manifest" href="/manifest.json?v=11">
-        <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=11">
-        <link rel="apple-touch-icon" sizes="57x57"   href="/apple-touch-icon-57x57.png?v=11">
-        <link rel="apple-touch-icon" sizes="60x60"   href="/apple-touch-icon-60x60.png?v=11">
-        <link rel="apple-touch-icon" sizes="72x72"   href="/apple-touch-icon-72x72.png?v=11">
-        <link rel="apple-touch-icon" sizes="76x76"   href="/apple-touch-icon-76x76.png?v=11">
-        <link rel="apple-touch-icon" sizes="114x114" href="/apple-touch-icon-114x114.png?v=11">
-        <link rel="apple-touch-icon" sizes="120x120" href="/apple-touch-icon-120x120.png?v=11">
-        <link rel="apple-touch-icon" sizes="144x144" href="/apple-touch-icon-144x144.png?v=11">
-        <link rel="apple-touch-icon" sizes="152x152" href="/apple-touch-icon-152x152.png?v=11">
-        <link rel="apple-touch-icon" sizes="167x167" href="/apple-touch-icon-167x167.png?v=11">
-        <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon-180x180.png?v=11">
+        <link rel="manifest" href="/manifest.json?v=12">
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=12">
+        <link rel="apple-touch-icon" sizes="57x57"   href="/apple-touch-icon-57x57.png?v=12">
+        <link rel="apple-touch-icon" sizes="60x60"   href="/apple-touch-icon-60x60.png?v=12">
+        <link rel="apple-touch-icon" sizes="72x72"   href="/apple-touch-icon-72x72.png?v=12">
+        <link rel="apple-touch-icon" sizes="76x76"   href="/apple-touch-icon-76x76.png?v=12">
+        <link rel="apple-touch-icon" sizes="114x114" href="/apple-touch-icon-114x114.png?v=12">
+        <link rel="apple-touch-icon" sizes="120x120" href="/apple-touch-icon-120x120.png?v=12">
+        <link rel="apple-touch-icon" sizes="144x144" href="/apple-touch-icon-144x144.png?v=12">
+        <link rel="apple-touch-icon" sizes="152x152" href="/apple-touch-icon-152x152.png?v=12">
+        <link rel="apple-touch-icon" sizes="167x167" href="/apple-touch-icon-167x167.png?v=12">
+        <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon-180x180.png?v=12">
         <!-- Splash screens iOS -->
         <link rel="apple-touch-startup-image" media="(device-width:320px) and (device-height:568px) and (-webkit-device-pixel-ratio:2)"  href="/splash-640x1136.png">
         <link rel="apple-touch-startup-image" media="(device-width:375px) and (device-height:667px) and (-webkit-device-pixel-ratio:2)"  href="/splash-750x1334.png">
@@ -3454,7 +3454,7 @@ app.get('/manage', (c) => {
         <script>init()</script>
     <script>
       if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('/sw.js?v=11')
+        navigator.serviceWorker.register('/sw.js?v=12')
           .then(reg => console.log('✅ SW registrado:', reg.scope))
           .catch(err => console.log('SW erro:', err));
       }
@@ -3498,18 +3498,18 @@ app.get('/payment/:slug/:tipId', async (c) => {
         <meta name="apple-mobile-web-app-capable" content="yes">
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
         <meta name="apple-mobile-web-app-title" content="TOCA ESSA">
-        <link rel="manifest" href="/manifest.json?v=11">
-        <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=11">
-        <link rel="apple-touch-icon" sizes="57x57"   href="/apple-touch-icon-57x57.png?v=11">
-        <link rel="apple-touch-icon" sizes="60x60"   href="/apple-touch-icon-60x60.png?v=11">
-        <link rel="apple-touch-icon" sizes="72x72"   href="/apple-touch-icon-72x72.png?v=11">
-        <link rel="apple-touch-icon" sizes="76x76"   href="/apple-touch-icon-76x76.png?v=11">
-        <link rel="apple-touch-icon" sizes="114x114" href="/apple-touch-icon-114x114.png?v=11">
-        <link rel="apple-touch-icon" sizes="120x120" href="/apple-touch-icon-120x120.png?v=11">
-        <link rel="apple-touch-icon" sizes="144x144" href="/apple-touch-icon-144x144.png?v=11">
-        <link rel="apple-touch-icon" sizes="152x152" href="/apple-touch-icon-152x152.png?v=11">
-        <link rel="apple-touch-icon" sizes="167x167" href="/apple-touch-icon-167x167.png?v=11">
-        <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon-180x180.png?v=11">
+        <link rel="manifest" href="/manifest.json?v=12">
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=12">
+        <link rel="apple-touch-icon" sizes="57x57"   href="/apple-touch-icon-57x57.png?v=12">
+        <link rel="apple-touch-icon" sizes="60x60"   href="/apple-touch-icon-60x60.png?v=12">
+        <link rel="apple-touch-icon" sizes="72x72"   href="/apple-touch-icon-72x72.png?v=12">
+        <link rel="apple-touch-icon" sizes="76x76"   href="/apple-touch-icon-76x76.png?v=12">
+        <link rel="apple-touch-icon" sizes="114x114" href="/apple-touch-icon-114x114.png?v=12">
+        <link rel="apple-touch-icon" sizes="120x120" href="/apple-touch-icon-120x120.png?v=12">
+        <link rel="apple-touch-icon" sizes="144x144" href="/apple-touch-icon-144x144.png?v=12">
+        <link rel="apple-touch-icon" sizes="152x152" href="/apple-touch-icon-152x152.png?v=12">
+        <link rel="apple-touch-icon" sizes="167x167" href="/apple-touch-icon-167x167.png?v=12">
+        <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon-180x180.png?v=12">
         <!-- Splash screens iOS -->
         <link rel="apple-touch-startup-image" media="(device-width:320px) and (device-height:568px) and (-webkit-device-pixel-ratio:2)"  href="/splash-640x1136.png">
         <link rel="apple-touch-startup-image" media="(device-width:375px) and (device-height:667px) and (-webkit-device-pixel-ratio:2)"  href="/splash-750x1334.png">
@@ -3543,7 +3543,7 @@ app.get('/payment/:slug/:tipId', async (c) => {
         <script>init()</script>
     <script>
       if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('/sw.js?v=11')
+        navigator.serviceWorker.register('/sw.js?v=12')
           .then(reg => console.log('✅ SW registrado:', reg.scope))
           .catch(err => console.log('SW erro:', err));
       }
@@ -3567,18 +3567,18 @@ app.get('/dashboard/:slug', (c) => {
         <meta name="apple-mobile-web-app-capable" content="yes">
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
         <meta name="apple-mobile-web-app-title" content="TOCA ESSA">
-        <link rel="manifest" href="/manifest.json?v=11">
-        <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=11">
-        <link rel="apple-touch-icon" sizes="57x57"   href="/apple-touch-icon-57x57.png?v=11">
-        <link rel="apple-touch-icon" sizes="60x60"   href="/apple-touch-icon-60x60.png?v=11">
-        <link rel="apple-touch-icon" sizes="72x72"   href="/apple-touch-icon-72x72.png?v=11">
-        <link rel="apple-touch-icon" sizes="76x76"   href="/apple-touch-icon-76x76.png?v=11">
-        <link rel="apple-touch-icon" sizes="114x114" href="/apple-touch-icon-114x114.png?v=11">
-        <link rel="apple-touch-icon" sizes="120x120" href="/apple-touch-icon-120x120.png?v=11">
-        <link rel="apple-touch-icon" sizes="144x144" href="/apple-touch-icon-144x144.png?v=11">
-        <link rel="apple-touch-icon" sizes="152x152" href="/apple-touch-icon-152x152.png?v=11">
-        <link rel="apple-touch-icon" sizes="167x167" href="/apple-touch-icon-167x167.png?v=11">
-        <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon-180x180.png?v=11">
+        <link rel="manifest" href="/manifest.json?v=12">
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=12">
+        <link rel="apple-touch-icon" sizes="57x57"   href="/apple-touch-icon-57x57.png?v=12">
+        <link rel="apple-touch-icon" sizes="60x60"   href="/apple-touch-icon-60x60.png?v=12">
+        <link rel="apple-touch-icon" sizes="72x72"   href="/apple-touch-icon-72x72.png?v=12">
+        <link rel="apple-touch-icon" sizes="76x76"   href="/apple-touch-icon-76x76.png?v=12">
+        <link rel="apple-touch-icon" sizes="114x114" href="/apple-touch-icon-114x114.png?v=12">
+        <link rel="apple-touch-icon" sizes="120x120" href="/apple-touch-icon-120x120.png?v=12">
+        <link rel="apple-touch-icon" sizes="144x144" href="/apple-touch-icon-144x144.png?v=12">
+        <link rel="apple-touch-icon" sizes="152x152" href="/apple-touch-icon-152x152.png?v=12">
+        <link rel="apple-touch-icon" sizes="167x167" href="/apple-touch-icon-167x167.png?v=12">
+        <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon-180x180.png?v=12">
         <!-- Splash screens iOS -->
         <link rel="apple-touch-startup-image" media="(device-width:320px) and (device-height:568px) and (-webkit-device-pixel-ratio:2)"  href="/splash-640x1136.png">
         <link rel="apple-touch-startup-image" media="(device-width:375px) and (device-height:667px) and (-webkit-device-pixel-ratio:2)"  href="/splash-750x1334.png">
@@ -3616,7 +3616,7 @@ app.get('/dashboard/:slug', (c) => {
         <script>init()</script>
     <script>
       if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('/sw.js?v=11')
+        navigator.serviceWorker.register('/sw.js?v=12')
           .then(reg => console.log('✅ SW registrado:', reg.scope))
           .catch(err => console.log('SW erro:', err));
       }
@@ -3640,18 +3640,18 @@ app.get('/:slug', (c) => {
         <meta name="apple-mobile-web-app-capable" content="yes">
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
         <meta name="apple-mobile-web-app-title" content="TOCA ESSA">
-        <link rel="manifest" href="/manifest.json?v=11">
-        <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=11">
-        <link rel="apple-touch-icon" sizes="57x57"   href="/apple-touch-icon-57x57.png?v=11">
-        <link rel="apple-touch-icon" sizes="60x60"   href="/apple-touch-icon-60x60.png?v=11">
-        <link rel="apple-touch-icon" sizes="72x72"   href="/apple-touch-icon-72x72.png?v=11">
-        <link rel="apple-touch-icon" sizes="76x76"   href="/apple-touch-icon-76x76.png?v=11">
-        <link rel="apple-touch-icon" sizes="114x114" href="/apple-touch-icon-114x114.png?v=11">
-        <link rel="apple-touch-icon" sizes="120x120" href="/apple-touch-icon-120x120.png?v=11">
-        <link rel="apple-touch-icon" sizes="144x144" href="/apple-touch-icon-144x144.png?v=11">
-        <link rel="apple-touch-icon" sizes="152x152" href="/apple-touch-icon-152x152.png?v=11">
-        <link rel="apple-touch-icon" sizes="167x167" href="/apple-touch-icon-167x167.png?v=11">
-        <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon-180x180.png?v=11">
+        <link rel="manifest" href="/manifest.json?v=12">
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=12">
+        <link rel="apple-touch-icon" sizes="57x57"   href="/apple-touch-icon-57x57.png?v=12">
+        <link rel="apple-touch-icon" sizes="60x60"   href="/apple-touch-icon-60x60.png?v=12">
+        <link rel="apple-touch-icon" sizes="72x72"   href="/apple-touch-icon-72x72.png?v=12">
+        <link rel="apple-touch-icon" sizes="76x76"   href="/apple-touch-icon-76x76.png?v=12">
+        <link rel="apple-touch-icon" sizes="114x114" href="/apple-touch-icon-114x114.png?v=12">
+        <link rel="apple-touch-icon" sizes="120x120" href="/apple-touch-icon-120x120.png?v=12">
+        <link rel="apple-touch-icon" sizes="144x144" href="/apple-touch-icon-144x144.png?v=12">
+        <link rel="apple-touch-icon" sizes="152x152" href="/apple-touch-icon-152x152.png?v=12">
+        <link rel="apple-touch-icon" sizes="167x167" href="/apple-touch-icon-167x167.png?v=12">
+        <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon-180x180.png?v=12">
         <!-- Splash screens iOS -->
         <link rel="apple-touch-startup-image" media="(device-width:320px) and (device-height:568px) and (-webkit-device-pixel-ratio:2)"  href="/splash-640x1136.png">
         <link rel="apple-touch-startup-image" media="(device-width:375px) and (device-height:667px) and (-webkit-device-pixel-ratio:2)"  href="/splash-750x1334.png">
@@ -3673,19 +3673,19 @@ app.get('/:slug', (c) => {
         <!-- PWA Meta Tags -->
         <meta name="theme-color" content="#8b5cf6">
         <meta name="description" content="Plataforma de interação ao vivo entre artistas e público">
-        <link rel="manifest" href="/manifest.json?v=11">
-        <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=11">
-        <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=11">
-        <link rel="apple-touch-icon" sizes="57x57"   href="/apple-touch-icon-57x57.png?v=11">
-        <link rel="apple-touch-icon" sizes="60x60"   href="/apple-touch-icon-60x60.png?v=11">
-        <link rel="apple-touch-icon" sizes="72x72"   href="/apple-touch-icon-72x72.png?v=11">
-        <link rel="apple-touch-icon" sizes="76x76"   href="/apple-touch-icon-76x76.png?v=11">
-        <link rel="apple-touch-icon" sizes="114x114" href="/apple-touch-icon-114x114.png?v=11">
-        <link rel="apple-touch-icon" sizes="120x120" href="/apple-touch-icon-120x120.png?v=11">
-        <link rel="apple-touch-icon" sizes="144x144" href="/apple-touch-icon-144x144.png?v=11">
-        <link rel="apple-touch-icon" sizes="152x152" href="/apple-touch-icon-152x152.png?v=11">
-        <link rel="apple-touch-icon" sizes="167x167" href="/apple-touch-icon-167x167.png?v=11">
-        <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon-180x180.png?v=11">
+        <link rel="manifest" href="/manifest.json?v=12">
+        <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=12">
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=12">
+        <link rel="apple-touch-icon" sizes="57x57"   href="/apple-touch-icon-57x57.png?v=12">
+        <link rel="apple-touch-icon" sizes="60x60"   href="/apple-touch-icon-60x60.png?v=12">
+        <link rel="apple-touch-icon" sizes="72x72"   href="/apple-touch-icon-72x72.png?v=12">
+        <link rel="apple-touch-icon" sizes="76x76"   href="/apple-touch-icon-76x76.png?v=12">
+        <link rel="apple-touch-icon" sizes="114x114" href="/apple-touch-icon-114x114.png?v=12">
+        <link rel="apple-touch-icon" sizes="120x120" href="/apple-touch-icon-120x120.png?v=12">
+        <link rel="apple-touch-icon" sizes="144x144" href="/apple-touch-icon-144x144.png?v=12">
+        <link rel="apple-touch-icon" sizes="152x152" href="/apple-touch-icon-152x152.png?v=12">
+        <link rel="apple-touch-icon" sizes="167x167" href="/apple-touch-icon-167x167.png?v=12">
+        <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon-180x180.png?v=12">
         <!-- Splash screens iOS -->
         <link rel="apple-touch-startup-image" media="(device-width:320px) and (device-height:568px) and (-webkit-device-pixel-ratio:2)"  href="/splash-640x1136.png">
         <link rel="apple-touch-startup-image" media="(device-width:375px) and (device-height:667px) and (-webkit-device-pixel-ratio:2)"  href="/splash-750x1334.png">
@@ -3730,7 +3730,7 @@ app.get('/:slug', (c) => {
         <!-- PWA Service Worker -->
         <script>
           if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('/sw.js?v=11')
+            navigator.serviceWorker.register('/sw.js?v=12')
               .then(reg => console.log('✅ SW registrado:', reg.scope))
               .catch(err => console.log('SW erro:', err));
           }
