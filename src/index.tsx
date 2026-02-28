@@ -2158,22 +2158,22 @@ app.get('/api/artists/:slug/qrcode', async (c) => {
     return c.json({ error: 'Acesso negado' }, 403)
   }
 
-  // QR is deterministic and fixed by artist slug/public URL
-  const expectedQrCodeData = buildArtistPublicUrl(c, slug)
-  const currentQrCodeData = (artist.qr_code_data || '').toString().trim()
+  // Keep QR fixed forever once persisted (do not rotate by request host)
+  let qrCodeData = (artist.qr_code_data || '').toString().trim()
 
-  // Keep DB synchronized without forcing user action
-  if (!currentQrCodeData || currentQrCodeData !== expectedQrCodeData) {
+  // Legacy backfill only when empty
+  if (!qrCodeData) {
+    qrCodeData = buildArtistPublicUrl(c, slug)
     await c.env.DB.prepare(`
       UPDATE artists
       SET qr_code_data = ?, qr_code_generated_at = COALESCE(qr_code_generated_at, datetime('now'))
       WHERE id = ?
-    `).bind(expectedQrCodeData, artist.id).run()
+    `).bind(qrCodeData, artist.id).run()
   }
 
   return c.json({
-    qr_code_data: expectedQrCodeData,
-    qr_code_url: `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(expectedQrCodeData)}`,
+    qr_code_data: qrCodeData,
+    qr_code_url: `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(qrCodeData)}`,
     generated_at: artist.qr_code_generated_at
   })
 })
@@ -2193,9 +2193,10 @@ app.post('/api/artists/:slug/qrcode/regenerate', async (c) => {
     return c.json({ error: 'Acesso negado' }, 403)
   }
 
-  // QR remains fixed/deterministic for this artist
-  const qrCodeData = buildArtistPublicUrl(c, slug)
-  if ((artist.qr_code_data || '').toString().trim() !== qrCodeData) {
+  // QR remains fixed: only initialize if missing
+  let qrCodeData = (artist.qr_code_data || '').toString().trim()
+  if (!qrCodeData) {
+    qrCodeData = buildArtistPublicUrl(c, slug)
     await c.env.DB.prepare(`
       UPDATE artists
       SET qr_code_data = ?, qr_code_generated_at = COALESCE(qr_code_generated_at, datetime('now'))
