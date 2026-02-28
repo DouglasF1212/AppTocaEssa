@@ -457,7 +457,12 @@ function renderPage() {
       <!-- Action Button -->
       <div class="grid md:grid-cols-1 gap-4 mb-6">
         <div class="flex justify-center">
-          <button onclick="showRequestModal()" class="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 px-8 py-4 rounded-xl font-bold text-lg transition shadow-lg">
+          <button
+            id="requestSongBtn"
+            onclick="showRequestModal()"
+            class="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 px-8 py-4 rounded-xl font-bold text-lg transition shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:from-purple-600 disabled:hover:to-pink-600"
+            ${selectedSong ? '' : 'disabled'}
+          >
             <i class="fas fa-guitar mr-2"></i>
             Pedir Música
           </button>
@@ -553,6 +558,12 @@ function enforceAudienceLayout() {
   });
 }
 
+function updateRequestButtonState() {
+  const requestBtn = document.getElementById('requestSongBtn');
+  if (!requestBtn) return;
+  requestBtn.disabled = !selectedSong;
+}
+
 // Render songs list
 function renderSongs() {
   if (songs.length === 0) {
@@ -600,6 +611,8 @@ async function selectSong(songId) {
       card.classList.remove('ring-4', 'ring-yellow-400');
     }
   });
+
+  updateRequestButtonState();
 
   const modal = document.getElementById('requestModal');
   if (!modal.classList.contains('hidden')) {
@@ -836,6 +849,7 @@ async function showCustomRequestModal() {
   }
 
   selectedSong = null;
+  updateRequestButtonState();
 
   const modal = document.getElementById('requestModal');
   const content = document.getElementById('requestContent');
@@ -1087,6 +1101,7 @@ async function submitRequest(event) {
 
     closeModal('requestModal');
     selectedSong = null;
+    updateRequestButtonState();
 
     document.querySelectorAll('.song-card').forEach(card => {
       card.classList.remove('ring-4', 'ring-yellow-400');
