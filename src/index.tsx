@@ -163,6 +163,18 @@ function generateSessionId(): string {
   return crypto.randomUUID()
 }
 
+
+// Build stable public URL for artist pages
+function buildArtistPublicUrl(c: any, slug: string): string {
+  const configuredBaseUrl = ((c.env as any)?.PUBLIC_BASE_URL || '').toString().trim().replace(/\/+$/, '')
+  if (configuredBaseUrl) {
+    return `${configuredBaseUrl}/${slug}`
+  }
+
+  const requestUrl = new URL(c.req.url)
+  return `${requestUrl.origin}/${slug}`
+}
+
 function getLicenseAccessInfo(user: any) {
   const isAdmin = (user?.role || 'artist') === 'admin'
   const isApproved = (user?.license_status || 'pending') === 'approved'
@@ -272,7 +284,7 @@ app.post('/api/auth/register', async (c) => {
     .replace(/^-+|-+$/g, '')
   
   // Create artist profile with QR code data
-  const qrCodeData = `${c.req.url.split('/api')[0]}/${slug}` // Full URL to artist page
+  const qrCodeData = buildArtistPublicUrl(c, slug)
   
   await c.env.DB.prepare(`
     INSERT INTO artists (name, slug, bio, user_id, active, qr_code_data, qr_code_generated_at)
@@ -2146,10 +2158,22 @@ app.get('/api/artists/:slug/qrcode', async (c) => {
     return c.json({ error: 'Acesso negado' }, 403)
   }
   
+  let qrCodeData = (artist as any).qr_code_data as string | null
+
+  // Backfill for legacy artists so QR code remains stable across logins
+  if (!qrCodeData || !qrCodeData.trim()) {
+    qrCodeData = buildArtistPublicUrl(c, slug)
+    await c.env.DB.prepare(`
+      UPDATE artists
+      SET qr_code_data = ?, qr_code_generated_at = COALESCE(qr_code_generated_at, datetime('now'))
+      WHERE id = ?
+    `).bind(qrCodeData, (artist as any).id).run()
+  }
+
   return c.json({
-    qr_code_data: artist.qr_code_data,
-    qr_code_url: `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(artist.qr_code_data)}`,
-    generated_at: artist.qr_code_generated_at
+    qr_code_data: qrCodeData,
+    qr_code_url: `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(qrCodeData)}`,
+    generated_at: (artist as any).qr_code_generated_at
   })
 })
 
@@ -2169,8 +2193,7 @@ app.post('/api/artists/:slug/qrcode/regenerate', async (c) => {
   }
   
   // Generate new QR code data (URL to artist page)
-  const baseUrl = c.req.url.split('/api')[0]
-  const qrCodeData = `${baseUrl}/${slug}`
+  const qrCodeData = buildArtistPublicUrl(c, slug)
   
   await c.env.DB.prepare(`
     UPDATE artists 
