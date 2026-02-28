@@ -2459,7 +2459,7 @@ app.get('/', async (c) => {
         </div>
     <script>
       if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('/sw.js?v=9')
+        navigator.serviceWorker.register('/sw.js?v=10')
           .then(reg => console.log('✅ SW registrado:', reg.scope))
           .catch(err => console.log('SW erro:', err));
       }
@@ -2811,7 +2811,7 @@ app.get('/login', (c) => {
         </script>
     <script>
       if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('/sw.js?v=9')
+        navigator.serviceWorker.register('/sw.js?v=10')
           .then(reg => console.log('✅ SW registrado:', reg.scope))
           .catch(err => console.log('SW erro:', err));
       }
@@ -2911,7 +2911,7 @@ app.get('/register', (c) => {
         </script>
     <script>
       if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('/sw.js?v=9')
+        navigator.serviceWorker.register('/sw.js?v=10')
           .then(reg => console.log('✅ SW registrado:', reg.scope))
           .catch(err => console.log('SW erro:', err));
       }
@@ -2973,7 +2973,7 @@ app.get('/license-payment', (c) => {
         <script>init()</script>
     <script>
       if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('/sw.js?v=9')
+        navigator.serviceWorker.register('/sw.js?v=10')
           .then(reg => console.log('✅ SW registrado:', reg.scope))
           .catch(err => console.log('SW erro:', err));
       }
@@ -3124,7 +3124,7 @@ app.get('/admin/login', (c) => {
         </script>
     <script>
       if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('/sw.js?v=9')
+        navigator.serviceWorker.register('/sw.js?v=10')
           .then(reg => console.log('✅ SW registrado:', reg.scope))
           .catch(err => console.log('SW erro:', err));
       }
@@ -3263,7 +3263,7 @@ app.get('/admin/panel', (c) => {
         <script src="/static/admin-panel.js?v=9"></script>
     <script>
       if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('/sw.js?v=9')
+        navigator.serviceWorker.register('/sw.js?v=10')
           .then(reg => console.log('✅ SW registrado:', reg.scope))
           .catch(err => console.log('SW erro:', err));
       }
@@ -3445,7 +3445,7 @@ app.get('/manage', (c) => {
         <script>init()</script>
     <script>
       if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('/sw.js?v=9')
+        navigator.serviceWorker.register('/sw.js?v=10')
           .then(reg => console.log('✅ SW registrado:', reg.scope))
           .catch(err => console.log('SW erro:', err));
       }
@@ -3534,7 +3534,7 @@ app.get('/payment/:slug/:tipId', async (c) => {
         <script>init()</script>
     <script>
       if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('/sw.js?v=9')
+        navigator.serviceWorker.register('/sw.js?v=10')
           .then(reg => console.log('✅ SW registrado:', reg.scope))
           .catch(err => console.log('SW erro:', err));
       }
@@ -3607,7 +3607,7 @@ app.get('/dashboard/:slug', (c) => {
         <script>init()</script>
     <script>
       if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('/sw.js?v=9')
+        navigator.serviceWorker.register('/sw.js?v=10')
           .then(reg => console.log('✅ SW registrado:', reg.scope))
           .catch(err => console.log('SW erro:', err));
       }
@@ -3715,13 +3715,13 @@ app.get('/:slug', (c) => {
           const ARTIST_SLUG = '${slug}';
         </script>
         <script src="/static/pix-generator.js?v=3"></script>
-        <script src="/static/audience.js?v=10"></script>
+        <script src="/static/audience.js?v=11"></script>
         <script>init()</script>
         
         <!-- PWA Service Worker -->
         <script>
           if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('/sw.js?v=9')
+            navigator.serviceWorker.register('/sw.js?v=10')
               .then(reg => console.log('✅ SW registrado:', reg.scope))
               .catch(err => console.log('SW erro:', err));
           }
