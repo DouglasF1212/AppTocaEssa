@@ -2146,34 +2146,35 @@ app.put('/api/notifications/read-all', async (c) => {
 app.get('/api/artists/:slug/qrcode', async (c) => {
   const session = await checkAuth(c)
   if (!session) return c.json({ error: 'Não autenticado' }, 401)
-  
+
   const slug = c.req.param('slug')
-  
+
   const artist = await c.env.DB.prepare(`
-    SELECT id, qr_code_data, qr_code_generated_at FROM artists 
+    SELECT id, qr_code_data, qr_code_generated_at FROM artists
     WHERE slug = ? AND user_id = ?
-  `).bind(slug, session.user_id).first()
-  
+  `).bind(slug, session.user_id).first() as any
+
   if (!artist) {
     return c.json({ error: 'Acesso negado' }, 403)
   }
-  
-  let qrCodeData = (artist as any).qr_code_data as string | null
 
-  // Backfill for legacy artists so QR code remains stable across logins
-  if (!qrCodeData || !qrCodeData.trim()) {
-    qrCodeData = buildArtistPublicUrl(c, slug)
+  // QR is deterministic and fixed by artist slug/public URL
+  const expectedQrCodeData = buildArtistPublicUrl(c, slug)
+  const currentQrCodeData = (artist.qr_code_data || '').toString().trim()
+
+  // Keep DB synchronized without forcing user action
+  if (!currentQrCodeData || currentQrCodeData !== expectedQrCodeData) {
     await c.env.DB.prepare(`
       UPDATE artists
       SET qr_code_data = ?, qr_code_generated_at = COALESCE(qr_code_generated_at, datetime('now'))
       WHERE id = ?
-    `).bind(qrCodeData, (artist as any).id).run()
+    `).bind(expectedQrCodeData, artist.id).run()
   }
 
   return c.json({
-    qr_code_data: qrCodeData,
-    qr_code_url: `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(qrCodeData)}`,
-    generated_at: (artist as any).qr_code_generated_at
+    qr_code_data: expectedQrCodeData,
+    qr_code_url: `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(expectedQrCodeData)}`,
+    generated_at: artist.qr_code_generated_at
   })
 })
 
@@ -2192,10 +2193,9 @@ app.post('/api/artists/:slug/qrcode/regenerate', async (c) => {
     return c.json({ error: 'Acesso negado' }, 403)
   }
 
-  // QR must be stable/fixed: only initialize when missing
-  let qrCodeData = artist.qr_code_data as string | null
-  if (!qrCodeData || !qrCodeData.trim()) {
-    qrCodeData = buildArtistPublicUrl(c, slug)
+  // QR remains fixed/deterministic for this artist
+  const qrCodeData = buildArtistPublicUrl(c, slug)
+  if ((artist.qr_code_data || '').toString().trim() !== qrCodeData) {
     await c.env.DB.prepare(`
       UPDATE artists
       SET qr_code_data = ?, qr_code_generated_at = COALESCE(qr_code_generated_at, datetime('now'))

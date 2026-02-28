@@ -12,7 +12,9 @@ const TRIAL_PERIOD_DAYS = 30;
 // Configure axios: send cookies + interceptor that reads session_id fresh on every request
 axios.defaults.withCredentials = true;
 axios.interceptors.request.use(function(config) {
-  const sid = localStorage.getItem('session_id');
+  const sid = localStorage.getItem('session_id')
+    || localStorage.getItem('admin_session_id')
+    || sessionStorage.getItem('session_id');
   if (sid) config.headers['X-Session-ID'] = sid;
   return config;
 });
@@ -2018,8 +2020,8 @@ async function regenerateQRCode() {
     const response = await axios.post(`/api/artists/${artist.slug}/qrcode/regenerate`);
     const data = response.data;
     
-    showSuccess('QR Code fixo carregado com sucesso!');
-    loadQRCode();
+    showSuccess('QR Code fixo confirmado com sucesso!');
+    await loadQRCode();
   } catch (error) {
     showError('Erro ao regenerar QR Code: ' + (error.response?.data?.error || error.message));
   }
