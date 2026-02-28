@@ -402,7 +402,11 @@ function getBlockMessage() {
 // Load songs
 async function loadSongs() {
   const response = await axios.get(`/api/artists/${ARTIST_SLUG}/songs`);
+codex/fix-music-request-button-functionality-lijixw
+  songs = Array.isArray(response.data) ? response.data : [];
+
   songs = response.data;
+main
   if (selectedSong && !songs.some(song => song.id === selectedSong.id)) {
     selectedSong = null;
   }
@@ -464,11 +468,15 @@ function renderPage() {
             id="requestSongBtn"
             onclick="showRequestModal()"
             class="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 px-8 py-4 rounded-xl font-bold text-lg transition shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:from-purple-600 disabled:hover:to-pink-600"
+codex/fix-music-request-button-functionality-lijixw
+            ${selectedSong && songs.some(song => song.id === selectedSong.id) ? '' : 'disabled'}
+
  codex/fix-music-request-button-functionality-5ld26a
             ${selectedSong && songs.length > 0 ? '' : 'disabled'}
 
             ${selectedSong ? '' : 'disabled'}
  main
+main
           >
             <i class="fas fa-guitar mr-2"></i>
             Pedir Música
@@ -500,12 +508,15 @@ function renderPage() {
           ${renderSongs()}
         </div>
 
+codex/fix-music-request-button-functionality-lijixw
+
         <div class="mt-6 text-center">
           <button onclick="showCustomRequestModal()" class="bg-gray-700 hover:bg-gray-600 px-6 py-3 rounded-xl font-semibold text-base transition shadow-lg">
             <i class="fas fa-question-circle mr-2"></i>
             Música fora do repertório
           </button>
         </div>
+main
       </div>
 
       <div id="customRequestSection" class="text-center mb-8">
@@ -552,10 +563,14 @@ function enforceAudienceLayout() {
 function updateRequestButtonState() {
   const requestBtn = document.getElementById('requestSongBtn');
   if (!requestBtn) return;
+codex/fix-music-request-button-functionality-lijixw
+  requestBtn.disabled = !selectedSong || songs.length === 0;
+
 codex/fix-music-request-button-functionality-5ld26a
   requestBtn.disabled = !selectedSong || songs.length === 0;
 
   requestBtn.disabled = !selectedSong;
+main
 main
 }
 
@@ -916,7 +931,10 @@ async function showRequestModal() {
   const modal = document.getElementById('requestModal');
   const content = document.getElementById('requestContent');
 
-  if (!selectedSong) {
+  const isSelectedSongAvailable = selectedSong && songs.some(song => song.id === selectedSong.id);
+  if (!isSelectedSongAvailable) {
+    selectedSong = null;
+    updateRequestButtonState();
     showError('Selecione uma música do repertório para pedir.');
     return;
   } else {
