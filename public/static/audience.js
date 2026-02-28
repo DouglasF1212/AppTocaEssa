@@ -403,6 +403,9 @@ function getBlockMessage() {
 async function loadSongs() {
   const response = await axios.get(`/api/artists/${ARTIST_SLUG}/songs`);
   songs = response.data;
+  if (selectedSong && !songs.some(song => song.id === selectedSong.id)) {
+    selectedSong = null;
+  }
   if (songs.length > 0 && selectedSong) {
     const songCards = document.querySelectorAll('.song-card');
     songCards.forEach(card => {
@@ -457,7 +460,12 @@ function renderPage() {
       <!-- Action Button -->
       <div class="grid md:grid-cols-1 gap-4 mb-6">
         <div class="flex justify-center">
-          <button onclick="showRequestModal()" class="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 px-8 py-4 rounded-xl font-bold text-lg transition shadow-lg">
+          <button
+            id="requestSongBtn"
+            onclick="showRequestModal()"
+            class="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 px-8 py-4 rounded-xl font-bold text-lg transition shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:from-purple-600 disabled:hover:to-pink-600"
+            ${selectedSong && songs.length > 0 ? '' : 'disabled'}
+          >
             <i class="fas fa-guitar mr-2"></i>
             Pedir Música
           </button>
@@ -494,22 +502,6 @@ function renderPage() {
             Música fora do repertório
           </button>
         </div>
-      </div>
-
-      <div class="text-center mb-8">
-        <p class="text-gray-300 mb-3">Não encontrou no repertório?</p>
-        <button onclick="showCustomRequestModal()" class="bg-gray-700 hover:bg-gray-600 px-6 py-3 rounded-xl font-semibold text-base transition shadow-lg border border-gray-500">
-          <i class="fas fa-question-circle mr-2"></i>
-          Pedir música fora do repertório
-        </button>
-      </div>
-
-      <div class="text-center mb-8">
-        <p class="text-gray-300 mb-3">Não encontrou no repertório?</p>
-        <button onclick="showCustomRequestModal()" class="bg-gray-700 hover:bg-gray-600 px-6 py-3 rounded-xl font-semibold text-base transition shadow-lg border border-gray-500">
-          <i class="fas fa-question-circle mr-2"></i>
-          Pedir música fora do repertório
-        </button>
       </div>
 
       <div id="customRequestSection" class="text-center mb-8">
@@ -551,6 +543,12 @@ function enforceAudienceLayout() {
     if (btn.closest('#requestModal')) return;
     btn.remove();
   });
+}
+
+function updateRequestButtonState() {
+  const requestBtn = document.getElementById('requestSongBtn');
+  if (!requestBtn) return;
+  requestBtn.disabled = !selectedSong || songs.length === 0;
 }
 
 // Render songs list
@@ -600,6 +598,8 @@ async function selectSong(songId) {
       card.classList.remove('ring-4', 'ring-yellow-400');
     }
   });
+
+  updateRequestButtonState();
 
   const modal = document.getElementById('requestModal');
   if (!modal.classList.contains('hidden')) {
@@ -836,6 +836,7 @@ async function showCustomRequestModal() {
   }
 
   selectedSong = null;
+  updateRequestButtonState();
 
   const modal = document.getElementById('requestModal');
   const content = document.getElementById('requestContent');
@@ -1087,6 +1088,7 @@ async function submitRequest(event) {
 
     closeModal('requestModal');
     selectedSong = null;
+    updateRequestButtonState();
 
     document.querySelectorAll('.song-card').forEach(card => {
       card.classList.remove('ring-4', 'ring-yellow-400');
