@@ -7,6 +7,7 @@ let bankAccount = null;
 let currentTab = 'profile';
 let showSettings = { requests_open: 1, max_requests: 0 };
 let userNotifications = [];
+let isLoadingQrCode = false;
 const TRIAL_PERIOD_DAYS = 30;
 
 // Configure axios: send cookies + interceptor that reads session_id fresh on every request
@@ -1990,24 +1991,42 @@ function renderQRCodeTab() {
   `;
 }
 
-async function loadQRCode() {
+async function loadQRCode(retry = true) {
+  if (isLoadingQrCode) return;
+  isLoadingQrCode = true;
   try {
+    if (!artist || !artist.slug) {
+      await checkAuthentication();
+    }
+
     const response = await axios.get(`/api/artists/${artist.slug}/qrcode`);
     const data = response.data;
-    
+
     // Update QR Code image
     document.getElementById('qrCodeContainer').innerHTML = `
       <img src="${data.qr_code_url}" alt="QR Code" class="w-64 h-64 rounded-lg shadow-lg" id="qrCodeImage">
     `;
-    
+
     // Update link
     document.getElementById('artistLink').textContent = data.qr_code_data;
-    
+
     // Store QR code URL globally for download
     window.currentQRCodeUrl = data.qr_code_url;
     window.currentQRCodeData = data.qr_code_data;
   } catch (error) {
+    // session may be stale in header/cookie; refresh auth once and retry
+    if (retry && (error.response?.status === 401 || error.response?.status === 403)) {
+      try {
+        await checkAuthentication();
+        isLoadingQrCode = false;
+        return loadQRCode(false);
+      } catch (_) {
+        // ignore and show original error below
+      }
+    }
     showError('Erro ao carregar QR Code: ' + (error.response?.data?.error || error.message));
+  } finally {
+    isLoadingQrCode = false;
   }
 }
 
@@ -2027,12 +2046,16 @@ async function regenerateQRCode() {
   }
 }
 
-function downloadQRCode() {
+async function downloadQRCode() {
+  if (!window.currentQRCodeUrl) {
+    await loadQRCode();
+  }
+
   if (!window.currentQRCodeUrl) {
     showError('QR Code não carregado');
     return;
   }
-  
+
   // Create a temporary link to download the image
   const link = document.createElement('a');
   link.href = window.currentQRCodeUrl;
@@ -2040,7 +2063,7 @@ function downloadQRCode() {
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
-  
+
   showSuccess('QR Code baixado com sucesso!');
 }
 

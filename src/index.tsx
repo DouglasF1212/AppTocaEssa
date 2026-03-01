@@ -3482,7 +3482,7 @@ app.get('/manage', (c) => {
         </div>
         
         <script src="https://cdn.jsdelivr.net/npm/axios@1.6.0/dist/axios.min.js"></script>
-        <script src="/static/manage.js?v=12"></script>
+        <script src="/static/manage.js?v=13"></script>
         <script>init()</script>
     <script>
       if ('serviceWorker' in navigator) {
